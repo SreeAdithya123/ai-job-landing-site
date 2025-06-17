@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
 import InterviewCopilot from "./pages/InterviewCopilot";
 import MockInterview from "./pages/MockInterview";
 import NotFound from "./pages/NotFound";
@@ -19,16 +21,18 @@ const App =  () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/interview-copilot" element={<InterviewCopilot />} />
           <Route path="/mock-interview" element={<MockInterview />} />
-          {/* Placeholder routes */}
-          <Route path="/preparation-hub" element={<Index />} />
-          <Route path="/resume-builder" element={<Index />} />
-          <Route path="/material-generator" element={<Index />} />
-          <Route path="/job-hunter" element={<Index />} />
-          <Route path="/career-coach" element={<Index />} />
-          <Route path="/recruiters" element={<Index />} />
-          <Route path="/question-bank" element={<Index />} />
+          {/* Placeholder routes that redirect to dashboard */}
+          <Route path="/preparation-hub" element={<Dashboard />} />
+          <Route path="/resume-builder" element={<Dashboard />} />
+          <Route path="/material-generator" element={<Dashboard />} />
+          <Route path="/job-hunter" element={<Dashboard />} />
+          <Route path="/career-coach" element={<Dashboard />} />
+          <Route path="/recruiters" element={<Dashboard />} />
+          <Route path="/question-bank" element={<Dashboard />} />
           <Route path="/careers" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

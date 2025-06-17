@@ -1,17 +1,20 @@
 
 import React from 'react';
-import Layout from '../components/Layout';
 import Hero from '../components/Hero';
+import WhyAIInterviewer from '../components/WhyAIInterviewer';
+import Features from '../components/Features';
+import Pricing from '../components/Pricing';
 import Footer from '../components/Footer';
 
 const Index = () => {
   return (
-    <Layout>
-      <div className="min-h-screen">
-        <Hero />
-        <Footer />
-      </div>
-    </Layout>
+    <div className="min-h-screen">
+      <Hero />
+      <WhyAIInterviewer />
+      <Features />
+      <Pricing />
+      <Footer />
+    </div>
   );
 };
 
