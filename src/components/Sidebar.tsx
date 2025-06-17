@@ -57,7 +57,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center shadow-glow">
               <Code className="h-4 w-4 text-white" />
             </div>
             <span className="text-xl font-bold text-gray-900">AI Interviewer</span>
@@ -85,7 +85,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
                   className={({ isActive }) => `
                     flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200
                     ${isActive 
-                      ? 'bg-orange-50 text-orange-700 border-r-2 border-orange-500' 
+                      ? 'bg-primary/10 text-primary border-r-2 border-primary shadow-glow-accent' 
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                     }
                   `}
@@ -94,7 +94,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
                   <item.icon className="mr-3 h-4 w-4" />
                   {item.name}
                   {item.badge && (
-                    <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                    <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-accent/10 text-accent rounded-full border border-accent/20">
                       {item.badge}
                     </span>
                   )}
@@ -105,11 +105,11 @@ const Sidebar = ({ onClose }: SidebarProps) => {
         ))}
 
         {/* Stealth Mode Banner */}
-        <div className="mx-2 p-3 bg-gradient-to-r from-orange-50 to-pink-50 rounded-lg border border-orange-200">
-          <div className="text-sm font-medium text-orange-900 mb-1">
+        <div className="mx-2 p-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-primary/20">
+          <div className="text-sm font-medium text-primary mb-1">
             Stealth Mode is now available
           </div>
-          <button className="text-xs text-orange-700 hover:text-orange-800 font-medium">
+          <button className="text-xs text-accent hover:text-primary font-medium transition-colors">
             Access Now →
           </button>
         </div>
@@ -128,11 +128,11 @@ const Sidebar = ({ onClose }: SidebarProps) => {
         </div>
         
         <div className="space-y-2">
-          <button className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-orange-700 bg-orange-50 border border-orange-200 rounded-md hover:bg-orange-100 transition-colors">
+          <button className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors">
             <Crown className="h-3 w-3 mr-1" />
             Interview Copilot Subscription
           </button>
-          <button className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors">
+          <button className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-accent bg-accent/10 border border-accent/20 rounded-md hover:bg-accent/20 transition-colors">
             <Briefcase className="h-3 w-3 mr-1" />
             AI Job Hunter Subscription
           </button>
