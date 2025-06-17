@@ -2,10 +2,17 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
-import { Laptop, Code, Star, Phone, Settings, Plus } from 'lucide-react';
+import { Laptop, Code, Star, Phone, Settings, Plus, ExternalLink } from 'lucide-react';
 
 const InterviewCopilot = () => {
   const [selectedType, setSelectedType] = useState('general');
+  const [completedInterviews, setCompletedInterviews] = useState<Array<{
+    id: string;
+    type: string;
+    date: string;
+    duration: string;
+    status: string;
+  }>>([]);
 
   const interviewTypes = [
     {
@@ -33,6 +40,25 @@ const InterviewCopilot = () => {
       description: 'Voice-only interview preparation'
     }
   ];
+
+  const handleStartInterview = (type: string) => {
+    if (type === 'general' || type === 'coding') {
+      // Open ElevenLabs link
+      window.open('https://elevenlabs.io/app/talk-to?agent_id=agent_01jxyr90cgfbmsa93nmswvcfp7', '_blank');
+      
+      // Simulate saving the interview after it ends (in a real app, this would be triggered by the actual end event)
+      setTimeout(() => {
+        const newInterview = {
+          id: Date.now().toString(),
+          type: type === 'general' ? 'General Interview' : 'Coding Interview',
+          date: new Date().toLocaleDateString(),
+          duration: '15-30 min',
+          status: 'Completed'
+        };
+        setCompletedInterviews(prev => [newInterview, ...prev]);
+      }, 5000); // Simulate 5 second interview for demo
+    }
+  };
 
   return (
     <Layout>
@@ -74,7 +100,20 @@ const InterviewCopilot = () => {
                   <type.icon className="h-6 w-6" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{type.name}</h3>
-                <p className="text-sm text-gray-600">{type.description}</p>
+                <p className="text-sm text-gray-600 mb-4">{type.description}</p>
+                
+                {(type.id === 'general' || type.id === 'coding') && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartInterview(type.id);
+                    }}
+                    className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+                  >
+                    <span>Start Interview</span>
+                    <ExternalLink className="h-4 w-4" />
+                  </button>
+                )}
               </motion.div>
             ))}
           </div>
@@ -89,20 +128,41 @@ const InterviewCopilot = () => {
               </button>
             </div>
             
-            <div className="p-12 text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Laptop className="h-8 w-8 text-gray-400" />
+            {completedInterviews.length > 0 ? (
+              <div className="divide-y divide-gray-200">
+                {completedInterviews.map((interview) => (
+                  <div key={interview.id} className="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-gray-900">{interview.type}</h3>
+                      <p className="text-sm text-gray-500">
+                        {interview.date} • {interview.duration}
+                      </p>
+                    </div>
+                    <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                      {interview.status}
+                    </span>
+                  </div>
+                ))}
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                You don't have any Interview Copilot™ sessions.
-              </h3>
-              <p className="text-gray-500 mb-6">
-                Start your first session to get real-time AI assistance during interviews.
-              </p>
-              <button className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">
-                Start Your First Session
-              </button>
-            </div>
+            ) : (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Laptop className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  You don't have any Interview Copilot™ sessions.
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  Start your first session to get real-time AI assistance during interviews.
+                </p>
+                <button 
+                  onClick={() => handleStartInterview('general')}
+                  className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
+                >
+                  Start Your First Session
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

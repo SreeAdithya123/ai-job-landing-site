@@ -1,29 +1,57 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
-import { Users, Target, BookOpen, Filter } from 'lucide-react';
+import { Users, Target, BookOpen, Filter, ExternalLink } from 'lucide-react';
 
 const MockInterview = () => {
+  const [completedInterviews, setCompletedInterviews] = useState<Array<{
+    id: string;
+    type: string;
+    date: string;
+    duration: string;
+    status: string;
+  }>>([]);
+
+  const handleStartMockInterview = () => {
+    // Open ElevenLabs link
+    window.open('https://elevenlabs.io/app/talk-to?agent_id=agent_01jxyr90cgfbmsa93nmswvcfp7', '_blank');
+    
+    // Simulate saving the interview after it ends
+    setTimeout(() => {
+      const newInterview = {
+        id: Date.now().toString(),
+        type: 'Mock Interview',
+        date: new Date().toLocaleDateString(),
+        duration: '20-45 min',
+        status: 'Completed'
+      };
+      setCompletedInterviews(prev => [newInterview, ...prev]);
+    }, 5000); // Simulate 5 second interview for demo
+  };
+
   const actionButtons = [
     {
       title: 'Start Job Readiness Assessment',
       description: 'Evaluate your current interview skills',
       icon: Target,
-      color: 'bg-blue-500'
+      color: 'bg-blue-500',
+      action: null
     },
     {
       title: 'Start Mock Interview',
       description: 'Practice with AI interviewer',
       icon: Users,
       color: 'bg-orange-500',
-      badge: 'Beta'
+      badge: 'Beta',
+      action: handleStartMockInterview
     },
     {
       title: 'Start Practicing Questions',
       description: 'Drill common interview questions',
       icon: BookOpen,
-      color: 'bg-green-500'
+      color: 'bg-green-500',
+      action: null
     }
   ];
 
@@ -47,6 +75,7 @@ const MockInterview = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ y: -4 }}
+                onClick={button.action || undefined}
               >
                 <div className={`w-12 h-12 ${button.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   <button.icon className="h-6 w-6 text-white" />
@@ -59,7 +88,14 @@ const MockInterview = () => {
                     </span>
                   )}
                 </div>
-                <p className="text-gray-600 text-sm">{button.description}</p>
+                <p className="text-gray-600 text-sm mb-4">{button.description}</p>
+                
+                {button.action && (
+                  <div className="flex items-center space-x-1 text-orange-600 text-sm font-medium">
+                    <span>Click to start</span>
+                    <ExternalLink className="h-4 w-4" />
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -79,20 +115,41 @@ const MockInterview = () => {
               </div>
             </div>
             
-            <div className="p-12 text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="h-8 w-8 text-gray-400" />
+            {completedInterviews.length > 0 ? (
+              <div className="divide-y divide-gray-200">
+                {completedInterviews.map((interview) => (
+                  <div key={interview.id} className="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-gray-900">{interview.type}</h3>
+                      <p className="text-sm text-gray-500">
+                        {interview.date} • {interview.duration}
+                      </p>
+                    </div>
+                    <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                      {interview.status}
+                    </span>
+                  </div>
+                ))}
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No mock interview sessions yet.
-              </h3>
-              <p className="text-gray-500 mb-6">
-                Start your first mock interview to practice and improve your skills.
-              </p>
-              <button className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">
-                Start Mock Interview
-              </button>
-            </div>
+            ) : (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No mock interview sessions yet.
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  Start your first mock interview to practice and improve your skills.
+                </p>
+                <button 
+                  onClick={handleStartMockInterview}
+                  className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
+                >
+                  Start Mock Interview
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
