@@ -4,87 +4,89 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+/* Definition of the design system with futuristic Lavender-Neon AI aesthetic */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: #F8FAFC;
+    --foreground: #1E293B;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: #FFFFFF;
+    --card-foreground: #1E293B;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: #FFFFFF;
+    --popover-foreground: #1E293B;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: #8B5CF6;
+    --primary-foreground: #FFFFFF;
+    --primary-light: #C4B5FD;
+    --primary-hover: #7C3AED;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: #F1F5F9;
+    --secondary-foreground: #1E293B;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: #F1F5F9;
+    --muted-foreground: #64748B;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: #14B8A6;
+    --accent-foreground: #FFFFFF;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: #E5E7EB;
+    --input: #E5E7EB;
+    --ring: #14B8A6;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: #FFFFFF;
+    --sidebar-foreground: #1E293B;
+    --sidebar-primary: #8B5CF6;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #F1F5F9;
+    --sidebar-accent-foreground: #1E293B;
+    --sidebar-border: #E5E7EB;
+    --sidebar-ring: #14B8A6;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: #0F172A;
+    --foreground: #F8FAFC;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: #1E293B;
+    --card-foreground: #F8FAFC;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: #1E293B;
+    --popover-foreground: #F8FAFC;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: #8B5CF6;
+    --primary-foreground: #FFFFFF;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: #334155;
+    --secondary-foreground: #F8FAFC;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: #334155;
+    --muted-foreground: #94A3B8;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: #14B8A6;
+    --accent-foreground: #FFFFFF;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: #334155;
+    --input: #334155;
+    --ring: #14B8A6;
     
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: #1E293B;
+    --sidebar-foreground: #F8FAFC;
+    --sidebar-primary: #8B5CF6;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #334155;
+    --sidebar-accent-foreground: #F8FAFC;
+    --sidebar-border: #334155;
+    --sidebar-ring: #14B8A6;
   }
 }
 
@@ -96,11 +98,50 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+    min-height: 100vh;
   }
 }
 
 @layer utilities {
   .hover-scale {
     @apply transition-transform duration-200 hover:scale-105;
+  }
+
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-glass;
+  }
+
+  .glass-panel {
+    @apply bg-white/60 backdrop-blur-glass border border-white/30 shadow-glass;
+  }
+
+  .glow-border {
+    @apply border-2 border-transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #8B5CF6, #14B8A6) border-box;
+  }
+
+  .glow-border:focus-within {
+    @apply shadow-glow-accent;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-primary text-white font-medium rounded-xl px-6 py-3 
+           shadow-lg hover:shadow-glow transform transition-all duration-200 
+           hover:-translate-y-0.5 hover:shadow-xl;
+  }
+
+  .btn-secondary {
+    @apply glass-card text-primary font-medium rounded-xl px-6 py-3 
+           hover:bg-white/90 transform transition-all duration-200 
+           hover:-translate-y-0.5;
+  }
+
+  .input-field {
+    @apply bg-white/80 border border-gray-200 rounded-xl px-4 py-3 
+           focus:border-accent focus:ring-2 focus:ring-accent/20 
+           focus:shadow-glow-accent transition-all duration-200
+           backdrop-blur-sm;
   }
 }
