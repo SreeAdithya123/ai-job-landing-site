@@ -14,7 +14,9 @@ import {
   User,
   Crown,
   Zap,
-  X
+  X,
+  Settings,
+  LogOut
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -50,6 +52,16 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       ]
     }
   ];
+
+  const handleLogout = () => {
+    // Add logout logic here when authentication is implemented
+    console.log('Logout clicked');
+  };
+
+  const handleManageAccount = () => {
+    // Add account management logic here
+    console.log('Manage Account clicked');
+  };
 
   return (
     <div className="h-full flex flex-col bg-white">
@@ -115,7 +127,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
         </div>
       </nav>
 
-      {/* User Profile & Subscriptions */}
+      {/* User Profile & Account Management */}
       <div className="p-4 border-t border-gray-200 space-y-3">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
@@ -125,6 +137,24 @@ const Sidebar = ({ onClose }: SidebarProps) => {
             <div className="text-sm font-medium text-gray-900">John Doe</div>
             <div className="text-xs text-gray-500">john@example.com</div>
           </div>
+        </div>
+        
+        {/* Account Management Buttons */}
+        <div className="space-y-2">
+          <button 
+            onClick={handleManageAccount}
+            className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors"
+          >
+            <Settings className="h-3 w-3 mr-1" />
+            Manage Account
+          </button>
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
+          >
+            <LogOut className="h-3 w-3 mr-1" />
+            Logout
+          </button>
         </div>
         
         <div className="space-y-2">
