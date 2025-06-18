@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
-import { Laptop, Code, Star, Phone, Settings, Plus, ExternalLink } from 'lucide-react';
+import { Laptop, Code, Star, Phone, Settings, Plus, ExternalLink, Users } from 'lucide-react';
 
 const InterviewCopilot = () => {
   const [selectedType, setSelectedType] = useState('general');
@@ -28,16 +28,16 @@ const InterviewCopilot = () => {
       description: 'Technical programming challenges and algorithms'
     },
     {
-      id: 'hirevue',
-      name: 'HireVue Interview',
+      id: 'upsc',
+      name: 'UPSC Interviewer',
       icon: Star,
-      description: 'Video interview with AI-powered analysis'
+      description: 'Civil services interview preparation and mock tests'
     },
     {
-      id: 'phone',
-      name: 'Phone Interview',
-      icon: Phone,
-      description: 'Voice-only interview preparation'
+      id: 'friendly',
+      name: 'Friendly Interview',
+      icon: Users,
+      description: 'Casual conversation-style interview practice'
     }
   ];
 
@@ -67,7 +67,7 @@ const InterviewCopilot = () => {
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2 bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">Interview Copilot</h1>
+              <h1 className="text-3xl font-bold text-foreground mb-2 bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">AI Interviewer</h1>
               <p className="text-muted-foreground">Real-time AI assistance during your interviews</p>
             </div>
             <button className="flex items-center space-x-2 px-4 py-2 glass-card border border-primary/20 rounded-lg hover:bg-white/90 transition-colors">
@@ -150,7 +150,7 @@ const InterviewCopilot = () => {
                   <Laptop className="h-8 w-8 text-primary" />
                 </div>
                 <h3 className="text-lg font-medium text-foreground mb-2">
-                  You don't have any Interview Copilot™ sessions.
+                  You don't have any AI Interviewer™ sessions.
                 </h3>
                 <p className="text-muted-foreground mb-6">
                   Start your first session to get real-time AI assistance during interviews.

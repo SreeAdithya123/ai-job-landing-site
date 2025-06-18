@@ -11,7 +11,7 @@ const Dashboard = () => {
     
     // Add title
     doc.setFontSize(20);
-    doc.text('AI Interview Dashboard - Progress Report', 20, 30);
+    doc.text('AI Interviewer Dashboard - Progress Report', 20, 30);
     
     // Add date
     doc.setFontSize(12);
@@ -58,7 +58,7 @@ const Dashboard = () => {
       'Mock Interview - 2 hours ago - 92%',
       'Coding Interview - 1 day ago - 88%',
       'General Interview - 2 days ago - 90%',
-      'Phone Interview - 3 days ago - 85%'
+      'UPSC Interview - 3 days ago - 85%'
     ];
     
     activities.forEach((activity, index) => {
@@ -66,7 +66,7 @@ const Dashboard = () => {
     });
     
     // Save the PDF
-    doc.save('ai-interview-progress-report.pdf');
+    doc.save('ai-interviewer-progress-report.pdf');
   };
 
   return (
@@ -76,7 +76,7 @@ const Dashboard = () => {
           <div className="text-center mb-12">
             <div className="flex items-center justify-center space-x-4 mb-6">
               <h1 className="text-4xl font-bold text-foreground bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
-                Welcome to Your AI Interview Dashboard
+                Welcome to Your AI Interviewer Dashboard
               </h1>
               <button
                 onClick={generatePDFReport}

@@ -2,6 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, Clock, CheckCircle, Target, BarChart3, Award } from 'lucide-react';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const ProgressTracking = () => {
   const stats = [
@@ -55,7 +56,7 @@ const ProgressTracking = () => {
       status: 'Completed'
     },
     {
-      type: 'Phone Interview',
+      type: 'UPSC Interview',
       date: '3 days ago',
       score: '85%',
       status: 'Completed'
@@ -67,6 +68,35 @@ const ProgressTracking = () => {
     { skill: 'Technical Skills', progress: 78, color: 'bg-accent' },
     { skill: 'Problem Solving', progress: 92, color: 'bg-green-500' },
     { skill: 'Confidence', progress: 88, color: 'bg-blue-500' }
+  ];
+
+  // Data for pie chart - Interview Types Distribution
+  const pieChartData = [
+    { name: 'General', value: 35, color: '#8B5CF6' },
+    { name: 'Technical', value: 25, color: '#06B6D4' },
+    { name: 'UPSC', value: 20, color: '#10B981' },
+    { name: 'Friendly', value: 20, color: '#F59E0B' }
+  ];
+
+  // Data for bar chart - Weekly Progress
+  const barChartData = [
+    { name: 'Mon', interviews: 2, hours: 1.5 },
+    { name: 'Tue', interviews: 3, hours: 2.2 },
+    { name: 'Wed', interviews: 1, hours: 1.0 },
+    { name: 'Thu', interviews: 4, hours: 3.1 },
+    { name: 'Fri', interviews: 2, hours: 1.8 },
+    { name: 'Sat', interviews: 3, hours: 2.5 },
+    { name: 'Sun', interviews: 1, hours: 0.8 }
+  ];
+
+  // Data for line chart - Performance Trend
+  const lineChartData = [
+    { week: 'Week 1', score: 75 },
+    { week: 'Week 2', score: 78 },
+    { week: 'Week 3', score: 82 },
+    { week: 'Week 4', score: 85 },
+    { week: 'Week 5', score: 88 },
+    { week: 'Week 6', score: 90 }
   ];
 
   return (
@@ -97,6 +127,63 @@ const ProgressTracking = () => {
         ))}
       </div>
 
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Pie Chart - Interview Types */}
+        <motion.div
+          className="glass-card p-6 rounded-xl"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className="flex items-center space-x-2 mb-6">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold text-foreground">Interview Types Distribution</h3>
+          </div>
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie
+                data={pieChartData}
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                label={({ name, value }) => `${name}: ${value}%`}
+              >
+                {pieChartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </motion.div>
+
+        {/* Bar Chart - Weekly Activity */}
+        <motion.div
+          className="glass-card p-6 rounded-xl"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <div className="flex items-center space-x-2 mb-6">
+            <BarChart3 className="h-5 w-5 text-accent" />
+            <h3 className="text-lg font-semibold text-foreground">Weekly Activity</h3>
+          </div>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={barChartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="interviews" fill="#8B5CF6" name="Interviews" />
+              <Bar dataKey="hours" fill="#06B6D4" name="Hours" />
+            </BarChart>
+          </ResponsiveContainer>
+        </motion.div>
+      </div>
+
       {/* Progress Charts and Activities */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Skill Progress */}
@@ -104,7 +191,7 @@ const ProgressTracking = () => {
           className="glass-card p-6 rounded-xl"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
         >
           <div className="flex items-center space-x-2 mb-6">
             <Award className="h-5 w-5 text-primary" />
@@ -135,7 +222,7 @@ const ProgressTracking = () => {
           className="glass-card p-6 rounded-xl"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
         >
           <div className="flex items-center space-x-2 mb-6">
             <Clock className="h-5 w-5 text-accent" />
@@ -157,6 +244,34 @@ const ProgressTracking = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Performance Trend Line Chart */}
+      <motion.div
+        className="glass-card p-6 rounded-xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
+      >
+        <div className="flex items-center space-x-2 mb-6">
+          <TrendingUp className="h-5 w-5 text-green-600" />
+          <h3 className="text-lg font-semibold text-foreground">Performance Trend</h3>
+        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={lineChartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="week" />
+            <YAxis />
+            <Tooltip />
+            <Line 
+              type="monotone" 
+              dataKey="score" 
+              stroke="#10B981" 
+              strokeWidth={3}
+              dot={{ fill: '#10B981', strokeWidth: 2, r: 6 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </motion.div>
     </div>
   );
 };

@@ -28,7 +28,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
     {
       section: 'Interview',
       items: [
-        { name: 'Interview Copilot', href: '/interview-copilot', icon: Laptop },
+        { name: 'AI Interviewer', href: '/interview-copilot', icon: Laptop },
         { name: 'AI Resume Builder', href: '/resume-builder', icon: FileText },
       ]
     },
@@ -142,7 +142,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
         <div className="space-y-2">
           <button className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors">
             <Crown className="h-3 w-3 mr-1" />
-            Interview Copilot Subscription
+            AI Interviewer Subscription
           </button>
         </div>
       </div>
