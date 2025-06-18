@@ -1,11 +1,35 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import ProgressTracking from '../components/ProgressTracking';
-import { Download } from 'lucide-react';
+import { Download, TrendingUp, Users, Clock, Target } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import jsPDF from 'jspdf';
 
 const Dashboard = () => {
+  const [interviewCounts, setInterviewCounts] = useState({
+    total: 0,
+    thisWeek: 0,
+    thisMonth: 0,
+    completed: 0,
+    pending: 0
+  });
+
+  // Simulate loading interview counts
+  useEffect(() => {
+    const loadInterviewCounts = () => {
+      setInterviewCounts({
+        total: 47,
+        thisWeek: 8,
+        thisMonth: 23,
+        completed: 42,
+        pending: 5
+      });
+    };
+
+    loadInterviewCounts();
+  }, []);
+
   const generatePDFReport = () => {
     const doc = new jsPDF();
     
@@ -17,16 +41,17 @@ const Dashboard = () => {
     doc.setFontSize(12);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 45);
     
-    // Add stats section
+    // Add interview counts section
     doc.setFontSize(16);
-    doc.text('Performance Statistics', 20, 65);
+    doc.text('Interview Statistics', 20, 65);
     
     doc.setFontSize(12);
     const stats = [
-      'Total Sessions: 24 (+12%)',
-      'Hours Practiced: 18.5 (+8%)', 
-      'Completed Interviews: 15 (+15%)',
-      'Success Rate: 85% (+5%)'
+      `Total Interviews: ${interviewCounts.total}`,
+      `This Week: ${interviewCounts.thisWeek}`,
+      `This Month: ${interviewCounts.thisMonth}`,
+      `Completed: ${interviewCounts.completed}`,
+      `Pending: ${interviewCounts.pending}`
     ];
     
     stats.forEach((stat, index) => {
@@ -35,7 +60,7 @@ const Dashboard = () => {
     
     // Add skill progress section
     doc.setFontSize(16);
-    doc.text('Skill Progress', 20, 120);
+    doc.text('Skill Progress', 20, 130);
     
     doc.setFontSize(12);
     const skills = [
@@ -46,28 +71,39 @@ const Dashboard = () => {
     ];
     
     skills.forEach((skill, index) => {
-      doc.text(`• ${skill}`, 25, 135 + (index * 8));
-    });
-    
-    // Add recent activities section
-    doc.setFontSize(16);
-    doc.text('Recent Activities', 20, 175);
-    
-    doc.setFontSize(12);
-    const activities = [
-      'Mock Interview - 2 hours ago - 92%',
-      'Coding Interview - 1 day ago - 88%',
-      'General Interview - 2 days ago - 90%',
-      'UPSC Interview - 3 days ago - 85%'
-    ];
-    
-    activities.forEach((activity, index) => {
-      doc.text(`• ${activity}`, 25, 190 + (index * 8));
+      doc.text(`• ${skill}`, 25, 145 + (index * 8));
     });
     
     // Save the PDF
     doc.save('ai-interviewer-progress-report.pdf');
   };
+
+  const interviewStats = [
+    {
+      title: "Total Interviews",
+      value: interviewCounts.total,
+      icon: Users,
+      color: "from-blue-500 to-blue-600"
+    },
+    {
+      title: "This Week",
+      value: interviewCounts.thisWeek,
+      icon: Clock,
+      color: "from-green-500 to-green-600"
+    },
+    {
+      title: "This Month",
+      value: interviewCounts.thisMonth,
+      icon: TrendingUp,
+      color: "from-purple-500 to-purple-600"
+    },
+    {
+      title: "Completed",
+      value: interviewCounts.completed,
+      icon: Target,
+      color: "from-orange-500 to-orange-600"
+    }
+  ];
 
   return (
     <Layout>
@@ -89,6 +125,31 @@ const Dashboard = () => {
             <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
               Your personalized space to practice interviews, track progress, and land your dream job.
             </p>
+          </div>
+
+          {/* Interview Counts Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {interviewStats.map((stat, index) => (
+              <Card key={stat.title} className="glass-card hover:shadow-xl transition-all duration-300">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    {stat.title}
+                  </CardTitle>
+                  <div className={`w-8 h-8 bg-gradient-to-r ${stat.color} rounded-lg flex items-center justify-center`}>
+                    <stat.icon className="h-4 w-4 text-white" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-foreground">{stat.value}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {stat.title === "Total Interviews" && "All time"}
+                    {stat.title === "This Week" && "Last 7 days"}
+                    {stat.title === "This Month" && "Last 30 days"}
+                    {stat.title === "Completed" && "Successfully finished"}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           {/* Progress Tracking Dashboard */}
