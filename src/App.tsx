@@ -8,7 +8,6 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import InterviewCopilot from "./pages/InterviewCopilot";
-import MockInterview from "./pages/MockInterview";
 import ResumeBuilder from "./pages/ResumeBuilder";
 import NotFound from "./pages/NotFound";
 
@@ -25,12 +24,9 @@ const App =  () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/interview-copilot" element={<InterviewCopilot />} />
-          <Route path="/mock-interview" element={<MockInterview />} />
           <Route path="/resume-builder" element={<ResumeBuilder />} />
           {/* Placeholder routes that redirect to dashboard */}
-          <Route path="/preparation-hub" element={<Dashboard />} />
           <Route path="/material-generator" element={<Dashboard />} />
-          <Route path="/job-hunter" element={<Dashboard />} />
           <Route path="/career-coach" element={<Dashboard />} />
           <Route path="/recruiters" element={<Dashboard />} />
           <Route path="/question-bank" element={<Dashboard />} />

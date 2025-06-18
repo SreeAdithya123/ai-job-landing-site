@@ -29,8 +29,6 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       section: 'Interview',
       items: [
         { name: 'Interview Copilot', href: '/interview-copilot', icon: Laptop },
-        { name: 'Mock Interview', href: '/mock-interview', icon: Users },
-        { name: 'Preparation Hub', href: '/preparation-hub', icon: BookOpen },
         { name: 'AI Resume Builder', href: '/resume-builder', icon: FileText },
       ]
     },
@@ -38,7 +36,6 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       section: 'Tools',
       items: [
         { name: 'AI Material Generator', href: '/material-generator', icon: Zap },
-        { name: 'AI Job Hunter', href: '/job-hunter', icon: Briefcase, badge: 'Beta' },
         { name: 'AI Career Coach', href: '/career-coach', icon: Star },
         { name: 'Speak with Recruiters', href: '/recruiters', icon: Users },
         { name: 'Interview Question Bank', href: '/question-bank', icon: HelpCircle },
@@ -115,16 +112,6 @@ const Sidebar = ({ onClose }: SidebarProps) => {
             </div>
           </div>
         ))}
-
-        {/* Stealth Mode Banner */}
-        <div className="mx-2 p-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-primary/20">
-          <div className="text-sm font-medium text-primary mb-1">
-            Stealth Mode is now available
-          </div>
-          <button className="text-xs text-accent hover:text-primary font-medium transition-colors">
-            Access Now →
-          </button>
-        </div>
       </nav>
 
       {/* User Profile & Account Management */}
@@ -161,10 +148,6 @@ const Sidebar = ({ onClose }: SidebarProps) => {
           <button className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors">
             <Crown className="h-3 w-3 mr-1" />
             Interview Copilot Subscription
-          </button>
-          <button className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-accent bg-accent/10 border border-accent/20 rounded-md hover:bg-accent/20 transition-colors">
-            <Briefcase className="h-3 w-3 mr-1" />
-            AI Job Hunter Subscription
           </button>
         </div>
       </div>
