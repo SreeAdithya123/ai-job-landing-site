@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import InterviewCopilot from "./pages/InterviewCopilot";
 import ResumeBuilder from "./pages/ResumeBuilder";
+import MaterialGenerator from "./pages/MaterialGenerator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,8 +26,8 @@ const App =  () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/interview-copilot" element={<InterviewCopilot />} />
           <Route path="/resume-builder" element={<ResumeBuilder />} />
+          <Route path="/material-generator" element={<MaterialGenerator />} />
           {/* Placeholder routes that redirect to dashboard */}
-          <Route path="/material-generator" element={<Dashboard />} />
           <Route path="/career-coach" element={<Dashboard />} />
           <Route path="/recruiters" element={<Dashboard />} />
           <Route path="/question-bank" element={<Dashboard />} />
