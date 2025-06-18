@@ -102,11 +102,6 @@ const Sidebar = ({ onClose }: SidebarProps) => {
                 >
                   <item.icon className="mr-3 h-4 w-4" />
                   {item.name}
-                  {item.badge && (
-                    <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-accent/10 text-accent rounded-full border border-accent/20">
-                      {item.badge}
-                    </span>
-                  )}
                 </NavLink>
               ))}
             </div>
