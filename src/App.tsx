@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,8 @@ import InterviewCopilot from "./pages/InterviewCopilot";
 import ResumeBuilder from "./pages/ResumeBuilder";
 import MaterialGenerator from "./pages/MaterialGenerator";
 import NotFound from "./pages/NotFound";
+import CareerCoach from "./pages/CareerCoach";
+import Recruiters from "./pages/Recruiters";
 
 const queryClient = new QueryClient();
 
@@ -27,9 +28,9 @@ const App =  () => (
           <Route path="/interview-copilot" element={<InterviewCopilot />} />
           <Route path="/resume-builder" element={<ResumeBuilder />} />
           <Route path="/material-generator" element={<MaterialGenerator />} />
+          <Route path="/career-coach" element={<CareerCoach />} />
+          <Route path="/recruiters" element={<Recruiters />} />
           {/* Placeholder routes that redirect to dashboard */}
-          <Route path="/career-coach" element={<Dashboard />} />
-          <Route path="/recruiters" element={<Dashboard />} />
           <Route path="/question-bank" element={<Dashboard />} />
           <Route path="/careers" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
