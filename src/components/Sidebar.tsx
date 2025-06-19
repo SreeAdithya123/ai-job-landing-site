@@ -16,7 +16,8 @@ import {
   Zap,
   X,
   Settings,
-  LogOut
+  LogOut,
+  Scan
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -30,6 +31,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       items: [
         { name: 'AI Interviewer', href: '/interview-copilot', icon: Laptop },
         { name: 'AI Resume Builder', href: '/resume-builder', icon: FileText },
+        { name: 'Resume Scanner', href: '/resume-scanner', icon: Scan },
       ]
     },
     {
