@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import InterviewCopilot from "./pages/InterviewCopilot";
+import UPSCInterviewer from "./pages/UPSCInterviewer";
 import ResumeBuilder from "./pages/ResumeBuilder";
 import ResumeScanner from "./pages/ResumeScanner";
 import MaterialGenerator from "./pages/MaterialGenerator";
@@ -28,6 +29,7 @@ const App =  () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/interview-copilot" element={<InterviewCopilot />} />
+          <Route path="/upsc-interviewer" element={<UPSCInterviewer />} />
           <Route path="/resume-builder" element={<ResumeBuilder />} />
           <Route path="/resume-scanner" element={<ResumeScanner />} />
           <Route path="/material-generator" element={<MaterialGenerator />} />

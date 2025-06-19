@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Laptop, Code, Star, Phone, Settings, Plus, ExternalLink, Users } from 'lucide-react';
 
@@ -13,6 +14,8 @@ const InterviewCopilot = () => {
     duration: string;
     status: string;
   }>>([]);
+  
+  const navigate = useNavigate();
 
   const interviewTypes = [
     {
@@ -57,6 +60,9 @@ const InterviewCopilot = () => {
         };
         setCompletedInterviews(prev => [newInterview, ...prev]);
       }, 5000); // Simulate 5 second interview for demo
+    } else if (type === 'upsc') {
+      // Navigate to UPSC Interviewer page
+      navigate('/upsc-interviewer');
     }
   };
 
@@ -102,18 +108,16 @@ const InterviewCopilot = () => {
                 <h3 className="font-semibold text-lg mb-2 text-foreground">{type.name}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{type.description}</p>
                 
-                {(type.id === 'general' || type.id === 'coding') && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleStartInterview(type.id);
-                    }}
-                    className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 text-sm font-medium transform hover:scale-105"
-                  >
-                    <span>Start Interview</span>
-                    <ExternalLink className="h-4 w-4" />
-                  </button>
-                )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStartInterview(type.id);
+                  }}
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 text-sm font-medium transform hover:scale-105"
+                >
+                  <span>Start Interview</span>
+                  {(type.id === 'general' || type.id === 'coding') && <ExternalLink className="h-4 w-4" />}
+                </button>
               </motion.div>
             ))}
           </div>
