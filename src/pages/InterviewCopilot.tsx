@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -63,6 +62,9 @@ const InterviewCopilot = () => {
     } else if (type === 'upsc') {
       // Navigate to UPSC Interviewer page
       navigate('/upsc-interviewer');
+    } else if (type === 'friendly') {
+      // Navigate to Friendly Interviewer page
+      navigate('/friendly-interviewer');
     }
   };
 

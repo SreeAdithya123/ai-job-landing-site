@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Phone, PhoneOff, Star } from 'lucide-react';
+import { ArrowLeft, Users, UserCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 
-const UPSCInterviewer = () => {
+const FriendlyInterviewer = () => {
   const [isInterviewActive, setIsInterviewActive] = useState(false);
   const [transcript, setTranscript] = useState<Array<{
     speaker: 'AI' | 'User';
@@ -20,10 +20,10 @@ const UPSCInterviewer = () => {
     const currentTime = new Date().toLocaleTimeString();
     setTranscript([{
       speaker: 'AI',
-      text: 'Good morning. I am your UPSC interview panel member. Please take your seat and we shall begin with the interview process.',
+      text: 'Hello! I\'m your friendly AI interviewer. Let\'s have a casual conversation about your experiences and aspirations.',
       timestamp: currentTime
     }]);
-    console.log('UPSC Interview started');
+    console.log('Friendly Interview started');
   };
 
   const handleExitInterview = () => {
@@ -32,10 +32,10 @@ const UPSCInterviewer = () => {
     const currentTime = new Date().toLocaleTimeString();
     setTranscript(prev => [...prev, {
       speaker: 'AI',
-      text: 'Thank you for your time. The interview panel will deliberate on your responses. You may leave now.',
+      text: 'Thank you for the wonderful conversation! Take care.',
       timestamp: currentTime
     }]);
-    console.log('UPSC Interview ended');
+    console.log('Friendly Interview ended');
   };
 
   const handleBackToInterviews = () => {
@@ -56,7 +56,7 @@ const UPSCInterviewer = () => {
               <span className="text-primary font-medium">Back to Interviews</span>
             </button>
             <h1 className="text-3xl font-bold text-foreground bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
-              UPSC Interviewer
+              Friendly Interviewer
             </h1>
           </div>
 
@@ -69,13 +69,13 @@ const UPSCInterviewer = () => {
                   <div className="aspect-square bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl border-2 border-dashed border-primary/30 flex items-center justify-center">
                     <div className="text-center">
                       <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Star className="h-8 w-8 text-white" />
+                        <Users className="h-8 w-8 text-white" />
                       </div>
                       <p className="text-muted-foreground text-sm">
-                        UPSC Interview Panel
+                        Friendly AI Interviewer
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        (Civil Services Interview)
+                        (Casual Conversation Mode)
                       </p>
                     </div>
                   </div>
@@ -92,8 +92,8 @@ const UPSCInterviewer = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
                   >
-                    <Phone className="h-5 w-5" />
-                    <span>Start Interview</span>
+                    <Users className="h-5 w-5" />
+                    <span>Start Friendly Chat</span>
                   </motion.button>
                 ) : (
                   <motion.div
@@ -105,7 +105,7 @@ const UPSCInterviewer = () => {
                     <div className="text-center mb-6">
                       <div className="inline-flex items-center space-x-2 px-4 py-2 bg-green-100 text-green-800 rounded-full border border-green-200">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-sm font-medium">Interview in Progress</span>
+                        <span className="text-sm font-medium">Friendly Chat in Progress</span>
                       </div>
                     </div>
                     
@@ -113,8 +113,8 @@ const UPSCInterviewer = () => {
                       onClick={handleExitInterview}
                       className="px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium text-lg transform hover:scale-105 flex items-center space-x-3 mx-auto"
                     >
-                      <PhoneOff className="h-5 w-5" />
-                      <span>Exit Interview</span>
+                      <UserCheck className="h-5 w-5" />
+                      <span>End Chat</span>
                     </button>
                   </motion.div>
                 )}
@@ -128,12 +128,12 @@ const UPSCInterviewer = () => {
                   transition={{ duration: 0.6, delay: 0.2 }}
                   className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg"
                 >
-                  <h3 className="font-semibold text-blue-900 mb-2">Interview Tips:</h3>
+                  <h3 className="font-semibold text-blue-900 mb-2">Friendly Chat Tips:</h3>
                   <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Speak clearly and confidently</li>
-                    <li>• Take your time to think before answering</li>
-                    <li>• Maintain good posture and eye contact</li>
-                    <li>• Be prepared to discuss current affairs</li>
+                    <li>• Be yourself and speak naturally</li>
+                    <li>• Share your experiences openly</li>
+                    <li>• Ask questions if you're curious</li>
+                    <li>• Relax and enjoy the conversation</li>
                   </ul>
                 </motion.div>
               )}
@@ -154,7 +154,7 @@ const UPSCInterviewer = () => {
               <div className="h-96 overflow-y-auto bg-gray-50 rounded-lg p-4 space-y-3">
                 {transcript.length === 0 ? (
                   <div className="text-center text-muted-foreground text-sm mt-20">
-                    <Star className="h-12 w-12 mx-auto mb-4 text-primary/30" />
+                    <Users className="h-12 w-12 mx-auto mb-4 text-primary/30" />
                     <p>Transcript will appear here when the interview starts</p>
                   </div>
                 ) : (
@@ -174,7 +174,7 @@ const UPSCInterviewer = () => {
                         <span className={`text-sm font-medium ${
                           entry.speaker === 'AI' ? 'text-primary' : 'text-accent'
                         }`}>
-                          {entry.speaker === 'AI' ? 'Interview Panel' : 'Candidate'}
+                          {entry.speaker === 'AI' ? 'Friendly AI' : 'You'}
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {entry.timestamp}
@@ -208,4 +208,4 @@ const UPSCInterviewer = () => {
   );
 };
 
-export default UPSCInterviewer;
+export default FriendlyInterviewer;
