@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
-import AIAvatar from '../components/AIAvatar';
 import { Laptop, Code, Star, Phone, Settings, Plus, ExternalLink, Users } from 'lucide-react';
 
 const InterviewCopilot = () => {
@@ -14,11 +13,6 @@ const InterviewCopilot = () => {
     duration: string;
     status: string;
   }>>([]);
-  
-  // UPSC Avatar states
-  const [isUPSCInterviewActive, setIsUPSCInterviewActive] = useState(false);
-  const [isAvatarSpeaking, setIsAvatarSpeaking] = useState(false);
-  const [currentResponseLength, setCurrentResponseLength] = useState(0);
 
   const interviewTypes = [
     {
@@ -66,40 +60,6 @@ const InterviewCopilot = () => {
     }
   };
 
-  const handleStartUPSCInterview = () => {
-    setIsUPSCInterviewActive(true);
-    
-    // Simulate interview conversation with avatar responses
-    setTimeout(() => {
-      simulateInterviewerResponse("Welcome to your UPSC interview. Please introduce yourself and tell us about your background.", 120);
-    }, 2000);
-  };
-
-  const handleEndUPSCInterview = () => {
-    setIsUPSCInterviewActive(false);
-    setIsAvatarSpeaking(false);
-    
-    // Save completed interview
-    const newInterview = {
-      id: Date.now().toString(),
-      type: 'UPSC Interviewer',
-      date: new Date().toLocaleDateString(),
-      duration: '20-45 min',
-      status: 'Completed'
-    };
-    setCompletedInterviews(prev => [newInterview, ...prev]);
-  };
-
-  const simulateInterviewerResponse = (text: string, length: number) => {
-    setCurrentResponseLength(length);
-    setIsAvatarSpeaking(true);
-    
-    // Stop speaking after the response duration
-    setTimeout(() => {
-      setIsAvatarSpeaking(false);
-    }, length * 50); // Approximate speaking time
-  };
-
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50">
@@ -116,77 +76,46 @@ const InterviewCopilot = () => {
             </button>
           </div>
 
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-            {/* Interview Types Section */}
-            <div className="lg:col-span-2">
-              <h2 className="text-xl font-semibold text-foreground mb-6">Interview Types</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {interviewTypes.map((type, index) => (
-                  <motion.div
-                    key={type.id}
-                    className={`p-6 glass-card rounded-xl border-2 cursor-pointer transition-all duration-200 hover:shadow-glow ${
-                      selectedType === type.id 
-                        ? 'border-primary bg-gradient-to-br from-primary/10 to-accent/10 shadow-glow-accent' 
-                        : 'border-gray-200 hover:border-primary/30'
-                    }`}
-                    onClick={() => setSelectedType(type.id)}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    whileHover={{ y: -4 }}
+          {/* Interview Type Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {interviewTypes.map((type, index) => (
+              <motion.div
+                key={type.id}
+                className={`p-6 glass-card rounded-xl border-2 cursor-pointer transition-all duration-200 hover:shadow-glow ${
+                  selectedType === type.id 
+                    ? 'border-primary bg-gradient-to-br from-primary/10 to-accent/10 shadow-glow-accent' 
+                    : 'border-gray-200 hover:border-primary/30'
+                }`}
+                onClick={() => setSelectedType(type.id)}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={{ y: -4 }}
+              >
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${
+                  selectedType === type.id 
+                    ? 'bg-gradient-to-r from-primary to-accent text-white shadow-glow' 
+                    : 'bg-gray-100 text-gray-600'
+                }`}>
+                  <type.icon className="h-6 w-6" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2 text-foreground">{type.name}</h3>
+                <p className="text-sm text-muted-foreground mb-4">{type.description}</p>
+                
+                {(type.id === 'general' || type.id === 'coding') && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartInterview(type.id);
+                    }}
+                    className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 text-sm font-medium transform hover:scale-105"
                   >
-                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${
-                      selectedType === type.id 
-                        ? 'bg-gradient-to-r from-primary to-accent text-white shadow-glow' 
-                        : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      <type.icon className="h-6 w-6" />
-                    </div>
-                    <h3 className="font-semibold text-lg mb-2 text-foreground">{type.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">{type.description}</p>
-                    
-                    {(type.id === 'general' || type.id === 'coding') && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleStartInterview(type.id);
-                        }}
-                        className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 text-sm font-medium transform hover:scale-105"
-                      >
-                        <span>Start Interview</span>
-                        <ExternalLink className="h-4 w-4" />
-                      </button>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* UPSC Avatar Section */}
-            <div className="lg:col-span-1">
-              <h2 className="text-xl font-semibold text-foreground mb-6">UPSC Interview Assistant</h2>
-              <AIAvatar
-                isActive={isUPSCInterviewActive}
-                isSpeaking={isAvatarSpeaking}
-                responseLength={currentResponseLength}
-                onStartCall={handleStartUPSCInterview}
-                onEndCall={handleEndUPSCInterview}
-                avatarName="Dr. Priya Sharma"
-                avatarRole="UPSC Interview Panel Member"
-              />
-              
-              {/* UPSC Interview Tips */}
-              <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <h4 className="font-medium text-blue-900 mb-2">Interview Tips</h4>
-                <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• Be confident and maintain eye contact</li>
-                  <li>• Speak clearly and at a moderate pace</li>
-                  <li>• Support your answers with examples</li>
-                  <li>• Stay calm and composed throughout</li>
-                </ul>
-              </div>
-            </div>
+                    <span>Start Interview</span>
+                    <ExternalLink className="h-4 w-4" />
+                  </button>
+                )}
+              </motion.div>
+            ))}
           </div>
 
           {/* Sessions Section */}
