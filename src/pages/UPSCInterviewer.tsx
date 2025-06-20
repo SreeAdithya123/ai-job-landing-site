@@ -125,7 +125,7 @@ const UPSCInterviewer = () => {
                   <span>Repeat</span>
                 </motion.button>
                 
-                <motion.button onClick={handleStartInterview} className="flex items-center space-x-3 px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium" initial={{
+                <motion.button onClick={handleStartInterview} className="flex items-center space-x-3 px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium" initial={{
               opacity: 0,
               y: 20
             }} animate={{
@@ -136,7 +136,7 @@ const UPSCInterviewer = () => {
               delay: 0.1
             }}>
                   <LogOut className="h-5 w-5" />
-                  <span>Start Interview</span>
+                  <span>Start Interview</span>
                 </motion.button>
               </> : <motion.div initial={{
             opacity: 0,
