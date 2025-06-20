@@ -8,13 +8,15 @@ interface UploadModalProps {
   onClose: () => void;
   selectedMaterial: string;
   onGenerateComplete: (fileName: string, type: string) => void;
+  apiKey: string;
 }
 
 const UploadModal: React.FC<UploadModalProps> = ({ 
   isOpen, 
   onClose, 
   selectedMaterial, 
-  onGenerateComplete 
+  onGenerateComplete,
+  apiKey 
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -61,15 +63,24 @@ const UploadModal: React.FC<UploadModalProps> = ({
     
     setIsGenerating(true);
     
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    onGenerateComplete(selectedFile.name, outputTypes.find(t => t.value === outputType)?.label || 'Summary');
-    
-    // Reset form
-    setSelectedFile(null);
-    setOutputType('summary');
-    setIsGenerating(false);
+    try {
+      // Here you would integrate with your API using the provided apiKey
+      console.log('Processing file with API key:', apiKey);
+      console.log('File:', selectedFile.name);
+      console.log('Output type:', outputType);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      onGenerateComplete(selectedFile.name, outputTypes.find(t => t.value === outputType)?.label || 'Summary');
+    } catch (error) {
+      console.error('Error generating material:', error);
+    } finally {
+      // Reset form
+      setSelectedFile(null);
+      setOutputType('summary');
+      setIsGenerating(false);
+    }
   };
 
   const handleClose = () => {

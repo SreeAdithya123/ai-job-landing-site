@@ -24,6 +24,9 @@ const MaterialGenerator = () => {
     status: string;
   }>>([]);
 
+  // API key for Material Generator
+  const API_KEY = 'vaH5yXCtZMCYFFlljqJWzsVKcJO7Rs4eEglOAEOC';
+
   const materialTypes = [
     {
       id: 'pdf-summary',
@@ -164,6 +167,7 @@ const MaterialGenerator = () => {
         onClose={() => setIsModalOpen(false)}
         selectedMaterial={selectedMaterial}
         onGenerateComplete={handleGenerateComplete}
+        apiKey={API_KEY}
       />
     </Layout>
   );

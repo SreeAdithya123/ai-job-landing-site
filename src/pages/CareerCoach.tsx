@@ -5,6 +5,9 @@ import ChatBot from '../components/ChatBot';
 import { Star, Target, TrendingUp, Award } from 'lucide-react';
 
 const CareerCoach = () => {
+  // API key for Career Coach
+  const API_KEY = 'WaDmYbqdMO9gegCw2qxd17m1XrfmAY2sPXp9hkxA';
+
   const features = [
     {
       icon: Target,
@@ -65,6 +68,8 @@ const CareerCoach = () => {
                 title="Your Personal Career Coach"
                 placeholder="Ask me anything about your career..."
                 initialMessage="Hello! I'm your personal AI Career Coach. I'm here to help you navigate your career journey, whether you need advice on skill development, interview preparation, resume optimization, or career planning. What would you like to discuss today?"
+                apiKey={API_KEY}
+                context="career"
               />
             </div>
           </div>

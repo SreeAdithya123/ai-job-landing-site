@@ -16,9 +16,11 @@ interface ChatBotProps {
   title: string;
   placeholder?: string;
   initialMessage?: string;
+  apiKey?: string;
+  context?: 'career' | 'recruiter';
 }
 
-const ChatBot = ({ title, placeholder = "Type your message...", initialMessage }: ChatBotProps) => {
+const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, apiKey, context }: ChatBotProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -59,17 +61,57 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage }
     setInputValue('');
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const botMessage: Message = {
+    try {
+      // Here you would integrate with your API using the provided apiKey
+      if (apiKey) {
+        console.log('Processing message with API key:', apiKey);
+        console.log('Context:', context);
+        console.log('User input:', inputValue);
+        
+        // Simulate API call - replace with actual API integration
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: getEnhancedBotResponse(inputValue, title, context),
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, botMessage]);
+      } else {
+        // Fallback to basic responses
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: getBotResponse(inputValue, title),
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, botMessage]);
+      }
+    } catch (error) {
+      console.error('Error processing message:', error);
+      const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: getBotResponse(inputValue, title),
+        content: "I'm sorry, I encountered an error processing your message. Please try again.",
         sender: 'bot',
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, botMessage]);
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
+  };
+
+  const getEnhancedBotResponse = (userInput: string, botTitle: string, context?: string): string => {
+    const input = userInput.toLowerCase();
+    
+    if (context === 'career') {
+      return "Thank you for your question! With our enhanced AI capabilities, I can provide you with personalized career guidance based on current market trends and your specific situation. Let me analyze your query and provide detailed insights...";
+    } else if (context === 'recruiter') {
+      return "Great! I'm connecting you with our enhanced recruiter network. Based on your profile and preferences, I can match you with the most suitable opportunities from our partner companies. Let me process your request...";
+    }
+    
+    return getBotResponse(userInput, botTitle);
   };
 
   const getBotResponse = (userInput: string, botTitle: string): string => {
@@ -114,6 +156,9 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage }
         <div className="flex items-center space-x-2">
           <Bot className="h-6 w-6" />
           <h3 className="text-lg font-semibold">{title}</h3>
+          {apiKey && (
+            <span className="px-2 py-1 bg-white/20 rounded-full text-xs">Enhanced AI</span>
+          )}
         </div>
       </div>
 

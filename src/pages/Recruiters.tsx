@@ -5,6 +5,9 @@ import ChatBot from '../components/ChatBot';
 import { Users, Building, Briefcase, Star } from 'lucide-react';
 
 const Recruiters = () => {
+  // API key for Recruiters
+  const API_KEY = 'WaDmYbqdMO9gegCw2qxd17m1XrfmAY2sPXp9hkxA';
+
   const companies = [
     { name: 'Google', logo: '🔍', industry: 'Technology' },
     { name: 'Microsoft', logo: '🪟', industry: 'Technology' },
@@ -100,6 +103,8 @@ const Recruiters = () => {
                 title="Recruiter Connection Assistant"
                 placeholder="Tell me about your dream job..."
                 initialMessage="Welcome! I'm here to help you connect with recruiters from top companies. Whether you're looking for your next role at a tech giant, startup, or Fortune 500 company, I can help facilitate those connections. What type of role and company are you interested in?"
+                apiKey={API_KEY}
+                context="recruiter"
               />
             </div>
           </div>
