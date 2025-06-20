@@ -1,13 +1,13 @@
-
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, FileText, ChevronDown } from 'lucide-react';
+import { X, Upload, FileText, ChevronDown, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedMaterial: string;
-  onGenerateComplete: (fileName: string, type: string) => void;
+  onGenerateComplete: (fileName: string, type: string, content: string) => void;
   apiKey: string;
 }
 
@@ -23,7 +23,9 @@ const UploadModal: React.FC<UploadModalProps> = ({
   const [outputType, setOutputType] = useState('summary');
   const [isGenerating, setIsGenerating] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const outputTypes = [
     { value: 'summary', label: 'Summary' },
@@ -58,27 +60,99 @@ const UploadModal: React.FC<UploadModalProps> = ({
     }
   };
 
+  const generateContent = async (text: string, type: string): Promise<string> => {
+    const prompts = {
+      summary: `Create a comprehensive summary of the following text. Structure it with clear headings and bullet points:\n\n${text}`,
+      notes: `Convert the following text into student-friendly bullet notes with clear sections and subsections:\n\n${text}`,
+      flashcards: `Create Q&A flashcards from the following text. Format as "Q: [question]\nA: [answer]" pairs:\n\n${text}`,
+      qa: `Extract important questions and answers from the following text. Format as structured Q&A:\n\n${text}`
+    };
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert educational content creator. Generate well-structured, comprehensive study materials.'
+            },
+            {
+              role: 'user',
+              content: prompts[type as keyof typeof prompts] || prompts.summary
+            }
+          ],
+          max_tokens: 2000,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      console.error('Error generating content:', error);
+      throw error;
+    }
+  };
+
+  const extractTextFromFile = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        if (text.length < 50) {
+          reject(new Error('File content is too short to process'));
+          return;
+        }
+        resolve(text);
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsText(file);
+    });
+  };
+
   const handleGenerate = async () => {
     if (!selectedFile) return;
     
     setIsGenerating(true);
+    setGenerationProgress('Reading file...');
     
     try {
-      // Here you would integrate with your API using the provided apiKey
-      console.log('Processing file with API key:', apiKey);
-      console.log('File:', selectedFile.name);
-      console.log('Output type:', outputType);
+      const fileText = await extractTextFromFile(selectedFile);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      setGenerationProgress('Generating content with AI...');
+      const generatedContent = await generateContent(fileText, outputType);
       
-      onGenerateComplete(selectedFile.name, outputTypes.find(t => t.value === outputType)?.label || 'Summary');
-    } catch (error) {
-      console.error('Error generating material:', error);
-    } finally {
+      const outputLabel = outputTypes.find(t => t.value === outputType)?.label || 'Summary';
+      
+      onGenerateComplete(selectedFile.name, outputLabel, generatedContent);
+      
+      toast({
+        title: "Generation Complete",
+        description: `Successfully generated ${outputLabel.toLowerCase()} from ${selectedFile.name}`,
+      });
+      
       // Reset form
       setSelectedFile(null);
       setOutputType('summary');
+      setGenerationProgress('');
+    } catch (error) {
+      console.error('Error generating material:', error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate material. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsGenerating(false);
     }
   };
@@ -207,11 +281,25 @@ const UploadModal: React.FC<UploadModalProps> = ({
             </div>
           </div>
 
+          {/* Generation Progress */}
+          {isGenerating && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center space-x-3">
+                <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+                <div>
+                  <p className="text-sm font-medium text-blue-900">Generating Material</p>
+                  <p className="text-xs text-blue-700">{generationProgress}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex space-x-3 mt-6">
             <button
               onClick={handleClose}
               className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              disabled={isGenerating}
             >
               Cancel
             </button>

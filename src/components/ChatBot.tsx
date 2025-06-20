@@ -1,9 +1,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User } from 'lucide-react';
+import { Send, Bot, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 
 interface Message {
   id: string;
@@ -25,6 +26,7 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (initialMessage) {
@@ -47,6 +49,49 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
     scrollToBottom();
   }, [messages]);
 
+  const callOpenAI = async (userInput: string, context?: string): Promise<string> => {
+    if (!apiKey) {
+      throw new Error('API key not available');
+    }
+
+    const systemPrompts = {
+      career: 'You are an expert career coach with years of experience helping professionals advance their careers. Provide personalized, actionable advice on career development, resume optimization, interview preparation, skill development, and job search strategies.',
+      recruiter: 'You are a professional recruiter with extensive connections across top companies. Help users connect with recruiters, understand hiring processes, and navigate job opportunities at their target companies.'
+    };
+
+    const systemPrompt = systemPrompts[context as keyof typeof systemPrompts] || 
+      'You are a helpful AI assistant focused on career and professional development.';
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userInput }
+          ],
+          max_tokens: 500,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      console.error('OpenAI API error:', error);
+      throw error;
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
@@ -58,36 +103,31 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputValue;
     setInputValue('');
     setIsLoading(true);
 
     try {
-      // Here you would integrate with your API using the provided apiKey
+      let botResponse: string;
+      
       if (apiKey) {
         console.log('Processing message with API key:', apiKey);
         console.log('Context:', context);
-        console.log('User input:', inputValue);
+        console.log('User input:', currentInput);
         
-        // Simulate API call - replace with actual API integration
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const botMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: getEnhancedBotResponse(inputValue, title, context),
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botMessage]);
+        botResponse = await callOpenAI(currentInput, context);
       } else {
         // Fallback to basic responses
-        const botMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: getBotResponse(inputValue, title),
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botMessage]);
+        botResponse = getBotResponse(currentInput, title);
       }
+
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: botResponse,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error('Error processing message:', error);
       const errorMessage: Message = {
@@ -97,6 +137,12 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
+      
+      toast({
+        title: "Error",
+        description: "Failed to process your message. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -184,7 +230,7 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
                     : 'bg-gray-100 text-gray-900'
                 }`}
               >
-                <p className="text-sm">{message.content}</p>
+                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 <span className="text-xs opacity-70 mt-1 block">
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
@@ -202,10 +248,9 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
                 <Bot className="h-4 w-4 text-white" />
               </div>
               <div className="bg-gray-100 p-3 rounded-lg">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-sm text-gray-600">Thinking...</span>
                 </div>
               </div>
             </div>

@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
 import MaterialCard from '../components/MaterialCard';
 import UploadModal from '../components/UploadModal';
+import OutputDisplay from '../components/OutputDisplay';
 import { 
   FileText, 
   BookOpen, 
@@ -22,7 +22,13 @@ const MaterialGenerator = () => {
     type: string;
     date: string;
     status: string;
+    content?: string;
   }>>([]);
+  const [currentOutput, setCurrentOutput] = useState<{
+    fileName: string;
+    type: string;
+    content: string;
+  } | null>(null);
 
   // API key for Material Generator
   const API_KEY = 'vaH5yXCtZMCYFFlljqJWzsVKcJO7Rs4eEglOAEOC';
@@ -63,15 +69,17 @@ const MaterialGenerator = () => {
     setIsModalOpen(true);
   };
 
-  const handleGenerateComplete = (fileName: string, type: string) => {
+  const handleGenerateComplete = (fileName: string, type: string, content: string) => {
     const newSession = {
       id: Date.now().toString(),
       fileName,
       type,
       date: new Date().toLocaleDateString(),
-      status: 'Completed'
+      status: 'Completed',
+      content
     };
     setRecentSessions(prev => [newSession, ...prev]);
+    setCurrentOutput({ fileName, type, content });
     setIsModalOpen(false);
   };
 
@@ -115,6 +123,18 @@ const MaterialGenerator = () => {
               />
             ))}
           </div>
+
+          {/* Output Display Section */}
+          {currentOutput && (
+            <div className="mb-8">
+              <OutputDisplay 
+                fileName={currentOutput.fileName}
+                type={currentOutput.type}
+                content={currentOutput.content}
+                onClose={() => setCurrentOutput(null)}
+              />
+            </div>
+          )}
 
           {/* Recent Sessions Section */}
           <div className="glass-card rounded-xl shadow-sm border border-gray-200">
