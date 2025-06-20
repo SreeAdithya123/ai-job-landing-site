@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Phone, PhoneOff, Star } from 'lucide-react';
+import { ArrowLeft, MessageSquare, User, RotateCcw, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 
@@ -44,164 +44,185 @@ const UPSCInterviewer = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header with Back Button */}
-          <div className="flex items-center mb-8">
-            <button
-              onClick={handleBackToInterviews}
-              className="flex items-center space-x-2 px-4 py-2 glass-card border border-primary/20 rounded-lg hover:bg-white/90 transition-colors mr-4"
-            >
-              <ArrowLeft className="h-4 w-4 text-primary" />
-              <span className="text-primary font-medium">Back to Interviews</span>
-            </button>
-            <h1 className="text-3xl font-bold text-foreground bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
-              UPSC Interviewer
-            </h1>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center">
+              <button
+                onClick={handleBackToInterviews}
+                className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-colors mr-6"
+              >
+                <ArrowLeft className="h-4 w-4 text-slate-300" />
+                <span className="text-slate-300 font-medium">Back</span>
+              </button>
+              
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
+                  <MessageSquare className="h-5 w-5 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold text-white">
+                  UPSC Civil Services Interview
+                </h1>
+              </div>
+            </div>
+            
+            <div className="px-4 py-2 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-lg">
+              <span className="text-slate-300 text-sm font-medium">Technical Interview</span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Main Interview Interface */}
-            <div className="glass-card rounded-xl shadow-lg border border-gray-200 p-8">
-              {/* Interviewer Image Division */}
-              <div className="mb-8">
-                <div className="w-full max-w-md mx-auto">
-                  <div className="aspect-square bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl border-2 border-dashed border-primary/30 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Star className="h-8 w-8 text-white" />
+          {/* Main Interview Interface */}
+          <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* AI Interviewer Section */}
+              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-600/50 rounded-xl p-8 flex flex-col items-center justify-center min-h-[400px]">
+                <div className="relative mb-6">
+                  {/* Outer ring */}
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-r from-slate-600 to-slate-500 p-1">
+                    {/* Middle ring */}
+                    <div className="w-full h-full rounded-full bg-gradient-to-r from-primary/20 to-accent/20 p-3">
+                      {/* Inner circle */}
+                      <div className="w-full h-full rounded-full bg-gradient-to-r from-primary/30 to-accent/30 flex items-center justify-center">
+                        <MessageSquare className="h-12 w-12 text-white" />
                       </div>
-                      <p className="text-muted-foreground text-sm">
-                        UPSC Interview Panel
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        (Civil Services Interview)
-                      </p>
                     </div>
                   </div>
                 </div>
+                
+                <h2 className="text-2xl font-bold text-white mb-2">AI Interviewer</h2>
+                <p className="text-slate-400 text-sm">UPSC Panel Member</p>
               </div>
 
-              {/* Action Buttons */}
-              <div className="text-center">
-                {!isInterviewActive ? (
-                  <motion.button
-                    onClick={handleStartInterview}
-                    className="px-8 py-4 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 font-medium text-lg transform hover:scale-105 flex items-center space-x-3 mx-auto"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <Phone className="h-5 w-5" />
-                    <span>Start Interview</span>
-                  </motion.button>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-4"
-                  >
-                    <div className="text-center mb-6">
-                      <div className="inline-flex items-center space-x-2 px-4 py-2 bg-green-100 text-green-800 rounded-full border border-green-200">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-sm font-medium">Interview in Progress</span>
-                      </div>
+              {/* User Section */}
+              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-600/50 rounded-xl p-8 flex flex-col items-center justify-center min-h-[400px]">
+                <div className="relative mb-6">
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-r from-slate-600 to-slate-500 p-1">
+                    <div className="w-full h-full rounded-full bg-slate-700 flex items-center justify-center overflow-hidden">
+                      <User className="h-16 w-16 text-slate-400" />
                     </div>
-                    
-                    <button
-                      onClick={handleExitInterview}
-                      className="px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium text-lg transform hover:scale-105 flex items-center space-x-3 mx-auto"
-                    >
-                      <PhoneOff className="h-5 w-5" />
-                      <span>Exit Interview</span>
-                    </button>
-                  </motion.div>
-                )}
+                  </div>
+                </div>
+                
+                <h2 className="text-2xl font-bold text-white mb-2">Candidate (You)</h2>
+                <p className="text-slate-400 text-sm">UPSC Aspirant</p>
               </div>
+            </div>
+          </div>
 
-              {/* Interview Tips */}
-              {isInterviewActive && (
-                <motion.div
+          {/* Question Section */}
+          <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl p-6 mb-6">
+            <div className="text-center">
+              <p className="text-white text-lg">
+                What <span className="bg-slate-700 px-3 py-1 rounded-md text-slate-300">experience level</span> are you targeting?
+              </p>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-center space-x-4">
+            {!isInterviewActive ? (
+              <>
+                <motion.button
+                  className="flex items-center space-x-3 px-6 py-3 bg-slate-700/80 backdrop-blur-sm border border-slate-600 text-slate-300 rounded-lg hover:bg-slate-600/80 transition-all duration-200"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg"
+                  transition={{ duration: 0.6 }}
                 >
-                  <h3 className="font-semibold text-blue-900 mb-2">Interview Tips:</h3>
-                  <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Speak clearly and confidently</li>
-                    <li>• Take your time to think before answering</li>
-                    <li>• Maintain good posture and eye contact</li>
-                    <li>• Be prepared to discuss current affairs</li>
-                  </ul>
-                </motion.div>
-              )}
-            </div>
+                  <RotateCcw className="h-5 w-5" />
+                  <span>Repeat</span>
+                </motion.button>
+                
+                <motion.button
+                  onClick={handleStartInterview}
+                  className="flex items-center space-x-3 px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>Leave Interview</span>
+                </motion.button>
+              </>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center space-x-4"
+              >
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center space-x-2 px-4 py-2 bg-green-900/50 text-green-300 rounded-full border border-green-700/50">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-medium">Interview in Progress</span>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={handleExitInterview}
+                  className="flex items-center space-x-3 px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>End Interview</span>
+                </button>
+              </motion.div>
+            )}
+          </div>
 
-            {/* Right Column - Live Transcript */}
-            <div className="glass-card rounded-xl shadow-lg border border-gray-200 p-6">
+          {/* Live Transcript Section */}
+          {transcript.length > 0 && (
+            <div className="mt-8 bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-foreground">Live Transcript</h3>
+                <h3 className="text-lg font-semibold text-white">Live Transcript</h3>
                 <div className="flex items-center space-x-2">
-                  <div className={`w-2 h-2 rounded-full ${isInterviewActive ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
-                  <span className="text-sm text-muted-foreground">
+                  <div className={`w-2 h-2 rounded-full ${isInterviewActive ? 'bg-green-400 animate-pulse' : 'bg-slate-500'}`}></div>
+                  <span className="text-sm text-slate-400">
                     {isInterviewActive ? 'Recording' : 'Idle'}
                   </span>
                 </div>
               </div>
 
-              <div className="h-96 overflow-y-auto bg-gray-50 rounded-lg p-4 space-y-3">
-                {transcript.length === 0 ? (
-                  <div className="text-center text-muted-foreground text-sm mt-20">
-                    <Star className="h-12 w-12 mx-auto mb-4 text-primary/30" />
-                    <p>Transcript will appear here when the interview starts</p>
-                  </div>
-                ) : (
-                  transcript.map((entry, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className={`p-3 rounded-lg ${
-                        entry.speaker === 'AI' 
-                          ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-l-4 border-primary' 
-                          : 'bg-white border-l-4 border-accent'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start mb-1">
-                        <span className={`text-sm font-medium ${
-                          entry.speaker === 'AI' ? 'text-primary' : 'text-accent'
-                        }`}>
-                          {entry.speaker === 'AI' ? 'Interview Panel' : 'Candidate'}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {entry.timestamp}
-                        </span>
-                      </div>
-                      <p className="text-sm text-foreground">{entry.text}</p>
-                    </motion.div>
-                  ))
-                )}
+              <div className="h-64 overflow-y-auto bg-slate-900/50 rounded-lg p-4 space-y-3">
+                {transcript.map((entry, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className={`p-3 rounded-lg ${
+                      entry.speaker === 'AI' 
+                        ? 'bg-gradient-to-r from-primary/20 to-accent/20 border-l-4 border-primary' 
+                        : 'bg-slate-800/50 border-l-4 border-accent'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-1">
+                      <span className={`text-sm font-medium ${
+                        entry.speaker === 'AI' ? 'text-primary' : 'text-accent'
+                      }`}>
+                        {entry.speaker === 'AI' ? 'Interview Panel' : 'Candidate'}
+                      </span>
+                      <span className="text-xs text-slate-400">
+                        {entry.timestamp}
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-200">{entry.text}</p>
+                  </motion.div>
+                ))}
               </div>
 
-              {/* Transcript Controls */}
-              {transcript.length > 0 && (
-                <div className="mt-4 flex justify-between items-center">
-                  <button 
-                    onClick={() => setTranscript([])}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Clear Transcript
-                  </button>
-                  <button className="text-sm text-primary hover:text-primary-hover transition-colors">
-                    Download Transcript
-                  </button>
-                </div>
-              )}
+              <div className="mt-4 flex justify-between items-center">
+                <button 
+                  onClick={() => setTranscript([])}
+                  className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
+                >
+                  Clear Transcript
+                </button>
+                <button className="text-sm text-primary hover:text-primary-light transition-colors">
+                  Download Transcript
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </Layout>
