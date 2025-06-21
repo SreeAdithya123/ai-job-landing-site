@@ -3,6 +3,7 @@ import React from 'react';
 import Layout from '../components/Layout';
 import ProgressTracking from '../components/ProgressTracking';
 import RecentInterviewAnalyses from '../components/RecentInterviewAnalyses';
+import InterviewResultsNotification from '../components/InterviewResultsNotification';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { Download } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -75,6 +76,9 @@ const Dashboard = () => {
     <ProtectedRoute>
       <Layout>
         <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50">
+          {/* Interview Results Notification */}
+          <InterviewResultsNotification />
+          
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="text-center mb-12">
               <div className="flex items-center justify-center space-x-4 mb-6">
@@ -100,7 +104,9 @@ const Dashboard = () => {
             </div>
 
             {/* Recent Interview Analyses */}
-            <RecentInterviewAnalyses />
+            <div data-interview-analyses>
+              <RecentInterviewAnalyses />
+            </div>
           </div>
         </div>
       </Layout>
