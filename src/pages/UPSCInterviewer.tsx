@@ -68,15 +68,19 @@ const UPSCInterviewer = () => {
       setIsInterviewActive(false);
       setConnectionStatus('error');
       
-      // Handle different error types
+      // Handle different error types with proper type checking
       let errorMessage = 'Unknown error';
       if (typeof error === 'string') {
         errorMessage = error;
       } else if (error && typeof error === 'object') {
-        if ('message' in error && typeof error.message === 'string') {
-          errorMessage = error.message;
-        } else if ('reason' in error && typeof error.reason === 'string') {
-          errorMessage = error.reason;
+        // Use type assertion for error object
+        const errorObj = error as any;
+        if (errorObj.message && typeof errorObj.message === 'string') {
+          errorMessage = errorObj.message;
+        } else if (errorObj.reason && typeof errorObj.reason === 'string') {
+          errorMessage = errorObj.reason;
+        } else {
+          errorMessage = String(error);
         }
       }
       
@@ -116,9 +120,9 @@ const UPSCInterviewer = () => {
       
       console.log('🚀 Starting authenticated session with signed URL');
       
-      // Start the session with the signed URL (for private agents)
+      // Start the session with the signed URL using the correct parameter name
       const conversationId = await conversation.startSession({
-        url: data.signedUrl
+        authorization: data.signedUrl
       });
       
       console.log('✅ UPSC Interview started with conversation ID:', conversationId);
@@ -126,18 +130,19 @@ const UPSCInterviewer = () => {
       
     } catch (error) {
       console.error('❌ Error starting interview:', error);
-      console.error('Error stack:', error.stack);
+      console.error('Error stack:', (error as Error).stack);
       setIsInterviewActive(false);
       setConnectionStatus('error');
       
       // More specific error handling
-      if (error.name === 'NotAllowedError') {
+      const err = error as Error;
+      if (err.name === 'NotAllowedError') {
         toast({
           title: "Microphone Access Required",
           description: "Please allow microphone access to start the interview.",
           variant: "destructive",
         });
-      } else if (error.message?.includes('Configuration')) {
+      } else if (err.message?.includes('Configuration')) {
         toast({
           title: "Configuration Error",
           description: "Interview setup is incomplete. Please contact support.",
@@ -146,7 +151,7 @@ const UPSCInterviewer = () => {
       } else {
         toast({
           title: "Connection Error",
-          description: `Failed to connect: ${error.message || 'Unknown error'}`,
+          description: `Failed to connect: ${err.message || 'Unknown error'}`,
           variant: "destructive",
         });
       }
