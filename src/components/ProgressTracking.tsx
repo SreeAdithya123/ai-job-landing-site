@@ -1,19 +1,42 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, Clock, CheckCircle, Target, BarChart3, Award } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import InterviewSessions from './InterviewSessions';
 
 const ProgressTracking = () => {
-  const [dashboardStats, setDashboardStats] = useState({
-    totalSessions: 24,
-    hoursSpent: 18.5,
-    completedInterviews: 15,
-    successRate: 85
-  });
+  const stats = [
+    {
+      label: 'Total Sessions',
+      value: '24',
+      change: '+12%',
+      icon: BarChart3,
+      color: 'text-primary'
+    },
+    {
+      label: 'Hours Practiced',
+      value: '18.5',
+      change: '+8%',
+      icon: Clock,
+      color: 'text-accent'
+    },
+    {
+      label: 'Completed Interviews',
+      value: '15',
+      change: '+15%',
+      icon: CheckCircle,
+      color: 'text-green-600'
+    },
+    {
+      label: 'Success Rate',
+      value: '85%',
+      change: '+5%',
+      icon: Target,
+      color: 'text-blue-600'
+    }
+  ];
 
-  const [recentActivities, setRecentActivities] = useState([
+  const recentActivities = [
     {
       type: 'Mock Interview',
       date: '2 hours ago',
@@ -37,61 +60,6 @@ const ProgressTracking = () => {
       date: '3 days ago',
       score: '85%',
       status: 'Completed'
-    }
-  ]);
-
-  useEffect(() => {
-    // Load dynamic data from localStorage
-    const savedStats = JSON.parse(localStorage.getItem('dashboard_stats') || '{}');
-    const savedSessions = JSON.parse(localStorage.getItem('interview_sessions') || '[]');
-    
-    if (Object.keys(savedStats).length > 0) {
-      setDashboardStats(prevStats => ({
-        ...prevStats,
-        ...savedStats
-      }));
-    }
-
-    // Update recent activities with saved sessions
-    if (savedSessions.length > 0) {
-      const formattedActivities = savedSessions.slice(0, 4).map((session: any) => ({
-        type: session.type,
-        date: session.date,
-        score: session.analysis ? `${Math.round((session.analysis.confidence + session.analysis.clarity + session.analysis.relevance) / 3)}%` : '85%',
-        status: session.status
-      }));
-      setRecentActivities(formattedActivities);
-    }
-  }, []);
-
-  const stats = [
-    {
-      label: 'Total Sessions',
-      value: dashboardStats.totalSessions.toString(),
-      change: '+12%',
-      icon: BarChart3,
-      color: 'text-primary'
-    },
-    {
-      label: 'Hours Practiced',
-      value: dashboardStats.hoursSpent.toString(),
-      change: '+8%',
-      icon: Clock,
-      color: 'text-accent'
-    },
-    {
-      label: 'Completed Interviews',
-      value: dashboardStats.completedInterviews.toString(),
-      change: '+15%',
-      icon: CheckCircle,
-      color: 'text-green-600'
-    },
-    {
-      label: 'Success Rate',
-      value: `${dashboardStats.successRate}%`,
-      change: '+5%',
-      icon: Target,
-      color: 'text-blue-600'
     }
   ];
 
@@ -158,15 +126,6 @@ const ProgressTracking = () => {
           </motion.div>
         ))}
       </div>
-
-      {/* Interview Sessions Component */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-      >
-        <InterviewSessions />
-      </motion.div>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
