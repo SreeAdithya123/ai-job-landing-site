@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useConversation } from '@11labs/react';
+import { toast } from '@/hooks/use-toast';
 import Layout from '../components/Layout';
 import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewControls from '../components/interview/InterviewControls';
@@ -24,9 +25,15 @@ const UPSCInterviewer = () => {
   const conversation = useConversation({
     onConnect: () => {
       console.log('Connected to ElevenLabs Conversational AI');
+      setIsInterviewActive(true);
+      toast({
+        title: "Interview Started",
+        description: "Connected to AI interviewer successfully",
+      });
     },
     onDisconnect: () => {
       console.log('Disconnected from ElevenLabs Conversational AI');
+      setIsInterviewActive(false);
     },
     onMessage: (message) => {
       console.log('Message received:', message);
@@ -48,6 +55,12 @@ const UPSCInterviewer = () => {
     },
     onError: (error) => {
       console.error('ElevenLabs Conversation error:', error);
+      setIsInterviewActive(false);
+      toast({
+        title: "Interview Error",
+        description: "There was an error with the AI interviewer. Please try again.",
+        variant: "destructive",
+      });
     },
     overrides: {
       agent: {
@@ -62,24 +75,54 @@ const UPSCInterviewer = () => {
 
   const handleStartInterview = async () => {
     try {
+      console.log('Requesting microphone access...');
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      setIsInterviewActive(true);
+      console.log('Microphone access granted');
       
-      await conversation.startSession({
-        agentId: import.meta.env.VITE_ELEVENLABS_AGENT_ID || 'your-agent-id'
+      const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
+      console.log('Starting session with agent ID:', agentId);
+      
+      if (!agentId) {
+        throw new Error('ElevenLabs Agent ID not configured. Please check your environment variables.');
+      }
+      
+      // Start the session with the agent ID
+      const conversationId = await conversation.startSession({
+        agentId: agentId
       });
       
-      console.log('UPSC Interview started with ElevenLabs AI');
+      console.log('UPSC Interview started with conversation ID:', conversationId);
+      
     } catch (error) {
       console.error('Error starting interview:', error);
       setIsInterviewActive(false);
+      
+      // More specific error handling
+      if (error.name === 'NotAllowedError') {
+        toast({
+          title: "Microphone Access Required",
+          description: "Please allow microphone access to start the interview.",
+          variant: "destructive",
+        });
+      } else if (error.message?.includes('Agent ID')) {
+        toast({
+          title: "Configuration Error",
+          description: "Interview setup is incomplete. Please contact support.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Connection Error",
+          description: "Failed to connect to the AI interviewer. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
   const handleExitInterview = async () => {
     try {
       await conversation.endSession();
-      setIsInterviewActive(false);
       
       const currentTime = new Date().toLocaleTimeString();
       setTranscript(prev => [...prev, {
@@ -87,6 +130,11 @@ const UPSCInterviewer = () => {
         text: 'Thank you for your time. The interview panel will deliberate on your responses. You may leave now.',
         timestamp: currentTime
       }]);
+      
+      toast({
+        title: "Interview Ended",
+        description: "Thank you for participating in the UPSC interview simulation.",
+      });
       
       console.log('UPSC Interview ended');
     } catch (error) {
