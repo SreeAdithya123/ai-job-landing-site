@@ -157,7 +157,8 @@ export const useUPSCConversation = () => {
 
       if (error) {
         console.error('Supabase function error:', error);
-        throw new Error(`Failed to get signed URL: ${error.message}`);
+        const errorMessage = error?.message || 'Failed to get signed URL';
+        throw new Error(errorMessage);
       }
 
       if (!data?.signed_url) {
@@ -225,6 +226,53 @@ export const useUPSCConversation = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const analyzeResponse = (userResponse: string) => {
+    const words = userResponse.split(' ').length;
+    const confidence = Math.min(100, (words / 50) * 100);
+    const clarity = userResponse.includes('because') || userResponse.includes('therefore') ? 85 : 70;
+    const relevance = userResponse.length > 100 ? 90 : 75;
+    
+    const suggestions = [];
+    if (confidence < 70) suggestions.push("Try to elaborate more on your answers");
+    if (clarity < 80) suggestions.push("Use more connecting words to improve clarity");
+    if (relevance < 80) suggestions.push("Make your answers more relevant to the question");
+
+    setInterviewAnalysis({
+      confidence: Math.round(confidence),
+      clarity: Math.round(clarity),
+      relevance: Math.round(relevance),
+      suggestions
+    });
+  };
+
+  const saveInterviewData = () => {
+    const interviewData = {
+      id: Date.now().toString(),
+      type: 'UPSC Interview',
+      date: new Date().toLocaleDateString(),
+      duration: '15-30 min',
+      status: 'Completed',
+      transcript,
+      audioRecordings,
+      analysis: interviewAnalysis,
+      timestamp: new Date().toISOString()
+    };
+
+    const existingInterviews = JSON.parse(localStorage.getItem('interview_sessions') || '[]');
+    existingInterviews.unshift(interviewData);
+    localStorage.setItem('interview_sessions', JSON.stringify(existingInterviews));
+
+    const existingStats = JSON.parse(localStorage.getItem('dashboard_stats') || '{}');
+    const updatedStats = {
+      ...existingStats,
+      totalSessions: (existingStats.totalSessions || 0) + 1,
+      hoursSpent: (existingStats.hoursSpent || 0) + 0.5,
+      completedInterviews: (existingStats.completedInterviews || 0) + 1,
+      successRate: interviewAnalysis ? Math.round((interviewAnalysis.confidence + interviewAnalysis.clarity + interviewAnalysis.relevance) / 3) : 85
+    };
+    localStorage.setItem('dashboard_stats', JSON.stringify(updatedStats));
   };
 
   return {
