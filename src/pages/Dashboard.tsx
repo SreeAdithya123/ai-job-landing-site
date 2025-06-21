@@ -2,6 +2,8 @@
 import React from 'react';
 import Layout from '../components/Layout';
 import ProgressTracking from '../components/ProgressTracking';
+import RecentInterviewAnalyses from '../components/RecentInterviewAnalyses';
+import ProtectedRoute from '../components/ProtectedRoute';
 import { Download } from 'lucide-react';
 import jsPDF from 'jspdf';
 
@@ -70,32 +72,39 @@ const Dashboard = () => {
   };
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center space-x-4 mb-6">
-              <h1 className="text-4xl font-bold text-foreground bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
-                Welcome to Your AI Interviewer Dashboard
-              </h1>
-              <button
-                onClick={generatePDFReport}
-                className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
-              >
-                <Download className="h-5 w-5" />
-                <span>Download Report</span>
-              </button>
+    <ProtectedRoute>
+      <Layout>
+        <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="text-center mb-12">
+              <div className="flex items-center justify-center space-x-4 mb-6">
+                <h1 className="text-4xl font-bold text-foreground bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
+                  Welcome to Your AI Interviewer Dashboard
+                </h1>
+                <button
+                  onClick={generatePDFReport}
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                >
+                  <Download className="h-5 w-5" />
+                  <span>Download Report</span>
+                </button>
+              </div>
+              <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+                Your personalized space to practice interviews, track progress, and land your dream job.
+              </p>
             </div>
-            <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-              Your personalized space to practice interviews, track progress, and land your dream job.
-            </p>
-          </div>
 
-          {/* Progress Tracking Dashboard */}
-          <ProgressTracking />
+            {/* Progress Tracking Dashboard */}
+            <div className="mb-12">
+              <ProgressTracking />
+            </div>
+
+            {/* Recent Interview Analyses */}
+            <RecentInterviewAnalyses />
+          </div>
         </div>
-      </div>
-    </Layout>
+      </Layout>
+    </ProtectedRoute>
   );
 };
 

@@ -9,6 +9,60 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      interview_analyses: {
+        Row: {
+          areas_for_improvement: string[] | null
+          communication_score: number | null
+          confidence_score: number | null
+          created_at: string
+          duration_minutes: number | null
+          feedback: string | null
+          id: string
+          interview_type: string
+          overall_score: number | null
+          problem_solving_score: number | null
+          strengths: string[] | null
+          technical_score: number | null
+          transcript_summary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          areas_for_improvement?: string[] | null
+          communication_score?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          duration_minutes?: number | null
+          feedback?: string | null
+          id?: string
+          interview_type: string
+          overall_score?: number | null
+          problem_solving_score?: number | null
+          strengths?: string[] | null
+          technical_score?: number | null
+          transcript_summary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          areas_for_improvement?: string[] | null
+          communication_score?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          duration_minutes?: number | null
+          feedback?: string | null
+          id?: string
+          interview_type?: string
+          overall_score?: number | null
+          problem_solving_score?: number | null
+          strengths?: string[] | null
+          technical_score?: number | null
+          transcript_summary?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
