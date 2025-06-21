@@ -61,9 +61,10 @@ const UPSCInterviewer = () => {
     },
     onError: (error) => {
       console.error('Conversation error:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Connection Error",
-        description: `Failed to maintain voice connection: ${error.message}`,
+        description: `Failed to maintain voice connection: ${errorMessage}`,
         variant: "destructive",
       });
       setIsInterviewActive(false);
@@ -178,9 +179,10 @@ const UPSCInterviewer = () => {
       console.log('UPSC Voice Interview started');
     } catch (error) {
       console.error('Failed to start interview:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Failed to Start",
-        description: `Could not start voice interview: ${error.message}`,
+        description: `Could not start voice interview: ${errorMessage}`,
         variant: "destructive",
       });
       setIsInterviewActive(false);
