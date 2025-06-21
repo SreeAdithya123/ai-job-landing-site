@@ -4,6 +4,7 @@ import { ArrowLeft, MessageSquare, User, RotateCcw, LogOut, Mic, MicOff } from '
 import { useNavigate } from 'react-router-dom';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import Layout from '../components/Layout';
 
 const UPSCInterviewer = () => {
@@ -26,9 +27,11 @@ const UPSCInterviewer = () => {
   } | null>(null);
 
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const conversation = useConversation({
     onMessage: (message) => {
+      console.log('Message received:', message);
       const currentTime = new Date().toLocaleTimeString();
       setTranscript(prev => [...prev, {
         speaker: message.source === 'ai' ? 'AI' : 'User',
@@ -43,18 +46,32 @@ const UPSCInterviewer = () => {
     },
     onConnect: () => {
       console.log('Voice conversation connected');
+      toast({
+        title: "Connected",
+        description: "Voice interview session has started successfully.",
+      });
     },
     onDisconnect: () => {
       console.log('Voice conversation disconnected');
       saveInterviewData();
+      toast({
+        title: "Disconnected",
+        description: "Voice interview session has ended.",
+      });
     },
     onError: (error) => {
       console.error('Conversation error:', error);
+      toast({
+        title: "Connection Error",
+        description: `Failed to maintain voice connection: ${error.message}`,
+        variant: "destructive",
+      });
+      setIsInterviewActive(false);
     },
     overrides: {
       agent: {
         prompt: {
-          prompt: "You are a UPSC Civil Services interview panel member. Conduct a professional interview with appropriate questions about current affairs, governance, ethics, and the candidate's background. Be encouraging but challenging. Keep responses concise and professional."
+          prompt: "You are a UPSC Civil Services interview panel member. Conduct a professional interview with appropriate questions about current affairs, governance, ethics, and the candidate's background. Be encouraging but challenging. Keep responses concise and professional. Ask one question at a time and wait for the candidate's response."
         },
         firstMessage: "Good morning. I am your UPSC interview panel member. Please introduce yourself and tell me why you want to join the civil services.",
         language: "en"
@@ -114,8 +131,17 @@ const UPSCInterviewer = () => {
 
   const handleStartInterview = async () => {
     try {
+      toast({
+        title: "Initializing",
+        description: "Setting up voice interview session...",
+      });
+
       // Request microphone permission
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('Microphone access granted');
+      
+      // Stop the stream as we just needed permission
+      stream.getTracks().forEach(track => track.stop());
       
       // Get signed URL from our edge function
       const { data, error } = await supabase.functions.invoke('elevenlabs-conversation', {
@@ -131,8 +157,10 @@ const UPSCInterviewer = () => {
       if (!data?.signed_url) {
         throw new Error('No signed URL received from server');
       }
+
+      console.log('Got signed URL, starting conversation...');
       
-      // Start ElevenLabs conversation with signed URL and agent ID
+      // Start ElevenLabs conversation with signed URL
       await conversation.startSession({
         signedUrl: data.signed_url
       });
@@ -150,12 +178,22 @@ const UPSCInterviewer = () => {
       console.log('UPSC Voice Interview started');
     } catch (error) {
       console.error('Failed to start interview:', error);
-      alert(`Failed to start voice interview: ${error.message}. Please check your microphone permissions and try again.`);
+      toast({
+        title: "Failed to Start",
+        description: `Could not start voice interview: ${error.message}`,
+        variant: "destructive",
+      });
+      setIsInterviewActive(false);
     }
   };
 
   const handleExitInterview = async () => {
     try {
+      toast({
+        title: "Ending Session",
+        description: "Closing voice interview session...",
+      });
+
       await conversation.endSession();
       setIsInterviewActive(false);
       
@@ -170,6 +208,11 @@ const UPSCInterviewer = () => {
       console.log('UPSC Interview ended');
     } catch (error) {
       console.error('Failed to end interview:', error);
+      toast({
+        title: "Error",
+        description: "Failed to properly end the interview session.",
+        variant: "destructive",
+      });
     }
   };
 
