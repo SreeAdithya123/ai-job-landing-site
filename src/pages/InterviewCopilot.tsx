@@ -4,7 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { useConversation } from '@11labs/react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import Layout from '../components/Layout';
+import ProtectedRoute from '../components/ProtectedRoute';
 import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewControls from '../components/interview/InterviewControls';
 import InterviewTranscript from '../components/interview/InterviewTranscript';
@@ -33,6 +35,7 @@ const InterviewCopilot = () => {
   const [userIsSpeaking, setUserIsSpeaking] = useState(false);
   
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   const conversation = useConversation({
     onConnect: () => {
@@ -245,171 +248,188 @@ const InterviewCopilot = () => {
     setTranscript([]);
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   // Show interview interface for general and coding interviews
   if (showInterviewInterface && (selectedType === 'general' || selectedType === 'coding')) {
     return (
-      <Layout>
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-              <button 
-                onClick={handleBackToInterviews} 
-                className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-colors mr-6"
-              >
-                <ArrowLeft className="h-4 w-4 text-slate-300" />
-                <span className="text-slate-300 font-medium">Back</span>
-              </button>
-              
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
-                  {selectedType === 'general' ? <Laptop className="h-5 w-5 text-white" /> : <Code className="h-5 w-5 text-white" />}
+      <ProtectedRoute>
+        <Layout>
+          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-8">
+                <button 
+                  onClick={handleBackToInterviews} 
+                  className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-colors mr-6"
+                >
+                  <ArrowLeft className="h-4 w-4 text-slate-300" />
+                  <span className="text-slate-300 font-medium">Back</span>
+                </button>
+                
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
+                    {selectedType === 'general' ? <Laptop className="h-5 w-5 text-white" /> : <Code className="h-5 w-5 text-white" />}
+                  </div>
+                  <h1 className="text-2xl font-bold text-white">
+                    {selectedType === 'general' ? 'General AI Interview' : 'Coding AI Interview'}
+                  </h1>
                 </div>
-                <h1 className="text-2xl font-bold text-white">
-                  {selectedType === 'general' ? 'General AI Interview' : 'Coding AI Interview'}
-                </h1>
               </div>
-            </div>
 
-            {/* Debug Status Display */}
-            <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl p-4 mb-6">
-              <div className="text-center">
-                <p className="text-white text-sm">
-                  Connection Status: <span className="bg-blue-700 px-2 py-1 rounded text-blue-300">{connectionStatus}</span>
-                  {userIsSpeaking && <span className="ml-4 bg-purple-700 px-2 py-1 rounded text-purple-300">User Speaking</span>}
-                </p>
-                <p className="text-slate-400 text-xs mt-1">
-                  Check browser console for detailed logs
-                </p>
+              {/* Debug Status Display */}
+              <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl p-4 mb-6">
+                <div className="text-center">
+                  <p className="text-white text-sm">
+                    Connection Status: <span className="bg-blue-700 px-2 py-1 rounded text-blue-300">{connectionStatus}</span>
+                    {userIsSpeaking && <span className="ml-4 bg-purple-700 px-2 py-1 rounded text-purple-300">User Speaking</span>}
+                  </p>
+                  <p className="text-slate-400 text-xs mt-1">
+                    Check browser console for detailed logs
+                  </p>
+                </div>
               </div>
+
+              <InterviewInterface conversation={conversation} userIsSpeaking={userIsSpeaking} />
+
+              <InterviewStatus isInterviewActive={isInterviewActive} />
+
+              <InterviewControls
+                isInterviewActive={isInterviewActive}
+                onStartInterview={handleStartInterview}
+                onExitInterview={handleExitInterview}
+              />
+
+              <InterviewTranscript
+                transcript={transcript}
+                isInterviewActive={isInterviewActive}
+                onClearTranscript={handleClearTranscript}
+              />
             </div>
-
-            <InterviewInterface conversation={conversation} userIsSpeaking={userIsSpeaking} />
-
-            <InterviewStatus isInterviewActive={isInterviewActive} />
-
-            <InterviewControls
-              isInterviewActive={isInterviewActive}
-              onStartInterview={handleStartInterview}
-              onExitInterview={handleExitInterview}
-            />
-
-            <InterviewTranscript
-              transcript={transcript}
-              isInterviewActive={isInterviewActive}
-              onClearTranscript={handleClearTranscript}
-            />
           </div>
-        </div>
-      </Layout>
+        </Layout>
+      </ProtectedRoute>
     );
   }
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2 bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">AI Interviewer</h1>
-              <p className="text-muted-foreground">Real-time AI assistance during your interviews</p>
-            </div>
-            <button className="flex items-center space-x-2 px-4 py-2 glass-card border border-primary/20 rounded-lg hover:bg-white/90 transition-colors">
-              <Settings className="h-4 w-4 text-primary" />
-              <span className="text-primary font-medium">Settings</span>
-            </button>
-          </div>
-
-          {/* Interview Type Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {interviewTypes.map((type, index) => (
-              <motion.div
-                key={type.id}
-                className={`p-6 glass-card rounded-xl border-2 cursor-pointer transition-all duration-200 hover:shadow-glow ${
-                  selectedType === type.id 
-                    ? 'border-primary bg-gradient-to-br from-primary/10 to-accent/10 shadow-glow-accent' 
-                    : 'border-gray-200 hover:border-primary/30'
-                }`}
-                onClick={() => setSelectedType(type.id)}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -4 }}
-              >
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${
-                  selectedType === type.id 
-                    ? 'bg-gradient-to-r from-primary to-accent text-white shadow-glow' 
-                    : 'bg-gray-100 text-gray-600'
-                }`}>
-                  <type.icon className="h-6 w-6" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2 text-foreground">{type.name}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{type.description}</p>
-                
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectInterview(type.id);
-                  }}
-                  className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 text-sm font-medium transform hover:scale-105"
-                >
-                  <span>Start Interview</span>
-                  {(type.id === 'upsc' || type.id === 'friendly') && <ExternalLink className="h-4 w-4" />}
-                </button>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Sessions Section */}
-          <div className="glass-card rounded-xl shadow-sm border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-foreground">Your Sessions</h2>
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 font-medium">
-                <Plus className="h-4 w-4" />
-                <span>New Session</span>
-              </button>
-            </div>
-            
-            {completedInterviews.length > 0 ? (
-              <div className="divide-y divide-gray-200">
-                {completedInterviews.map((interview) => (
-                  <div key={interview.id} className="px-6 py-4 flex items-center justify-between hover:bg-white/50 transition-colors">
-                    <div>
-                      <h3 className="font-medium text-foreground">{interview.type}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {interview.date} • {interview.duration}
-                      </p>
-                    </div>
-                    <span className="px-3 py-1 text-xs font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 rounded-full border border-green-200">
-                      {interview.status}
-                    </span>
-                  </div>
-                ))}
+    <ProtectedRoute>
+      <Layout>
+        <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground mb-2 bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">AI Interviewer</h1>
+                <p className="text-muted-foreground">Real-time AI assistance during your interviews</p>
               </div>
-            ) : (
-              <div className="p-12 text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Laptop className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="text-lg font-medium text-foreground mb-2">
-                  You don't have any AI Interviewer™ sessions.
-                </h3>
-                <p className="text-muted-foreground mb-6">
-                  Start your first session to get real-time AI assistance during interviews.
-                </p>
+              <div className="flex items-center space-x-4">
+                <button className="flex items-center space-x-2 px-4 py-2 glass-card border border-primary/20 rounded-lg hover:bg-white/90 transition-colors">
+                  <Settings className="h-4 w-4 text-primary" />
+                  <span className="text-primary font-medium">Settings</span>
+                </button>
                 <button 
-                  onClick={() => handleSelectInterview('general')}
-                  className="px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 font-medium transform hover:scale-105"
+                  onClick={handleSignOut}
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                 >
-                  Start Your First Session
+                  <span className="font-medium">Sign Out</span>
                 </button>
               </div>
-            )}
+            </div>
+
+            {/* Interview Type Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              {interviewTypes.map((type, index) => (
+                <motion.div
+                  key={type.id}
+                  className={`p-6 glass-card rounded-xl border-2 cursor-pointer transition-all duration-200 hover:shadow-glow ${
+                    selectedType === type.id 
+                      ? 'border-primary bg-gradient-to-br from-primary/10 to-accent/10 shadow-glow-accent' 
+                      : 'border-gray-200 hover:border-primary/30'
+                  }`}
+                  onClick={() => setSelectedType(type.id)}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ y: -4 }}
+                >
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${
+                    selectedType === type.id 
+                      ? 'bg-gradient-to-r from-primary to-accent text-white shadow-glow' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    <type.icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-semibold text-lg mb-2 text-foreground">{type.name}</h3>
+                  <p className="text-sm text-muted-foreground mb-4">{type.description}</p>
+                  
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectInterview(type.id);
+                    }}
+                    className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 text-sm font-medium transform hover:scale-105"
+                  >
+                    <span>Start Interview</span>
+                    {(type.id === 'upsc' || type.id === 'friendly') && <ExternalLink className="h-4 w-4" />}
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Sessions Section */}
+            <div className="glass-card rounded-xl shadow-sm border border-gray-200">
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-foreground">Your Sessions</h2>
+                <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 font-medium">
+                  <Plus className="h-4 w-4" />
+                  <span>New Session</span>
+                </button>
+              </div>
+              
+              {completedInterviews.length > 0 ? (
+                <div className="divide-y divide-gray-200">
+                  {completedInterviews.map((interview) => (
+                    <div key={interview.id} className="px-6 py-4 flex items-center justify-between hover:bg-white/50 transition-colors">
+                      <div>
+                        <h3 className="font-medium text-foreground">{interview.type}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {interview.date} • {interview.duration}
+                        </p>
+                      </div>
+                      <span className="px-3 py-1 text-xs font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 rounded-full border border-green-200">
+                        {interview.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-12 text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Laptop className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    You don't have any AI Interviewer™ sessions.
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    Start your first session to get real-time AI assistance during interviews.
+                  </p>
+                  <button 
+                    onClick={() => handleSelectInterview('general')}
+                    className="px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 font-medium transform hover:scale-105"
+                  >
+                    Start Your First Session
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </Layout>
+      </Layout>
+    </ProtectedRoute>
   );
 };
 

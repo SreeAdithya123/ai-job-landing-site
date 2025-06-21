@@ -1,33 +1,118 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 const Auth = () => {
-  const [isSignUp, setIsSignUp] = useState(true);
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { signUp, signIn, user } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Redirect authenticated users
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle authentication logic here
-    console.log('Auth form submitted:', { email, password, isSignUp });
-    // For now, just navigate to dashboard (you can implement actual auth later)
-    navigate('/dashboard');
+    
+    if (isSignUp && password !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      if (isSignUp) {
+        const { error } = await signUp(email, password);
+        if (error) {
+          if (error.message.includes('User already registered')) {
+            toast({
+              title: "Account exists",
+              description: "An account with this email already exists. Please sign in instead.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Sign up failed",
+              description: error.message,
+              variant: "destructive",
+            });
+          }
+        } else {
+          toast({
+            title: "Check your email",
+            description: "We've sent you a confirmation link to complete your registration.",
+          });
+        }
+      } else {
+        const { error } = await signIn(email, password);
+        if (error) {
+          if (error.message.includes('Invalid login credentials')) {
+            toast({
+              title: "Invalid credentials",
+              description: "Please check your email and password and try again.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Sign in failed",
+              description: error.message,
+              variant: "destructive",
+            });
+          }
+        } else {
+          toast({
+            title: "Welcome back!",
+            description: "You have successfully signed in.",
+          });
+          navigate('/dashboard');
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleAuth = () => {
-    // Handle Google authentication
-    console.log('Google auth clicked');
-    navigate('/dashboard');
+    toast({
+      title: "Coming soon",
+      description: "Google authentication will be available soon.",
+    });
   };
 
   return (
@@ -70,6 +155,7 @@ const Auth = () => {
                 onClick={handleGoogleAuth}
                 variant="outline"
                 className="w-full glass-card hover:bg-white/90 border-white/30"
+                disabled={isLoading}
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -98,6 +184,7 @@ const Auth = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="input-field"
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -109,11 +196,13 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     className="input-field pr-10"
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -128,19 +217,21 @@ const Auth = () => {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       className="input-field pr-10"
+                      disabled={isLoading}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      disabled={isLoading}
                     >
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                 )}
 
-                <Button type="submit" className="w-full shadow-glow hover:shadow-xl">
-                  {isSignUp ? 'Create Account' : 'Sign In'}
+                <Button type="submit" className="w-full shadow-glow hover:shadow-xl" disabled={isLoading}>
+                  {isLoading ? 'Loading...' : (isSignUp ? 'Create Account' : 'Sign In')}
                 </Button>
               </form>
 
@@ -148,6 +239,7 @@ const Auth = () => {
                 <button
                   onClick={() => setIsSignUp(!isSignUp)}
                   className="text-sm text-primary hover:text-primary-hover underline-offset-4 hover:underline"
+                  disabled={isLoading}
                 >
                   {isSignUp 
                     ? 'Already have an account? Sign in' 
