@@ -5,7 +5,7 @@ import ProgressTracking from '../components/ProgressTracking';
 import RecentInterviewAnalyses from '../components/RecentInterviewAnalyses';
 import InterviewResultsNotification from '../components/InterviewResultsNotification';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { Download, Play, Menu } from 'lucide-react';
+import { Download, Play, Menu, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStats } from '@/hooks/useUserStats';
 import jsPDF from 'jspdf';
@@ -134,6 +134,17 @@ const Dashboard = () => {
             {/* Progress Tracking Dashboard */}
             <div className="mb-12">
               <ProgressTracking />
+            </div>
+
+            {/* Dashboard Button Above Interview Section */}
+            <div className="flex justify-center mb-6">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+              >
+                <BarChart3 className="h-5 w-5" />
+                <span>Dashboard Overview</span>
+              </button>
             </div>
 
             {/* Recent Interview Analyses */}
