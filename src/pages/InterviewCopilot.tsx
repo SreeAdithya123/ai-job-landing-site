@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +9,7 @@ import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewControls from '../components/interview/InterviewControls';
 import InterviewTranscript from '../components/interview/InterviewTranscript';
 import InterviewStatus from '../components/interview/InterviewStatus';
-import { Laptop, Code, Star, Phone, Settings, Plus, ExternalLink, Users } from 'lucide-react';
+import { Laptop, Code, Star, Phone, Settings, Plus, ExternalLink, Users, ArrowLeft } from 'lucide-react';
 
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
@@ -28,6 +27,7 @@ const InterviewCopilot = () => {
     status: string;
   }>>([]);
   const [isInterviewActive, setIsInterviewActive] = useState(false);
+  const [showInterviewInterface, setShowInterviewInterface] = useState(false);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
   
@@ -126,74 +126,79 @@ const InterviewCopilot = () => {
     }
   ];
 
-  const handleStartInterview = async (type: string) => {
+  const handleSelectInterview = (type: string) => {
     if (type === 'general' || type === 'coding') {
-      try {
-        console.log('🎤 Requesting microphone access...');
-        setConnectionStatus('requesting-mic');
-        
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        console.log('✅ Microphone access granted');
-        
-        setConnectionStatus('fetching-config');
-        console.log('🔧 Fetching ElevenLabs configuration...');
-        
-        const { data, error } = await supabase.functions.invoke('get-elevenlabs-signed-url');
-        
-        if (error) {
-          console.error('❌ Configuration error:', error);
-          throw new Error(`Configuration error: ${error.message}`);
-        }
-        
-        if (!data || !data.signedUrl) {
-          console.error('❌ No signed URL received:', data);
-          throw new Error('Failed to get ElevenLabs signed URL for authentication');
-        }
-        
-        console.log('✅ Signed URL received for authenticated connection');
-        setConnectionStatus('connecting');
-        
-        console.log('🚀 Starting authenticated session with signed URL');
-        
-        const { data: configData, error: configError } = await supabase.functions.invoke('get-elevenlabs-config');
-        
-        if (configError || !configData?.agentId) {
-          console.error('❌ Failed to get agent ID:', configError);
-          throw new Error('Failed to get agent configuration');
-        }
-        
-        const conversationId = await conversation.startSession({
-          agentId: configData.agentId,
-          signedUrl: data.signedUrl
-        });
-        
-        console.log(`✅ ${type} Interview started with conversation ID:`, conversationId);
-        setConnectionStatus('connected');
-        
-      } catch (error) {
-        console.error('❌ Error starting interview:', error);
-        setIsInterviewActive(false);
-        setConnectionStatus('error');
-        
-        const err = error as Error;
-        if (err.name === 'NotAllowedError') {
-          toast({
-            title: "Microphone Access Required",
-            description: "Please allow microphone access to start the interview.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Connection Error",
-            description: `Failed to connect: ${err.message || 'Unknown error'}`,
-            variant: "destructive",
-          });
-        }
-      }
+      setSelectedType(type);
+      setShowInterviewInterface(true);
     } else if (type === 'upsc') {
       navigate('/upsc-interviewer');
     } else if (type === 'friendly') {
       navigate('/friendly-interviewer');
+    }
+  };
+
+  const handleStartInterview = async () => {
+    try {
+      console.log('🎤 Requesting microphone access...');
+      setConnectionStatus('requesting-mic');
+      
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('✅ Microphone access granted');
+      
+      setConnectionStatus('fetching-config');
+      console.log('🔧 Fetching ElevenLabs configuration...');
+      
+      const { data, error } = await supabase.functions.invoke('get-elevenlabs-signed-url');
+      
+      if (error) {
+        console.error('❌ Configuration error:', error);
+        throw new Error(`Configuration error: ${error.message}`);
+      }
+      
+      if (!data || !data.signedUrl) {
+        console.error('❌ No signed URL received:', data);
+        throw new Error('Failed to get ElevenLabs signed URL for authentication');
+      }
+      
+      console.log('✅ Signed URL received for authenticated connection');
+      setConnectionStatus('connecting');
+      
+      console.log('🚀 Starting authenticated session with signed URL');
+      
+      const { data: configData, error: configError } = await supabase.functions.invoke('get-elevenlabs-config');
+      
+      if (configError || !configData?.agentId) {
+        console.error('❌ Failed to get agent ID:', configError);
+        throw new Error('Failed to get agent configuration');
+      }
+      
+      const conversationId = await conversation.startSession({
+        agentId: configData.agentId,
+        signedUrl: data.signedUrl
+      });
+      
+      console.log(`✅ ${selectedType} Interview started with conversation ID:`, conversationId);
+      setConnectionStatus('connected');
+      
+    } catch (error) {
+      console.error('❌ Error starting interview:', error);
+      setIsInterviewActive(false);
+      setConnectionStatus('error');
+      
+      const err = error as Error;
+      if (err.name === 'NotAllowedError') {
+        toast({
+          title: "Microphone Access Required",
+          description: "Please allow microphone access to start the interview.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Connection Error",
+          description: `Failed to connect: ${err.message || 'Unknown error'}`,
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -217,31 +222,40 @@ const InterviewCopilot = () => {
     }
   };
 
+  const handleBackToInterviews = () => {
+    setShowInterviewInterface(false);
+    setIsInterviewActive(false);
+    setConnectionStatus('disconnected');
+    setTranscript([]);
+  };
+
   const handleClearTranscript = () => {
     setTranscript([]);
   };
 
   // Show interview interface for general and coding interviews
-  if (isInterviewActive && (selectedType === 'general' || selectedType === 'coding')) {
+  if (showInterviewInterface && (selectedType === 'general' || selectedType === 'coding')) {
     return (
       <Layout>
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
-                    {selectedType === 'general' ? <Laptop className="h-5 w-5 text-white" /> : <Code className="h-5 w-5 text-white" />}
-                  </div>
-                  <h1 className="text-2xl font-bold text-white">
-                    {selectedType === 'general' ? 'General AI Interview' : 'Coding AI Interview'}
-                  </h1>
-                </div>
-              </div>
+              <button 
+                onClick={handleBackToInterviews} 
+                className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-colors mr-6"
+              >
+                <ArrowLeft className="h-4 w-4 text-slate-300" />
+                <span className="text-slate-300 font-medium">Back</span>
+              </button>
               
-              <div className="px-4 py-2 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-lg">
-                <span className="text-slate-300 text-sm font-medium">AI Powered Interview</span>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
+                  {selectedType === 'general' ? <Laptop className="h-5 w-5 text-white" /> : <Code className="h-5 w-5 text-white" />}
+                </div>
+                <h1 className="text-2xl font-bold text-white">
+                  {selectedType === 'general' ? 'General AI Interview' : 'Coding AI Interview'}
+                </h1>
               </div>
             </div>
 
@@ -263,7 +277,7 @@ const InterviewCopilot = () => {
 
             <InterviewControls
               isInterviewActive={isInterviewActive}
-              onStartInterview={() => handleStartInterview(selectedType)}
+              onStartInterview={handleStartInterview}
               onExitInterview={handleExitInterview}
             />
 
@@ -323,7 +337,7 @@ const InterviewCopilot = () => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleStartInterview(type.id);
+                    handleSelectInterview(type.id);
                   }}
                   className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 text-sm font-medium transform hover:scale-105"
                 >
@@ -372,7 +386,7 @@ const InterviewCopilot = () => {
                   Start your first session to get real-time AI assistance during interviews.
                 </p>
                 <button 
-                  onClick={() => handleStartInterview('general')}
+                  onClick={() => handleSelectInterview('general')}
                   className="px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 font-medium transform hover:scale-105"
                 >
                   Start Your First Session
