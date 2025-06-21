@@ -134,9 +134,9 @@ const UPSCInterviewer = () => {
         throw new Error('No signed URL received from server');
       }
       
-      // Start ElevenLabs conversation with signed URL
+      // Start ElevenLabs conversation with signed URL using origin parameter
       await conversation.startSession({
-        url: data.signed_url
+        origin: data.signed_url
       });
       
       setIsInterviewActive(true);
