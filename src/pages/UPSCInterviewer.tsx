@@ -5,6 +5,7 @@ import { ArrowLeft, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useConversation } from '@11labs/react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import Layout from '../components/Layout';
 import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewControls from '../components/interview/InterviewControls';
@@ -79,16 +80,22 @@ const UPSCInterviewer = () => {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       console.log('Microphone access granted');
       
-      const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
-      console.log('Starting session with agent ID:', agentId);
+      console.log('Fetching ElevenLabs configuration...');
+      const { data, error } = await supabase.functions.invoke('get-elevenlabs-config');
       
-      if (!agentId) {
-        throw new Error('ElevenLabs Agent ID not configured. Please check your environment variables.');
+      if (error) {
+        throw new Error(`Configuration error: ${error.message}`);
       }
       
-      // Start the session with the agent ID
+      if (!data || !data.signedUrl) {
+        throw new Error('Failed to get ElevenLabs configuration');
+      }
+      
+      console.log('Starting session with signed URL');
+      
+      // Start the session with the signed URL
       const conversationId = await conversation.startSession({
-        agentId: agentId
+        url: data.signedUrl
       });
       
       console.log('UPSC Interview started with conversation ID:', conversationId);
@@ -104,7 +111,7 @@ const UPSCInterviewer = () => {
           description: "Please allow microphone access to start the interview.",
           variant: "destructive",
         });
-      } else if (error.message?.includes('Agent ID')) {
+      } else if (error.message?.includes('Configuration')) {
         toast({
           title: "Configuration Error",
           description: "Interview setup is incomplete. Please contact support.",
