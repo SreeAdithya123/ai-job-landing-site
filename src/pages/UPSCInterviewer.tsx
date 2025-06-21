@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, MessageSquare } from 'lucide-react';
@@ -87,15 +86,15 @@ const UPSCInterviewer = () => {
         throw new Error(`Configuration error: ${error.message}`);
       }
       
-      if (!data || !data.signedUrl) {
+      if (!data || !data.agentId) {
         throw new Error('Failed to get ElevenLabs configuration');
       }
       
-      console.log('Starting session with signed URL');
+      console.log('Starting session with agent ID:', data.agentId);
       
-      // Start the session with the signed URL
+      // Start the session with the agent ID
       const conversationId = await conversation.startSession({
-        url: data.signedUrl
+        agentId: data.agentId
       });
       
       console.log('UPSC Interview started with conversation ID:', conversationId);
