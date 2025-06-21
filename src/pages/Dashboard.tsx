@@ -5,7 +5,7 @@ import ProgressTracking from '../components/ProgressTracking';
 import RecentInterviewAnalyses from '../components/RecentInterviewAnalyses';
 import InterviewResultsNotification from '../components/InterviewResultsNotification';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { Download, Play } from 'lucide-react';
+import { Download, Play, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStats } from '@/hooks/useUserStats';
 import jsPDF from 'jspdf';
@@ -59,6 +59,44 @@ const Dashboard = () => {
         <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50">
           {/* Interview Results Notification */}
           <InterviewResultsNotification />
+          
+          {/* Dashboard Navigation Bar */}
+          <div className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <button className="lg:hidden p-2 rounded-md hover:bg-gray-100">
+                  <Menu className="h-6 w-6" />
+                </button>
+                <h2 className="text-lg font-semibold text-gray-900">Dashboard Overview</h2>
+              </div>
+              <nav className="hidden md:flex items-center space-x-6">
+                <button
+                  onClick={() => navigate('/mock-interview')}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Mock Interview
+                </button>
+                <button
+                  onClick={() => navigate('/interview-copilot')}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  AI Interviewer
+                </button>
+                <button
+                  onClick={() => navigate('/resume-builder')}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Resume Builder
+                </button>
+                <button
+                  onClick={() => navigate('/material-generator')}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Materials
+                </button>
+              </nav>
+            </div>
+          </div>
           
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="text-center mb-12">
