@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '../components/Layout';
 import ProgressTracking from '../components/ProgressTracking';
@@ -136,14 +135,14 @@ const Dashboard = () => {
               <ProgressTracking />
             </div>
 
-            {/* Dashboard Button Above Interview Section */}
+            {/* Start Interview Button Above Interview Section */}
             <div className="flex justify-center mb-6">
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/mock-interview')}
                 className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
               >
-                <BarChart3 className="h-5 w-5" />
-                <span>Dashboard Overview</span>
+                <Play className="h-5 w-5" />
+                <span>Start Interview</span>
               </button>
             </div>
 
