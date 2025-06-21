@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { saveInterviewAnalysis, getUserInterviewAnalyses, getLatestInterviewAnalysis, InterviewAnalysis } from '@/services/interviewAnalysisService';
 import { toast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
 
 export const useSaveInterviewAnalysis = () => {
   const queryClient = useQueryClient();
@@ -29,16 +30,58 @@ export const useSaveInterviewAnalysis = () => {
 };
 
 export const useInterviewAnalyses = () => {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
     queryKey: ['interview-analyses'],
     queryFn: getUserInterviewAnalyses,
   });
+
+  // Listen for real-time updates
+  useEffect(() => {
+    const handleNewAnalysis = () => {
+      console.log('Refreshing interview analyses due to real-time update');
+      queryClient.invalidateQueries({ queryKey: ['interview-analyses'] });
+    };
+
+    const handleRefreshRequest = () => {
+      queryClient.invalidateQueries({ queryKey: ['interview-analyses'] });
+    };
+
+    window.addEventListener('newInterviewAnalysis', handleNewAnalysis);
+    window.addEventListener('refreshInterviewAnalyses', handleRefreshRequest);
+
+    return () => {
+      window.removeEventListener('newInterviewAnalysis', handleNewAnalysis);
+      window.removeEventListener('refreshInterviewAnalyses', handleRefreshRequest);
+    };
+  }, [queryClient]);
+
+  return query;
 };
 
 export const useLatestInterviewAnalysis = () => {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
     queryKey: ['latest-interview-analysis'],
     queryFn: getLatestInterviewAnalysis,
-    refetchInterval: 5000, // Poll every 5 seconds for new results
+    refetchInterval: 10000, // Poll every 10 seconds for new results
   });
+
+  // Listen for real-time updates
+  useEffect(() => {
+    const handleNewAnalysis = () => {
+      console.log('Refreshing latest interview analysis due to real-time update');
+      queryClient.invalidateQueries({ queryKey: ['latest-interview-analysis'] });
+    };
+
+    window.addEventListener('newInterviewAnalysis', handleNewAnalysis);
+
+    return () => {
+      window.removeEventListener('newInterviewAnalysis', handleNewAnalysis);
+    };
+  }, [queryClient]);
+
+  return query;
 };
