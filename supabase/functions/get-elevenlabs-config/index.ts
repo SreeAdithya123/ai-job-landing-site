@@ -14,33 +14,16 @@ serve(async (req) => {
   }
 
   try {
-    const elevenlabsApiKey = Deno.env.get('ELEVENLABS_API_KEY');
     const elevenlabsAgentId = Deno.env.get('ELEVENLABS_AGENT_ID');
 
-    if (!elevenlabsApiKey || !elevenlabsAgentId) {
-      throw new Error('ElevenLabs configuration not found');
+    if (!elevenlabsAgentId) {
+      throw new Error('ElevenLabs Agent ID not configured');
     }
 
-    // Generate signed URL for conversational AI
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${elevenlabsAgentId}`,
-      {
-        method: 'GET',
-        headers: {
-          'xi-api-key': elevenlabsApiKey,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`ElevenLabs API error: ${response.status}`);
-    }
-
-    const data = await response.json();
+    console.log('Returning agent ID:', elevenlabsAgentId);
 
     return new Response(
       JSON.stringify({
-        signedUrl: data.signed_url,
         agentId: elevenlabsAgentId
       }),
       {

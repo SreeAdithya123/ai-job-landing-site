@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, MessageSquare } from 'lucide-react';
@@ -34,6 +35,10 @@ const UPSCInterviewer = () => {
     onDisconnect: () => {
       console.log('Disconnected from ElevenLabs Conversational AI');
       setIsInterviewActive(false);
+      toast({
+        title: "Interview Ended",
+        description: "Disconnected from AI interviewer",
+      });
     },
     onMessage: (message) => {
       console.log('Message received:', message);
@@ -61,15 +66,6 @@ const UPSCInterviewer = () => {
         description: "There was an error with the AI interviewer. Please try again.",
         variant: "destructive",
       });
-    },
-    overrides: {
-      agent: {
-        prompt: {
-          prompt: `You are a UPSC Civil Services interview panel member. Conduct a professional interview for the candidate. Ask relevant questions about current affairs, public administration, leadership, and the candidate's background. Maintain a formal but encouraging tone. Start with a greeting and ask the candidate to introduce themselves.`
-        },
-        firstMessage: "Good morning. I am your UPSC interview panel member. Please take your seat and introduce yourself to begin the interview process.",
-        language: "en"
-      }
     }
   });
 
@@ -87,12 +83,12 @@ const UPSCInterviewer = () => {
       }
       
       if (!data || !data.agentId) {
-        throw new Error('Failed to get ElevenLabs configuration');
+        throw new Error('Failed to get ElevenLabs agent ID');
       }
       
       console.log('Starting session with agent ID:', data.agentId);
       
-      // Start the session with the agent ID
+      // Start the session with the agent ID (for public agents)
       const conversationId = await conversation.startSession({
         agentId: data.agentId
       });
@@ -136,11 +132,6 @@ const UPSCInterviewer = () => {
         text: 'Thank you for your time. The interview panel will deliberate on your responses. You may leave now.',
         timestamp: currentTime
       }]);
-      
-      toast({
-        title: "Interview Ended",
-        description: "Thank you for participating in the UPSC interview simulation.",
-      });
       
       console.log('UPSC Interview ended');
     } catch (error) {
