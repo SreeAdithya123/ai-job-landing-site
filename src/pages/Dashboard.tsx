@@ -5,10 +5,15 @@ import ProgressTracking from '../components/ProgressTracking';
 import RecentInterviewAnalyses from '../components/RecentInterviewAnalyses';
 import InterviewResultsNotification from '../components/InterviewResultsNotification';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { Download } from 'lucide-react';
+import { Download, Play } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useUserStats } from '@/hooks/useUserStats';
 import jsPDF from 'jspdf';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const { isNewUser, totalSessions, totalHours, completedInterviews, averageScore } = useUserStats();
+
   const generatePDFReport = () => {
     const doc = new jsPDF();
     
@@ -26,47 +31,23 @@ const Dashboard = () => {
     
     doc.setFontSize(12);
     const stats = [
-      'Total Sessions: 24 (+12%)',
-      'Hours Practiced: 18.5 (+8%)', 
-      'Completed Interviews: 15 (+15%)',
-      'Success Rate: 85% (+5%)'
+      `Total Sessions: ${totalSessions}`,
+      `Hours Practiced: ${totalHours}`, 
+      `Completed Interviews: ${completedInterviews}`,
+      `Success Rate: ${averageScore}%`
     ];
     
     stats.forEach((stat, index) => {
       doc.text(`• ${stat}`, 25, 80 + (index * 8));
     });
     
-    // Add skill progress section
-    doc.setFontSize(16);
-    doc.text('Skill Progress', 20, 120);
-    
-    doc.setFontSize(12);
-    const skills = [
-      'Communication: 85%',
-      'Technical Skills: 78%',
-      'Problem Solving: 92%',
-      'Confidence: 88%'
-    ];
-    
-    skills.forEach((skill, index) => {
-      doc.text(`• ${skill}`, 25, 135 + (index * 8));
-    });
-    
-    // Add recent activities section
-    doc.setFontSize(16);
-    doc.text('Recent Activities', 20, 175);
-    
-    doc.setFontSize(12);
-    const activities = [
-      'Mock Interview - 2 hours ago - 92%',
-      'Coding Interview - 1 day ago - 88%',
-      'General Interview - 2 days ago - 90%',
-      'UPSC Interview - 3 days ago - 85%'
-    ];
-    
-    activities.forEach((activity, index) => {
-      doc.text(`• ${activity}`, 25, 190 + (index * 8));
-    });
+    // Add a note for new users
+    if (isNewUser) {
+      doc.setFontSize(14);
+      doc.text('Welcome to AI Interviewer!', 20, 120);
+      doc.setFontSize(12);
+      doc.text('Complete your first interview to start building your progress report.', 20, 135);
+    }
     
     // Save the PDF
     doc.save('ai-interviewer-progress-report.pdf');
@@ -83,18 +64,32 @@ const Dashboard = () => {
             <div className="text-center mb-12">
               <div className="flex items-center justify-center space-x-4 mb-6">
                 <h1 className="text-4xl font-bold text-foreground bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
-                  Welcome to Your AI Interviewer Dashboard
+                  {isNewUser ? 'Welcome to Your AI Interviewer Dashboard' : 'Your AI Interviewer Dashboard'}
                 </h1>
-                <button
-                  onClick={generatePDFReport}
-                  className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
-                >
-                  <Download className="h-5 w-5" />
-                  <span>Download Report</span>
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={generatePDFReport}
+                    className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                  >
+                    <Download className="h-5 w-5" />
+                    <span>Download Report</span>
+                  </button>
+                  {isNewUser && (
+                    <button
+                      onClick={() => navigate('/mock-interview')}
+                      className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                    >
+                      <Play className="h-5 w-5" />
+                      <span>Start First Interview</span>
+                    </button>
+                  )}
+                </div>
               </div>
               <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-                Your personalized space to practice interviews, track progress, and land your dream job.
+                {isNewUser 
+                  ? 'Get started with your first AI interview to begin tracking your progress and improving your skills.'
+                  : 'Your personalized space to practice interviews, track progress, and land your dream job.'
+                }
               </p>
             </div>
 
