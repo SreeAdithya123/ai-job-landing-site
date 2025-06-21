@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, MessageSquare } from 'lucide-react';
@@ -68,9 +67,22 @@ const UPSCInterviewer = () => {
       console.error('Error details:', JSON.stringify(error, null, 2));
       setIsInterviewActive(false);
       setConnectionStatus('error');
+      
+      // Handle different error types
+      let errorMessage = 'Unknown error';
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        if ('message' in error && typeof error.message === 'string') {
+          errorMessage = error.message;
+        } else if ('reason' in error && typeof error.reason === 'string') {
+          errorMessage = error.reason;
+        }
+      }
+      
       toast({
         title: "Interview Error",
-        description: `Connection error: ${error.message || 'Unknown error'}`,
+        description: `Connection error: ${errorMessage}`,
         variant: "destructive",
       });
     }
@@ -87,26 +99,26 @@ const UPSCInterviewer = () => {
       setConnectionStatus('fetching-config');
       console.log('🔧 Fetching ElevenLabs configuration...');
       
-      const { data, error } = await supabase.functions.invoke('get-elevenlabs-config');
+      const { data, error } = await supabase.functions.invoke('get-elevenlabs-signed-url');
       
       if (error) {
         console.error('❌ Configuration error:', error);
         throw new Error(`Configuration error: ${error.message}`);
       }
       
-      if (!data || !data.agentId) {
-        console.error('❌ No agent ID received:', data);
-        throw new Error('Failed to get ElevenLabs agent ID');
+      if (!data || !data.signedUrl) {
+        console.error('❌ No signed URL received:', data);
+        throw new Error('Failed to get ElevenLabs signed URL for authentication');
       }
       
-      console.log('✅ Agent ID received:', data.agentId);
+      console.log('✅ Signed URL received for authenticated connection');
       setConnectionStatus('connecting');
       
-      console.log('🚀 Starting session with agent ID:', data.agentId);
+      console.log('🚀 Starting authenticated session with signed URL');
       
-      // Start the session with the agent ID (for public agents)
+      // Start the session with the signed URL (for private agents)
       const conversationId = await conversation.startSession({
-        agentId: data.agentId
+        url: data.signedUrl
       });
       
       console.log('✅ UPSC Interview started with conversation ID:', conversationId);
