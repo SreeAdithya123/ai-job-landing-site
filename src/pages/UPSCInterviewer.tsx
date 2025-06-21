@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, MessageSquare, User, RotateCcw, LogOut, Mic, MicOff } from 'lucide-react';
@@ -121,8 +120,7 @@ const UPSCInterviewer = () => {
       // Get signed URL from our edge function
       const { data, error } = await supabase.functions.invoke('elevenlabs-conversation', {
         body: {
-          action: 'get_signed_url',
-          agentId: 'agent_01jxyr90cgfbmsa93nmswvcfp7'
+          action: 'get_signed_url'
         }
       });
 
@@ -134,9 +132,9 @@ const UPSCInterviewer = () => {
         throw new Error('No signed URL received from server');
       }
       
-      // Start ElevenLabs conversation with signed URL using origin parameter
+      // Start ElevenLabs conversation with signed URL and agent ID
       await conversation.startSession({
-        origin: data.signed_url
+        signedUrl: data.signed_url
       });
       
       setIsInterviewActive(true);

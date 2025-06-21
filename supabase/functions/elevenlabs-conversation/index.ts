@@ -13,14 +13,21 @@ serve(async (req) => {
   }
 
   try {
-    const { action, agentId } = await req.json();
+    const { action } = await req.json();
     const elevenLabsApiKey = Deno.env.get('ELEVENLABS_API_KEY');
+    const agentId = Deno.env.get('ELEVENLABS_AGENT_ID');
 
     if (!elevenLabsApiKey) {
       throw new Error('ElevenLabs API key not configured');
     }
 
+    if (!agentId) {
+      throw new Error('ElevenLabs Agent ID not configured');
+    }
+
     if (action === 'get_signed_url') {
+      console.log('Getting signed URL for agent:', agentId);
+      
       // Generate signed URL for ElevenLabs conversation
       const response = await fetch(
         `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${agentId}`,
@@ -40,6 +47,7 @@ serve(async (req) => {
       }
 
       const data = await response.json();
+      console.log('Successfully got signed URL');
       
       return new Response(
         JSON.stringify({ signed_url: data.signed_url }),
