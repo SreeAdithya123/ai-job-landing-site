@@ -16,20 +16,45 @@ const InterviewInterface: React.FC<InterviewInterfaceProps> = ({ conversation })
         {/* AI Interviewer Section */}
         <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-600/50 rounded-xl p-8 flex flex-col items-center justify-center min-h-[400px]">
           <div className="relative mb-6">
-            {/* Outer ring with animation when speaking */}
-            <div className={`w-32 h-32 rounded-full bg-gradient-to-r from-slate-600 to-slate-500 p-1 ${conversation.isSpeaking ? 'animate-pulse' : ''}`}>
-              {/* Middle ring */}
-              <div className="w-full h-full rounded-full bg-gradient-to-r from-primary/20 to-accent/20 p-3">
-                {/* Inner circle */}
-                <div className="w-full h-full rounded-full bg-gradient-to-r from-primary/30 to-accent/30 flex items-center justify-center">
-                  <MessageSquare className="h-12 w-12 text-white" />
+            {/* Animated ripple effects when speaking */}
+            {conversation.isSpeaking && (
+              <>
+                <div className="absolute inset-0 w-32 h-32 rounded-full bg-gradient-to-r from-primary/30 to-accent/30 animate-ping"></div>
+                <div className="absolute inset-2 w-28 h-28 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 animate-pulse animation-delay-150"></div>
+                <div className="absolute inset-4 w-24 h-24 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 animate-ping animation-delay-300"></div>
+              </>
+            )}
+            
+            {/* Outer ring with enhanced animation when speaking */}
+            <div className={`relative w-32 h-32 rounded-full bg-gradient-to-r from-slate-600 to-slate-500 p-1 transition-all duration-300 ${
+              conversation.isSpeaking 
+                ? 'animate-pulse shadow-lg shadow-primary/50 scale-105' 
+                : 'hover:scale-105'
+            }`}>
+              {/* Middle ring with glow effect */}
+              <div className={`w-full h-full rounded-full bg-gradient-to-r from-primary/20 to-accent/20 p-3 transition-all duration-300 ${
+                conversation.isSpeaking ? 'bg-gradient-to-r from-primary/40 to-accent/40' : ''
+              }`}>
+                {/* Inner circle with breathing animation */}
+                <div className={`w-full h-full rounded-full bg-gradient-to-r from-primary/30 to-accent/30 flex items-center justify-center transition-all duration-300 ${
+                  conversation.isSpeaking ? 'bg-gradient-to-r from-primary/60 to-accent/60 animate-pulse' : ''
+                }`}>
+                  <MessageSquare className={`h-12 w-12 text-white transition-all duration-300 ${
+                    conversation.isSpeaking ? 'scale-110 drop-shadow-lg' : ''
+                  }`} />
                 </div>
               </div>
             </div>
+            
+            {/* Speaking indicator with slide-in animation */}
             {conversation.isSpeaking && (
-              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-                <div className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                  Speaking...
+              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 animate-fade-in">
+                <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-3 py-1.5 rounded-full shadow-lg animate-pulse">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                    <span className="font-medium">Speaking...</span>
+                    <div className="w-2 h-2 bg-white rounded-full animate-bounce animation-delay-150"></div>
+                  </div>
                 </div>
               </div>
             )}
@@ -38,7 +63,11 @@ const InterviewInterface: React.FC<InterviewInterfaceProps> = ({ conversation })
           <h2 className="text-2xl font-bold text-white mb-2">AI Interviewer</h2>
           <p className="text-slate-400 text-sm">UPSC Panel Member</p>
           <div className="mt-4 flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${conversation.status === 'connected' ? 'bg-green-400 animate-pulse' : 'bg-slate-500'}`}></div>
+            <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              conversation.status === 'connected' 
+                ? 'bg-green-400 animate-pulse shadow-sm shadow-green-400' 
+                : 'bg-slate-500'
+            }`}></div>
             <span className="text-xs text-slate-400">
               {conversation.status === 'connected' ? 'Connected' : 'Disconnected'}
             </span>
@@ -48,7 +77,7 @@ const InterviewInterface: React.FC<InterviewInterfaceProps> = ({ conversation })
         {/* User Section */}
         <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-600/50 rounded-xl p-8 flex flex-col items-center justify-center min-h-[400px]">
           <div className="relative mb-6">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-r from-slate-600 to-slate-500 p-1">
+            <div className="w-32 h-32 rounded-full bg-gradient-to-r from-slate-600 to-slate-500 p-1 hover:scale-105 transition-transform duration-300">
               <div className="w-full h-full rounded-full bg-slate-700 flex items-center justify-center overflow-hidden">
                 <User className="h-16 w-16 text-slate-400" />
               </div>
