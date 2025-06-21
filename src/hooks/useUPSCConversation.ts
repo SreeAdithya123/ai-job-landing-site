@@ -46,7 +46,7 @@ export const useUPSCConversation = () => {
       }
     },
     onConnect: () => {
-      console.log('Voice conversation connected');
+      console.log('Voice conversation connected successfully');
       toast({
         title: "Connected",
         description: "Voice interview session has started successfully.",
@@ -54,9 +54,10 @@ export const useUPSCConversation = () => {
     },
     onDisconnect: () => {
       console.log('Voice conversation disconnected');
+      setIsInterviewActive(false);
       saveInterviewData();
       toast({
-        title: "Disconnected",
+        title: "Interview Ended",
         description: "Voice interview session has ended.",
       });
     },
@@ -132,16 +133,22 @@ export const useUPSCConversation = () => {
 
   const handleStartInterview = async () => {
     try {
+      console.log('Starting UPSC interview process...');
+      
       toast({
         title: "Initializing",
         description: "Setting up voice interview session...",
       });
 
+      // Request microphone access first
+      console.log('Requesting microphone access...');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       console.log('Microphone access granted');
       
+      // Stop the stream immediately as we just needed to request permission
       stream.getTracks().forEach(track => track.stop());
       
+      console.log('Getting signed URL from server...');
       const { data, error } = await supabase.functions.invoke('elevenlabs-conversation', {
         body: {
           action: 'get_signed_url'
@@ -149,21 +156,26 @@ export const useUPSCConversation = () => {
       });
 
       if (error) {
+        console.error('Supabase function error:', error);
         throw new Error(`Failed to get signed URL: ${error.message}`);
       }
 
       if (!data?.signed_url) {
+        console.error('No signed URL in response:', data);
         throw new Error('No signed URL received from server');
       }
 
-      console.log('Got signed URL, starting conversation...');
+      console.log('Signed URL received, starting conversation...');
       
+      // Start the conversation with the signed URL
       await conversation.startSession({
         signedUrl: data.signed_url
       });
       
+      console.log('Conversation session started successfully');
       setIsInterviewActive(true);
       
+      // Add initial transcript entry
       const currentTime = new Date().toLocaleTimeString();
       setTranscript([{
         speaker: 'AI',
@@ -171,7 +183,6 @@ export const useUPSCConversation = () => {
         timestamp: currentTime
       }]);
       
-      console.log('UPSC Voice Interview started');
     } catch (error) {
       console.error('Failed to start interview:', error);
       const errorMessage = error && typeof error === 'object' && 'message' in error 
@@ -188,6 +199,8 @@ export const useUPSCConversation = () => {
 
   const handleExitInterview = async () => {
     try {
+      console.log('Ending interview session...');
+      
       toast({
         title: "Ending Session",
         description: "Closing voice interview session...",
@@ -203,7 +216,7 @@ export const useUPSCConversation = () => {
         timestamp: currentTime
       }]);
       
-      console.log('UPSC Interview ended');
+      console.log('UPSC Interview ended successfully');
     } catch (error) {
       console.error('Failed to end interview:', error);
       toast({
