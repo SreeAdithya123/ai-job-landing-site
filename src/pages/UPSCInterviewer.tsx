@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, MessageSquare, User, RotateCcw, LogOut, Mic, MicOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useConversation } from '@11labs/react';
+import { supabase } from '@/integrations/supabase/client';
 import Layout from '../components/Layout';
 
 const UPSCInterviewer = () => {
@@ -117,9 +118,25 @@ const UPSCInterviewer = () => {
       // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Start ElevenLabs conversation
+      // Get signed URL from our edge function
+      const { data, error } = await supabase.functions.invoke('elevenlabs-conversation', {
+        body: {
+          action: 'get_signed_url',
+          agentId: 'agent_01jxyr90cgfbmsa93nmswvcfp7'
+        }
+      });
+
+      if (error) {
+        throw new Error(`Failed to get signed URL: ${error.message}`);
+      }
+
+      if (!data?.signed_url) {
+        throw new Error('No signed URL received from server');
+      }
+      
+      // Start ElevenLabs conversation with signed URL
       await conversation.startSession({
-        agentId: "agent_01jxyr90cgfbmsa93nmswvcfp7" // Using the provided agent ID
+        url: data.signed_url
       });
       
       setIsInterviewActive(true);
@@ -135,7 +152,7 @@ const UPSCInterviewer = () => {
       console.log('UPSC Voice Interview started');
     } catch (error) {
       console.error('Failed to start interview:', error);
-      alert('Failed to start voice interview. Please check your microphone permissions.');
+      alert(`Failed to start voice interview: ${error.message}. Please check your microphone permissions and try again.`);
     }
   };
 
