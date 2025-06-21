@@ -62,9 +62,9 @@ const UPSCInterviewer = () => {
     },
     onError: (error) => {
       console.error('Conversation error:', error);
-      const errorMessage = typeof error === 'object' && error !== null && 'message' in error 
+      const errorMessage = error && typeof error === 'object' && 'message' in error 
         ? String(error.message) 
-        : String(error);
+        : error ? String(error) : 'Unknown error occurred';
       toast({
         title: "Connection Error",
         description: `Failed to maintain voice connection: ${errorMessage}`,
@@ -182,9 +182,9 @@ const UPSCInterviewer = () => {
       console.log('UPSC Voice Interview started');
     } catch (error) {
       console.error('Failed to start interview:', error);
-      const errorMessage = typeof error === 'object' && error !== null && 'message' in error 
+      const errorMessage = error && typeof error === 'object' && 'message' in error 
         ? String(error.message) 
-        : String(error);
+        : error ? String(error) : 'Unknown error occurred';
       toast({
         title: "Failed to Start",
         description: `Could not start voice interview: ${errorMessage}`,
