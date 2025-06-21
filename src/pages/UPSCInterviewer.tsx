@@ -1,18 +1,24 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MessageSquare, User, RotateCcw, LogOut } from 'lucide-react';
+import { ArrowLeft, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useConversation } from '@11labs/react';
 import Layout from '../components/Layout';
+import InterviewInterface from '../components/interview/InterviewInterface';
+import InterviewControls from '../components/interview/InterviewControls';
+import InterviewTranscript from '../components/interview/InterviewTranscript';
+import InterviewStatus from '../components/interview/InterviewStatus';
+
+export interface TranscriptEntry {
+  speaker: 'AI' | 'User';
+  text: string;
+  timestamp: string;
+}
 
 const UPSCInterviewer = () => {
   const [isInterviewActive, setIsInterviewActive] = useState(false);
-  const [transcript, setTranscript] = useState<Array<{
-    speaker: 'AI' | 'User';
-    text: string;
-    timestamp: string;
-  }>>([]);
+  const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const navigate = useNavigate();
 
   const conversation = useConversation({
@@ -26,13 +32,13 @@ const UPSCInterviewer = () => {
       console.log('Message received:', message);
       const currentTime = new Date().toLocaleTimeString();
       
-      if (message.type === 'agent_response') {
+      if (message.source === 'ai') {
         setTranscript(prev => [...prev, {
           speaker: 'AI',
           text: message.message,
           timestamp: currentTime
         }]);
-      } else if (message.type === 'user_transcript') {
+      } else if (message.source === 'user') {
         setTranscript(prev => [...prev, {
           speaker: 'User',
           text: message.message,
@@ -56,12 +62,9 @@ const UPSCInterviewer = () => {
 
   const handleStartInterview = async () => {
     try {
-      // Request microphone permission first
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      
       setIsInterviewActive(true);
       
-      // Start the conversation with ElevenLabs
       await conversation.startSession({
         agentId: import.meta.env.VITE_ELEVENLABS_AGENT_ID || 'your-agent-id'
       });
@@ -78,7 +81,6 @@ const UPSCInterviewer = () => {
       await conversation.endSession();
       setIsInterviewActive(false);
       
-      // Add closing message to transcript
       const currentTime = new Date().toLocaleTimeString();
       setTranscript(prev => [...prev, {
         speaker: 'AI',
@@ -95,6 +97,10 @@ const UPSCInterviewer = () => {
 
   const handleBackToInterviews = () => {
     navigate('/interview-copilot');
+  };
+
+  const handleClearTranscript = () => {
+    setTranscript([]);
   };
 
   return (
@@ -127,175 +133,21 @@ const UPSCInterviewer = () => {
             </div>
           </div>
 
-          {/* Main Interview Interface */}
-          <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8 mb-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* AI Interviewer Section */}
-              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-600/50 rounded-xl p-8 flex flex-col items-center justify-center min-h-[400px]">
-                <div className="relative mb-6">
-                  {/* Outer ring with animation when speaking */}
-                  <div className={`w-32 h-32 rounded-full bg-gradient-to-r from-slate-600 to-slate-500 p-1 ${conversation.isSpeaking ? 'animate-pulse' : ''}`}>
-                    {/* Middle ring */}
-                    <div className="w-full h-full rounded-full bg-gradient-to-r from-primary/20 to-accent/20 p-3">
-                      {/* Inner circle */}
-                      <div className="w-full h-full rounded-full bg-gradient-to-r from-primary/30 to-accent/30 flex items-center justify-center">
-                        <MessageSquare className="h-12 w-12 text-white" />
-                      </div>
-                    </div>
-                  </div>
-                  {conversation.isSpeaking && (
-                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-                      <div className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                        Speaking...
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                <h2 className="text-2xl font-bold text-white mb-2">AI Interviewer</h2>
-                <p className="text-slate-400 text-sm">UPSC Panel Member</p>
-                <div className="mt-4 flex items-center space-x-2">
-                  <div className={`w-2 h-2 rounded-full ${conversation.status === 'connected' ? 'bg-green-400 animate-pulse' : 'bg-slate-500'}`}></div>
-                  <span className="text-xs text-slate-400">
-                    {conversation.status === 'connected' ? 'Connected' : 'Disconnected'}
-                  </span>
-                </div>
-              </div>
+          <InterviewInterface conversation={conversation} />
 
-              {/* User Section */}
-              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-600/50 rounded-xl p-8 flex flex-col items-center justify-center min-h-[400px]">
-                <div className="relative mb-6">
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-r from-slate-600 to-slate-500 p-1">
-                    <div className="w-full h-full rounded-full bg-slate-700 flex items-center justify-center overflow-hidden">
-                      <User className="h-16 w-16 text-slate-400" />
-                    </div>
-                  </div>
-                </div>
-                
-                <h2 className="text-2xl font-bold text-white mb-2">Candidate (You)</h2>
-                <p className="text-slate-400 text-sm">UPSC Aspirant</p>
-              </div>
-            </div>
-          </div>
+          <InterviewStatus isInterviewActive={isInterviewActive} />
 
-          {/* Status Section */}
-          {isInterviewActive && (
-            <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl p-6 mb-6">
-              <div className="text-center">
-                <p className="text-white text-lg">
-                  Interview is <span className="bg-green-700 px-3 py-1 rounded-md text-green-300">Active</span>
-                </p>
-                <p className="text-slate-400 text-sm mt-2">
-                  Speak naturally. The AI will ask you questions and respond to your answers.
-                </p>
-              </div>
-            </div>
-          )}
+          <InterviewControls
+            isInterviewActive={isInterviewActive}
+            onStartInterview={handleStartInterview}
+            onExitInterview={handleExitInterview}
+          />
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-center space-x-4">
-            {!isInterviewActive ? (
-              <>
-                <motion.button 
-                  className="flex items-center space-x-3 px-6 py-3 bg-slate-700/80 backdrop-blur-sm border border-slate-600 text-slate-300 rounded-lg hover:bg-slate-600/80 transition-all duration-200"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <RotateCcw className="h-5 w-5" />
-                  <span>Repeat</span>
-                </motion.button>
-                
-                <motion.button 
-                  onClick={handleStartInterview}
-                  className="flex items-center space-x-3 px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                >
-                  <MessageSquare className="h-5 w-5" />
-                  <span>Start AI Interview</span>
-                </motion.button>
-              </>
-            ) : (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className="flex items-center space-x-4"
-              >
-                <div className="text-center mb-6">
-                  <div className="inline-flex items-center space-x-2 px-4 py-2 bg-green-900/50 text-green-300 rounded-full border border-green-700/50">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium">AI Interview in Progress</span>
-                  </div>
-                </div>
-                
-                <button 
-                  onClick={handleExitInterview}
-                  className="flex items-center space-x-3 px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span>End Interview</span>
-                </button>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Live Transcript Section */}
-          {transcript.length > 0 && (
-            <div className="mt-8 bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">Live Transcript</h3>
-                <div className="flex items-center space-x-2">
-                  <div className={`w-2 h-2 rounded-full ${isInterviewActive ? 'bg-green-400 animate-pulse' : 'bg-slate-500'}`}></div>
-                  <span className="text-sm text-slate-400">
-                    {isInterviewActive ? 'Recording' : 'Idle'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="h-64 overflow-y-auto bg-slate-900/50 rounded-lg p-4 space-y-3">
-                {transcript.map((entry, index) => (
-                  <motion.div 
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className={`p-3 rounded-lg ${
-                      entry.speaker === 'AI' 
-                        ? 'bg-gradient-to-r from-primary/20 to-accent/20 border-l-4 border-primary' 
-                        : 'bg-slate-800/50 border-l-4 border-accent'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-1">
-                      <span className={`text-sm font-medium ${
-                        entry.speaker === 'AI' ? 'text-primary' : 'text-accent'
-                      }`}>
-                        {entry.speaker === 'AI' ? 'Interview Panel' : 'Candidate'}
-                      </span>
-                      <span className="text-xs text-slate-400">
-                        {entry.timestamp}
-                      </span>
-                    </div>
-                    <p className="text-sm text-slate-200">{entry.text}</p>
-                  </motion.div>
-                ))}
-              </div>
-
-              <div className="mt-4 flex justify-between items-center">
-                <button 
-                  onClick={() => setTranscript([])}
-                  className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
-                >
-                  Clear Transcript
-                </button>
-                <button className="text-sm text-primary hover:text-primary-light transition-colors">
-                  Download Transcript
-                </button>
-              </div>
-            </div>
-          )}
+          <InterviewTranscript
+            transcript={transcript}
+            isInterviewActive={isInterviewActive}
+            onClearTranscript={handleClearTranscript}
+          />
         </div>
       </div>
     </Layout>
