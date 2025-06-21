@@ -21,36 +21,41 @@ export interface TranscriptEntry {
 const UPSCInterviewer = () => {
   const [isInterviewActive, setIsInterviewActive] = useState(false);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
+  const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
   const navigate = useNavigate();
 
   const conversation = useConversation({
     onConnect: () => {
-      console.log('Connected to ElevenLabs Conversational AI');
+      console.log('✅ Successfully connected to ElevenLabs Conversational AI');
       setIsInterviewActive(true);
+      setConnectionStatus('connected');
       toast({
         title: "Interview Started",
         description: "Connected to AI interviewer successfully",
       });
     },
     onDisconnect: () => {
-      console.log('Disconnected from ElevenLabs Conversational AI');
+      console.log('🔌 Disconnected from ElevenLabs Conversational AI');
       setIsInterviewActive(false);
+      setConnectionStatus('disconnected');
       toast({
         title: "Interview Ended",
         description: "Disconnected from AI interviewer",
       });
     },
     onMessage: (message) => {
-      console.log('Message received:', message);
+      console.log('📨 Message received:', message);
       const currentTime = new Date().toLocaleTimeString();
       
       if (message.source === 'ai') {
+        console.log('🤖 AI message:', message.message);
         setTranscript(prev => [...prev, {
           speaker: 'AI',
           text: message.message,
           timestamp: currentTime
         }]);
       } else if (message.source === 'user') {
+        console.log('👤 User message:', message.message);
         setTranscript(prev => [...prev, {
           speaker: 'User',
           text: message.message,
@@ -59,11 +64,13 @@ const UPSCInterviewer = () => {
       }
     },
     onError: (error) => {
-      console.error('ElevenLabs Conversation error:', error);
+      console.error('❌ ElevenLabs Conversation error:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       setIsInterviewActive(false);
+      setConnectionStatus('error');
       toast({
         title: "Interview Error",
-        description: "There was an error with the AI interviewer. Please try again.",
+        description: `Connection error: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     }
@@ -71,33 +78,45 @@ const UPSCInterviewer = () => {
 
   const handleStartInterview = async () => {
     try {
-      console.log('Requesting microphone access...');
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-      console.log('Microphone access granted');
+      console.log('🎤 Requesting microphone access...');
+      setConnectionStatus('requesting-mic');
       
-      console.log('Fetching ElevenLabs configuration...');
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('✅ Microphone access granted');
+      
+      setConnectionStatus('fetching-config');
+      console.log('🔧 Fetching ElevenLabs configuration...');
+      
       const { data, error } = await supabase.functions.invoke('get-elevenlabs-config');
       
       if (error) {
+        console.error('❌ Configuration error:', error);
         throw new Error(`Configuration error: ${error.message}`);
       }
       
       if (!data || !data.agentId) {
+        console.error('❌ No agent ID received:', data);
         throw new Error('Failed to get ElevenLabs agent ID');
       }
       
-      console.log('Starting session with agent ID:', data.agentId);
+      console.log('✅ Agent ID received:', data.agentId);
+      setConnectionStatus('connecting');
+      
+      console.log('🚀 Starting session with agent ID:', data.agentId);
       
       // Start the session with the agent ID (for public agents)
       const conversationId = await conversation.startSession({
         agentId: data.agentId
       });
       
-      console.log('UPSC Interview started with conversation ID:', conversationId);
+      console.log('✅ UPSC Interview started with conversation ID:', conversationId);
+      setConnectionStatus('connected');
       
     } catch (error) {
-      console.error('Error starting interview:', error);
+      console.error('❌ Error starting interview:', error);
+      console.error('Error stack:', error.stack);
       setIsInterviewActive(false);
+      setConnectionStatus('error');
       
       // More specific error handling
       if (error.name === 'NotAllowedError') {
@@ -115,7 +134,7 @@ const UPSCInterviewer = () => {
       } else {
         toast({
           title: "Connection Error",
-          description: "Failed to connect to the AI interviewer. Please try again.",
+          description: `Failed to connect: ${error.message || 'Unknown error'}`,
           variant: "destructive",
         });
       }
@@ -124,6 +143,7 @@ const UPSCInterviewer = () => {
 
   const handleExitInterview = async () => {
     try {
+      console.log('🛑 Ending interview session...');
       await conversation.endSession();
       
       const currentTime = new Date().toLocaleTimeString();
@@ -133,10 +153,11 @@ const UPSCInterviewer = () => {
         timestamp: currentTime
       }]);
       
-      console.log('UPSC Interview ended');
+      console.log('✅ UPSC Interview ended successfully');
     } catch (error) {
-      console.error('Error ending interview:', error);
+      console.error('❌ Error ending interview:', error);
       setIsInterviewActive(false);
+      setConnectionStatus('disconnected');
     }
   };
 
@@ -175,6 +196,18 @@ const UPSCInterviewer = () => {
             
             <div className="px-4 py-2 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-lg">
               <span className="text-slate-300 text-sm font-medium">AI Powered Interview</span>
+            </div>
+          </div>
+
+          {/* Debug Status Display */}
+          <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl p-4 mb-6">
+            <div className="text-center">
+              <p className="text-white text-sm">
+                Connection Status: <span className="bg-blue-700 px-2 py-1 rounded text-blue-300">{connectionStatus}</span>
+              </p>
+              <p className="text-slate-400 text-xs mt-1">
+                Check browser console for detailed logs
+              </p>
             </div>
           </div>
 
