@@ -61,7 +61,7 @@ const InterviewInterface: React.FC<InterviewInterfaceProps> = ({ conversation })
           </div>
           
           <h2 className="text-2xl font-bold text-white mb-2">AI Interviewer</h2>
-          <p className="text-slate-400 text-sm">UPSC Panel Member</p>
+          <p className="text-slate-400 text-sm">Technical Interview Expert</p>
           <div className="mt-4 flex items-center space-x-2">
             <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
               conversation.status === 'connected' 
@@ -85,9 +85,19 @@ const InterviewInterface: React.FC<InterviewInterfaceProps> = ({ conversation })
           </div>
           
           <h2 className="text-2xl font-bold text-white mb-2">Candidate (You)</h2>
-          <p className="text-slate-400 text-sm">UPSC Aspirant</p>
+          <p className="text-slate-400 text-sm">Interview Participant</p>
         </div>
       </div>
+      
+      {/* Live conversation indicator */}
+      {conversation.status === 'connected' && (
+        <div className="mt-6 text-center">
+          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-slate-800/50 text-slate-300 rounded-full border border-slate-600/50">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium">Live Interview Session</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
