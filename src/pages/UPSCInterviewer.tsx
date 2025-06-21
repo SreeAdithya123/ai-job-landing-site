@@ -120,9 +120,18 @@ const UPSCInterviewer = () => {
       
       console.log('🚀 Starting authenticated session with signed URL');
       
-      // Start the session with the signed URL using the correct parameter name
+      // Get the agent ID from environment variables for the startSession call
+      const { data: configData, error: configError } = await supabase.functions.invoke('get-elevenlabs-config');
+      
+      if (configError || !configData?.agentId) {
+        console.error('❌ Failed to get agent ID:', configError);
+        throw new Error('Failed to get agent configuration');
+      }
+      
+      // Start the session with both agentId and signedUrl as required by the SDK
       const conversationId = await conversation.startSession({
-        authorization: data.signedUrl
+        agentId: configData.agentId,
+        signedUrl: data.signedUrl
       });
       
       console.log('✅ UPSC Interview started with conversation ID:', conversationId);
