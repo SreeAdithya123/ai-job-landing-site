@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, MessageSquare, User, RotateCcw, LogOut, Mic, MicOff } from 'lucide-react';
@@ -61,7 +62,9 @@ const UPSCInterviewer = () => {
     },
     onError: (error) => {
       console.error('Conversation error:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = typeof error === 'object' && error !== null && 'message' in error 
+        ? String(error.message) 
+        : String(error);
       toast({
         title: "Connection Error",
         description: `Failed to maintain voice connection: ${errorMessage}`,
@@ -179,7 +182,9 @@ const UPSCInterviewer = () => {
       console.log('UPSC Voice Interview started');
     } catch (error) {
       console.error('Failed to start interview:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = typeof error === 'object' && error !== null && 'message' in error 
+        ? String(error.message) 
+        : String(error);
       toast({
         title: "Failed to Start",
         description: `Could not start voice interview: ${errorMessage}`,
