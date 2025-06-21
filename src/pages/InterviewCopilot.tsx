@@ -30,6 +30,7 @@ const InterviewCopilot = () => {
   const [showInterviewInterface, setShowInterviewInterface] = useState(false);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
+  const [userIsSpeaking, setUserIsSpeaking] = useState(false);
   
   const navigate = useNavigate();
 
@@ -47,6 +48,7 @@ const InterviewCopilot = () => {
       console.log('🔌 Disconnected from ElevenLabs Conversational AI');
       setIsInterviewActive(false);
       setConnectionStatus('disconnected');
+      setUserIsSpeaking(false); // Stop user speaking animation on disconnect
       toast({
         title: "Interview Ended",
         description: "Disconnected from AI interviewer",
@@ -58,6 +60,7 @@ const InterviewCopilot = () => {
       
       if (message.source === 'ai') {
         console.log('🤖 AI message:', message.message);
+        setUserIsSpeaking(false); // User stops speaking when AI responds
         setTranscript(prev => [...prev, {
           speaker: 'AI',
           text: message.message,
@@ -65,17 +68,24 @@ const InterviewCopilot = () => {
         }]);
       } else if (message.source === 'user') {
         console.log('👤 User message:', message.message);
+        setUserIsSpeaking(true); // User is speaking
         setTranscript(prev => [...prev, {
           speaker: 'User',
           text: message.message,
           timestamp: currentTime
         }]);
+        
+        // Stop user speaking animation after a short delay to show the message was captured
+        setTimeout(() => {
+          setUserIsSpeaking(false);
+        }, 1000);
       }
     },
     onError: (error) => {
       console.error('❌ ElevenLabs Conversation error:', error);
       setIsInterviewActive(false);
       setConnectionStatus('error');
+      setUserIsSpeaking(false); // Stop user speaking animation on error
       
       let errorMessage = 'Unknown error';
       if (typeof error === 'string') {
@@ -219,6 +229,7 @@ const InterviewCopilot = () => {
       console.error('❌ Error ending interview:', error);
       setIsInterviewActive(false);
       setConnectionStatus('disconnected');
+      setUserIsSpeaking(false); // Stop user speaking animation
     }
   };
 
@@ -227,6 +238,7 @@ const InterviewCopilot = () => {
     setIsInterviewActive(false);
     setConnectionStatus('disconnected');
     setTranscript([]);
+    setUserIsSpeaking(false); // Reset user speaking state
   };
 
   const handleClearTranscript = () => {
@@ -264,6 +276,7 @@ const InterviewCopilot = () => {
               <div className="text-center">
                 <p className="text-white text-sm">
                   Connection Status: <span className="bg-blue-700 px-2 py-1 rounded text-blue-300">{connectionStatus}</span>
+                  {userIsSpeaking && <span className="ml-4 bg-purple-700 px-2 py-1 rounded text-purple-300">User Speaking</span>}
                 </p>
                 <p className="text-slate-400 text-xs mt-1">
                   Check browser console for detailed logs
@@ -271,7 +284,7 @@ const InterviewCopilot = () => {
               </div>
             </div>
 
-            <InterviewInterface conversation={conversation} />
+            <InterviewInterface conversation={conversation} userIsSpeaking={userIsSpeaking} />
 
             <InterviewStatus isInterviewActive={isInterviewActive} />
 
