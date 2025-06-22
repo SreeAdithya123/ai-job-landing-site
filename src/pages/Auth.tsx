@@ -11,6 +11,7 @@ import { toast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -30,13 +31,24 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isSignUp && password !== confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
-      return;
+    if (isSignUp) {
+      if (!fullName.trim()) {
+        toast({
+          title: "Error",
+          description: "Please enter your full name",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        toast({
+          title: "Error",
+          description: "Passwords do not match",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     if (password.length < 6) {
@@ -52,7 +64,7 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await signUp(email, password);
+        const { error } = await signUp(email, password, fullName);
         if (error) {
           if (error.message.includes('User already registered')) {
             toast({
@@ -176,6 +188,20 @@ const Auth = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                {isSignUp && (
+                  <div>
+                    <Input
+                      type="text"
+                      placeholder="Full name"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      className="input-field"
+                      disabled={isLoading}
+                    />
+                  </div>
+                )}
+
                 <div>
                   <Input
                     type="email"
