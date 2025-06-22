@@ -98,7 +98,7 @@ const Pricing = () => {
               className="relative"
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="bg-gradient-to-r from-primary to-accent text-white px-4 py-1 rounded-full text-sm font-medium shadow-glow flex items-center space-x-1">
                     <Star className="h-3 w-3" />
                     <span>Most Popular</span>
