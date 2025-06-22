@@ -19,12 +19,15 @@ import {
   LogOut,
   Scan
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarProps {
   onClose?: () => void;
 }
 
 const Sidebar = ({ onClose }: SidebarProps) => {
+  const { user, signOut } = useAuth();
+  
   const menuItems = [
     {
       section: 'Interview',
@@ -52,15 +55,23 @@ const Sidebar = ({ onClose }: SidebarProps) => {
     }
   ];
 
-  const handleLogout = () => {
-    // Add logout logic here when authentication is implemented
-    console.log('Logout clicked');
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      console.log('User logged out successfully');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   const handleManageAccount = () => {
     // Add account management logic here
     console.log('Manage Account clicked');
   };
+
+  // Extract user's name and email
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const userEmail = user?.email || '';
 
   return (
     <div className="h-full flex flex-col bg-white">
@@ -112,42 +123,44 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       </nav>
 
       {/* User Profile & Account Management */}
-      <div className="p-4 border-t border-gray-200 space-y-3">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-            <User className="h-4 w-4 text-gray-600" />
+      {user && (
+        <div className="p-4 border-t border-gray-200 space-y-3">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
+              <User className="h-4 w-4 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-gray-900 truncate">{userName}</div>
+              <div className="text-xs text-gray-500 truncate">{userEmail}</div>
+            </div>
           </div>
-          <div>
-            <div className="text-sm font-medium text-gray-900">John Doe</div>
-            <div className="text-xs text-gray-500">john@example.com</div>
+          
+          {/* Account Management Buttons */}
+          <div className="space-y-2">
+            <button 
+              onClick={handleManageAccount}
+              className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors"
+            >
+              <Settings className="h-3 w-3 mr-1" />
+              Manage Account
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
+            >
+              <LogOut className="h-3 w-3 mr-1" />
+              Logout
+            </button>
+          </div>
+          
+          <div className="space-y-2">
+            <button className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors">
+              <Crown className="h-3 w-3 mr-1" />
+              AI Interviewer Subscription
+            </button>
           </div>
         </div>
-        
-        {/* Account Management Buttons */}
-        <div className="space-y-2">
-          <button 
-            onClick={handleManageAccount}
-            className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors"
-          >
-            <Settings className="h-3 w-3 mr-1" />
-            Manage Account
-          </button>
-          <button 
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
-          >
-            <LogOut className="h-3 w-3 mr-1" />
-            Logout
-          </button>
-        </div>
-        
-        <div className="space-y-2">
-          <button className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors">
-            <Crown className="h-3 w-3 mr-1" />
-            AI Interviewer Subscription
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
