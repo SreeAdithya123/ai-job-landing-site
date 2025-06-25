@@ -63,6 +63,53 @@ export type Database = {
         }
         Relationships: []
       }
+      interview_questions: {
+        Row: {
+          ai_feedback: string | null
+          confidence_score: number | null
+          created_at: string
+          fluency_score: number | null
+          id: string
+          interview_analysis_id: string
+          question_order: number | null
+          question_score: number | null
+          question_text: string
+          user_answer: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          fluency_score?: number | null
+          id?: string
+          interview_analysis_id: string
+          question_order?: number | null
+          question_score?: number | null
+          question_text: string
+          user_answer: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          fluency_score?: number | null
+          id?: string
+          interview_analysis_id?: string
+          question_order?: number | null
+          question_score?: number | null
+          question_text?: string
+          user_answer?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_questions_interview_analysis_id_fkey"
+            columns: ["interview_analysis_id"]
+            isOneToOne: false
+            referencedRelation: "interview_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
