@@ -9,6 +9,7 @@ import { Download, Play, Menu, BarChart3, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStats } from '@/hooks/useUserStats';
 import jsPDF from 'jspdf';
+import { Button } from '@/components/ui/button';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -150,6 +151,17 @@ const Dashboard = () => {
             {/* Progress Tracking Dashboard */}
             <div className="mb-12">
               <ProgressTracking />
+            </div>
+
+            {/* Interview History Button */}
+            <div className="mb-8 text-center">
+              <Button
+                onClick={() => navigate('/interview-history')}
+                className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+              >
+                <History className="h-5 w-5" />
+                <span>View Interview History</span>
+              </Button>
             </div>
 
             {/* Recent Interview Analyses */}
