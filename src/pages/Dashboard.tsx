@@ -1,10 +1,11 @@
+
 import React from 'react';
 import Layout from '../components/Layout';
 import ProgressTracking from '../components/ProgressTracking';
 import RecentInterviewAnalyses from '../components/RecentInterviewAnalyses';
 import InterviewResultsNotification from '../components/InterviewResultsNotification';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { Download, Play, Menu, BarChart3 } from 'lucide-react';
+import { Download, Play, Menu, BarChart3, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStats } from '@/hooks/useUserStats';
 import jsPDF from 'jspdf';
@@ -82,6 +83,13 @@ const Dashboard = () => {
                   AI Interviewer
                 </button>
                 <button
+                  onClick={() => navigate('/interview-history')}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors flex items-center space-x-1"
+                >
+                  <History className="h-4 w-4" />
+                  <span>History</span>
+                </button>
+                <button
                   onClick={() => navigate('/resume-builder')}
                   className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
                 >
@@ -111,6 +119,15 @@ const Dashboard = () => {
                     <Download className="h-5 w-5" />
                     <span>Download Report</span>
                   </button>
+                  {!isNewUser && (
+                    <button
+                      onClick={() => navigate('/interview-history')}
+                      className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                    >
+                      <History className="h-5 w-5" />
+                      <span>View History</span>
+                    </button>
+                  )}
                   {isNewUser && (
                     <button
                       onClick={() => navigate('/mock-interview')}

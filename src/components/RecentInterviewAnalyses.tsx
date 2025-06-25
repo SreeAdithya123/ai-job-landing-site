@@ -1,12 +1,16 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BarChart3, TrendingUp } from 'lucide-react';
+import { BarChart3, TrendingUp, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getUserInterviewAnalyses, InterviewAnalysis } from '@/services/interviewAnalysisService';
 import InterviewAnalysisCard from './InterviewAnalysisCard';
+import InterviewDetailsModal from './InterviewDetailsModal';
 
 const RecentInterviewAnalyses = () => {
+  const navigate = useNavigate();
+  const [selectedAnalysis, setSelectedAnalysis] = useState<InterviewAnalysis | null>(null);
   const { data: analyses, isLoading, error } = useQuery({
     queryKey: ['interview-analyses'],
     queryFn: getUserInterviewAnalyses,
@@ -73,35 +77,63 @@ const RecentInterviewAnalyses = () => {
   }
 
   return (
-    <motion.div
-      className="space-y-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-    >
-      <div className="flex items-center space-x-2 mb-6">
-        <BarChart3 className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-semibold text-foreground">Recent Interview Analyses</h3>
-        <div className="flex items-center space-x-1 text-green-600 text-sm font-medium">
-          <TrendingUp className="h-4 w-4" />
-          <span>{analyses.length} {analyses.length === 1 ? 'analysis' : 'analyses'}</span>
+    <>
+      <motion.div
+        className="space-y-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-2">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold text-foreground">Recent Interview Analyses</h3>
+            <div className="flex items-center space-x-1 text-green-600 text-sm font-medium">
+              <TrendingUp className="h-4 w-4" />
+              <span>{analyses.length} {analyses.length === 1 ? 'analysis' : 'analyses'}</span>
+            </div>
+          </div>
+          
+          {analyses.length > 2 && (
+            <button
+              onClick={() => navigate('/interview-history')}
+              className="flex items-center space-x-2 px-4 py-2 text-primary hover:bg-primary/10 rounded-lg transition-colors text-sm font-medium"
+            >
+              <span>View All</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          )}
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {analyses.slice(0, 4).map((analysis) => (
-          <InterviewAnalysisCard key={analysis.id} analysis={analysis} />
-        ))}
-      </div>
-
-      {analyses.length > 4 && (
-        <div className="text-center">
-          <button className="px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium">
-            View All Analyses ({analyses.length})
-          </button>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {analyses.slice(0, 4).map((analysis) => (
+            <div key={analysis.id} onClick={() => setSelectedAnalysis(analysis)}>
+              <InterviewAnalysisCard analysis={analysis} />
+            </div>
+          ))}
         </div>
+
+        {analyses.length > 4 && (
+          <div className="text-center">
+            <button 
+              onClick={() => navigate('/interview-history')}
+              className="px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+            >
+              View All Analyses ({analyses.length})
+            </button>
+          </div>
+        )}
+      </motion.div>
+
+      {/* Details Modal */}
+      {selectedAnalysis && (
+        <InterviewDetailsModal
+          analysis={selectedAnalysis}
+          isOpen={!!selectedAnalysis}
+          onClose={() => setSelectedAnalysis(null)}
+        />
       )}
-    </motion.div>
+    </>
   );
 };
 

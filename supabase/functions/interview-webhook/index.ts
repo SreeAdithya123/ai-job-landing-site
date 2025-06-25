@@ -25,6 +25,14 @@ interface ElevenLabsWebhookPayload {
     professional_readiness?: number;
     feedback?: string;
     transcript_summary?: string;
+    questions?: Array<{
+      question: string;
+      answer: string;
+      feedback?: string;
+      fluency_score?: number;
+      confidence_score?: number;
+      score?: number;
+    }>;
   };
   conversation_duration_seconds?: number;
   interview_type?: string;
@@ -124,7 +132,7 @@ serve(async (req) => {
         user_id: payload.user_id,
       };
 
-      const { data, error } = await supabase
+      const { data: savedAnalysis, error } = await supabase
         .from('interview_analyses')
         .insert([analysisWithUserId])
         .select()
@@ -138,7 +146,34 @@ serve(async (req) => {
         });
       }
 
-      console.log('Interview analysis saved successfully:', data);
+      console.log('Interview analysis saved successfully:', savedAnalysis);
+
+      // Save detailed questions if available
+      if (analysis.questions && analysis.questions.length > 0 && savedAnalysis.id) {
+        const questionsToInsert = analysis.questions.map((q, index) => ({
+          interview_analysis_id: savedAnalysis.id,
+          question_text: q.question,
+          user_answer: q.answer,
+          ai_feedback: q.feedback,
+          fluency_score: q.fluency_score,
+          confidence_score: q.confidence_score,
+          question_score: q.score,
+          question_order: index + 1,
+        }));
+
+        const { data: savedQuestions, error: questionsError } = await supabase
+          .from('interview_questions')
+          .insert(questionsToInsert)
+          .select();
+
+        if (questionsError) {
+          console.error('Error saving interview questions:', questionsError);
+          // Don't fail the whole request if questions fail to save
+        } else {
+          console.log('Interview questions saved successfully:', savedQuestions?.length || 0, 'questions');
+        }
+      }
+
     } else {
       // Log the analysis for manual processing or use conversation_id to match with user sessions
       console.log('No user_id provided, analysis data:', interviewAnalysis);
