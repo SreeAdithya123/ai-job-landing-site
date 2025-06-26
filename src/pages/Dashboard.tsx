@@ -5,7 +5,7 @@ import ProgressTracking from '../components/ProgressTracking';
 import RecentInterviewAnalyses from '../components/RecentInterviewAnalyses';
 import InterviewResultsNotification from '../components/InterviewResultsNotification';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { Download, Play, Menu, BarChart3, History } from 'lucide-react';
+import { Download, Play, Menu, BarChart3, History, Video, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStats } from '@/hooks/useUserStats';
 import jsPDF from 'jspdf';
@@ -151,6 +151,57 @@ const Dashboard = () => {
             {/* Progress Tracking Dashboard */}
             <div className="mb-12">
               <ProgressTracking />
+            </div>
+
+            {/* Interview Options Grid */}
+            <div className="grid md:grid-cols-2 gap-8 mb-12">
+              {/* AI Interviewer Section */}
+              <div className="bg-white/80 backdrop-blur-sm border border-gray-200/80 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-200">
+                <div className="flex items-center space-x-4 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center shadow-glow">
+                    <MessageSquare className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">AI Interviewer</h3>
+                    <p className="text-gray-600">Practice with our advanced AI interviewer</p>
+                  </div>
+                </div>
+                <p className="text-gray-700 mb-6">
+                  Get personalized interview practice with real-time feedback, custom questions, and detailed performance analysis.
+                </p>
+                <Button
+                  onClick={() => navigate('/interview-copilot')}
+                  className="w-full bg-gradient-to-r from-primary to-accent text-white hover:shadow-lg"
+                  size="lg"
+                >
+                  <MessageSquare className="h-5 w-5 mr-2" />
+                  Start AI Interview
+                </Button>
+              </div>
+
+              {/* Virtual Interviewer Section */}
+              <div className="bg-white/80 backdrop-blur-sm border border-gray-200/80 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-200">
+                <div className="flex items-center space-x-4 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-glow">
+                    <Video className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">Virtual Interviewer</h3>
+                    <p className="text-gray-600">Experience immersive video interviews</p>
+                  </div>
+                </div>
+                <p className="text-gray-700 mb-6">
+                  Practice with our virtual interviewer featuring video calls, body language analysis, and realistic interview scenarios.
+                </p>
+                <Button
+                  onClick={() => navigate('/friendly-interviewer')}
+                  className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:shadow-lg"
+                  size="lg"
+                >
+                  <Video className="h-5 w-5 mr-2" />
+                  Start Virtual Interview
+                </Button>
+              </div>
             </div>
 
             {/* Interview History Button */}
