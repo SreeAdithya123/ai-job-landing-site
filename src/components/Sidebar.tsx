@@ -17,7 +17,8 @@ import {
   X,
   Settings,
   LogOut,
-  Scan
+  Scan,
+  Video
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -33,6 +34,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       section: 'Interview',
       items: [
         { name: 'AI Interviewer', href: '/interview-copilot', icon: Laptop },
+        { name: 'Virtual Interviewer', href: '/virtual-interviewer', icon: Video },
         { name: 'AI Resume Builder', href: '/resume-builder', icon: FileText },
         { name: 'Resume Scanner', href: '/resume-scanner', icon: Scan },
       ]
