@@ -30,25 +30,28 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('HeyGen API request:', { action, text: text?.substring(0, 100) });
 
     let response;
+    let requestBody;
 
     switch (action) {
       case 'start':
-        // Start streaming session
-        response = await fetch('https://api.heygen.com/v2/streaming/start', {
+        // Create a new streaming session
+        requestBody = {
+          avatar_id: heygenAvatarId,
+          quality: 'high',
+          voice: {
+            voice_id: 'en-US-JennyNeural',
+            rate: 1.0,
+            emotion: 'friendly'
+          }
+        };
+        
+        response = await fetch('https://api.heygen.com/v2/streaming/create_session', {
           method: 'POST',
           headers: {
             'X-API-KEY': heygenApiKey,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            avatar_id: heygenAvatarId,
-            quality: 'high',
-            voice: {
-              voice_id: 'en-US-JennyNeural',
-              rate: 1.0,
-              emotion: 'friendly'
-            }
-          }),
+          body: JSON.stringify(requestBody),
         });
         break;
 
@@ -57,37 +60,43 @@ const handler = async (req: Request): Promise<Response> => {
           throw new Error('Text is required for speak action');
         }
         
-        // Send text to avatar
-        response = await fetch('https://api.heygen.com/v2/streaming/speak', {
+        // Send text to the streaming session
+        requestBody = {
+          session_id: heygenAvatarId, // This should ideally be the session ID from create_session
+          text: text,
+        };
+        
+        response = await fetch('https://api.heygen.com/v2/streaming/task', {
           method: 'POST',
           headers: {
             'X-API-KEY': heygenApiKey,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            text: text,
-            avatar_id: heygenAvatarId,
-          }),
+          body: JSON.stringify(requestBody),
         });
         break;
 
       case 'stop':
-        // Stop streaming session
+        // Close the streaming session
+        requestBody = {
+          session_id: heygenAvatarId, // This should ideally be the session ID from create_session
+        };
+        
         response = await fetch('https://api.heygen.com/v2/streaming/stop', {
           method: 'POST',
           headers: {
             'X-API-KEY': heygenApiKey,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            avatar_id: heygenAvatarId,
-          }),
+          body: JSON.stringify(requestBody),
         });
         break;
 
       default:
         throw new Error(`Unknown action: ${action}`);
     }
+
+    console.log('HeyGen API response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
