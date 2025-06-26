@@ -72,10 +72,10 @@ const Dashboard = () => {
               </div>
               <nav className="hidden md:flex items-center space-x-6">
                 <button
-                  onClick={() => navigate('/mock-interview')}
+                  onClick={() => navigate('/friendly-interviewer')}
                   className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
                 >
-                  Mock Interview
+                  Virtual Interviewer
                 </button>
                 <button
                   onClick={() => navigate('/interview-copilot')}
