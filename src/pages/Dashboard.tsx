@@ -72,7 +72,7 @@ const Dashboard = () => {
               </div>
               <nav className="hidden md:flex items-center space-x-6">
                 <button
-                  onClick={() => navigate('/friendly-interviewer')}
+                  onClick={() => navigate('/virtual-interviewer')}
                   className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   Virtual Interviewer
@@ -194,7 +194,7 @@ const Dashboard = () => {
                   Practice with our virtual interviewer featuring video calls, body language analysis, and realistic interview scenarios.
                 </p>
                 <Button
-                  onClick={() => navigate('/friendly-interviewer')}
+                  onClick={() => navigate('/virtual-interviewer')}
                   className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:shadow-lg"
                   size="lg"
                 >

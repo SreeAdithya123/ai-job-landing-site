@@ -15,6 +15,7 @@ import ResumeScanner from "./pages/ResumeScanner";
 import MaterialGenerator from "./pages/MaterialGenerator";
 import CareerCoach from "./pages/CareerCoach";
 import FriendlyInterviewer from "./pages/FriendlyInterviewer";
+import VirtualInterviewer from "./pages/VirtualInterviewer";
 import UPSCInterviewer from "./pages/UPSCInterviewer";
 import Recruiters from "./pages/Recruiters";
 import Auth from "./pages/Auth";
@@ -42,6 +43,7 @@ function App() {
               <Route path="/material-generator" element={<MaterialGenerator />} />
               <Route path="/career-coach" element={<CareerCoach />} />
               <Route path="/friendly-interviewer" element={<FriendlyInterviewer />} />
+              <Route path="/virtual-interviewer" element={<VirtualInterviewer />} />
               <Route path="/upsc-interviewer" element={<UPSCInterviewer />} />
               <Route path="/recruiters" element={<Recruiters />} />
               <Route path="*" element={<NotFound />} />
