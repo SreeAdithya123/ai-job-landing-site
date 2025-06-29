@@ -12,11 +12,13 @@ import InterviewControls from '../components/interview/InterviewControls';
 import InterviewTranscript from '../components/interview/InterviewTranscript';
 import InterviewStatus from '../components/interview/InterviewStatus';
 import { Laptop, Code, Star, Phone, Settings, Plus, ExternalLink, Users, ArrowLeft } from 'lucide-react';
+
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
   text: string;
   timestamp: string;
 }
+
 const InterviewCopilot = () => {
   const [selectedType, setSelectedType] = useState('general');
   const [completedInterviews, setCompletedInterviews] = useState<Array<{
@@ -32,9 +34,71 @@ const InterviewCopilot = () => {
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
   const [userIsSpeaking, setUserIsSpeaking] = useState(false);
   const navigate = useNavigate();
-  const {
-    signOut
-  } = useAuth();
+  const { signOut, user } = useAuth();
+
+  // Function to save interview data to Supabase
+  const saveInterviewData = async (transcript: TranscriptEntry[]) => {
+    if (!user?.id || transcript.length < 2) return;
+
+    try {
+      // Group transcript entries into Q&A pairs
+      const qaPairs = [];
+      let currentQuestion = '';
+      let currentAnswer = '';
+
+      for (const entry of transcript) {
+        if (entry.speaker === 'AI' && entry.text && !entry.text.includes('Thank you for your time')) {
+          // If we have a previous Q&A pair, save it
+          if (currentQuestion && currentAnswer) {
+            qaPairs.push({
+              question: currentQuestion,
+              answer: currentAnswer
+            });
+          }
+          currentQuestion = entry.text;
+          currentAnswer = '';
+        } else if (entry.speaker === 'User' && entry.text) {
+          currentAnswer = entry.text;
+        }
+      }
+
+      // Add the last Q&A pair if it exists
+      if (currentQuestion && currentAnswer) {
+        qaPairs.push({
+          question: currentQuestion,
+          answer: currentAnswer
+        });
+      }
+
+      // Save each Q&A pair to the interviews table
+      for (const qa of qaPairs) {
+        await supabase
+          .from('interviews')
+          .insert({
+            user_id: user.id,
+            question: qa.question,
+            answer: qa.answer,
+            feedback: null // Will be populated later by AI analysis if needed
+          });
+      }
+
+      console.log(`✅ Saved ${qaPairs.length} interview Q&A pairs to database`);
+      
+      toast({
+        title: "Interview Saved",
+        description: `Your interview with ${qaPairs.length} questions has been saved to your history.`,
+      });
+
+    } catch (error) {
+      console.error('❌ Error saving interview data:', error);
+      toast({
+        title: "Save Error",
+        description: "Failed to save interview data. Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const conversation = useConversation({
     onConnect: () => {
       console.log('✅ Successfully connected to ElevenLabs Conversational AI');
@@ -49,7 +113,13 @@ const InterviewCopilot = () => {
       console.log('🔌 Disconnected from ElevenLabs Conversational AI');
       setIsInterviewActive(false);
       setConnectionStatus('disconnected');
-      setUserIsSpeaking(false); // Stop user speaking animation on disconnect
+      setUserIsSpeaking(false);
+      
+      // Save interview data when disconnecting
+      if (transcript.length > 0) {
+        saveInterviewData(transcript);
+      }
+      
       toast({
         title: "Interview Ended",
         description: "Disconnected from AI interviewer"
@@ -60,7 +130,7 @@ const InterviewCopilot = () => {
       const currentTime = new Date().toLocaleTimeString();
       if (message.source === 'ai') {
         console.log('🤖 AI message:', message.message);
-        setUserIsSpeaking(false); // User stops speaking when AI responds
+        setUserIsSpeaking(false);
         setTranscript(prev => [...prev, {
           speaker: 'AI',
           text: message.message,
@@ -68,14 +138,13 @@ const InterviewCopilot = () => {
         }]);
       } else if (message.source === 'user') {
         console.log('👤 User message:', message.message);
-        setUserIsSpeaking(true); // User is speaking
+        setUserIsSpeaking(true);
         setTranscript(prev => [...prev, {
           speaker: 'User',
           text: message.message,
           timestamp: currentTime
         }]);
 
-        // Stop user speaking animation after a short delay to show the message was captured
         setTimeout(() => {
           setUserIsSpeaking(false);
         }, 1000);
@@ -85,7 +154,7 @@ const InterviewCopilot = () => {
       console.error('❌ ElevenLabs Conversation error:', error);
       setIsInterviewActive(false);
       setConnectionStatus('error');
-      setUserIsSpeaking(false); // Stop user speaking animation on error
+      setUserIsSpeaking(false);
 
       let errorMessage = 'Unknown error';
       if (typeof error === 'string') {
@@ -107,6 +176,7 @@ const InterviewCopilot = () => {
       });
     }
   });
+
   const interviewTypes = [{
     id: 'general',
     name: 'General Interview',
@@ -128,6 +198,7 @@ const InterviewCopilot = () => {
     icon: Users,
     description: 'Casual conversation-style interview practice'
   }];
+
   const handleSelectInterview = (type: string) => {
     if (type === 'general' || type === 'coding') {
       setSelectedType(type);
@@ -138,6 +209,7 @@ const InterviewCopilot = () => {
       navigate('/friendly-interviewer');
     }
   };
+
   const handleStartInterview = async () => {
     try {
       console.log('🎤 Requesting microphone access...');
@@ -197,9 +269,16 @@ const InterviewCopilot = () => {
       }
     }
   };
+
   const handleExitInterview = async () => {
     try {
       console.log('🛑 Ending interview session...');
+      
+      // Save interview data before ending the session
+      if (transcript.length > 0) {
+        await saveInterviewData(transcript);
+      }
+      
       await conversation.endSession();
       const currentTime = new Date().toLocaleTimeString();
       setTranscript(prev => [...prev, {
@@ -212,19 +291,22 @@ const InterviewCopilot = () => {
       console.error('❌ Error ending interview:', error);
       setIsInterviewActive(false);
       setConnectionStatus('disconnected');
-      setUserIsSpeaking(false); // Stop user speaking animation
+      setUserIsSpeaking(false);
     }
   };
+
   const handleBackToInterviews = () => {
     setShowInterviewInterface(false);
     setIsInterviewActive(false);
     setConnectionStatus('disconnected');
     setTranscript([]);
-    setUserIsSpeaking(false); // Reset user speaking state
+    setUserIsSpeaking(false);
   };
+
   const handleClearTranscript = () => {
     setTranscript([]);
   };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
@@ -278,6 +360,7 @@ const InterviewCopilot = () => {
         </Layout>
       </ProtectedRoute>;
   }
+
   return <ProtectedRoute>
       <Layout>
         <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50">
@@ -371,4 +454,5 @@ const InterviewCopilot = () => {
       </Layout>
     </ProtectedRoute>;
 };
+
 export default InterviewCopilot;
