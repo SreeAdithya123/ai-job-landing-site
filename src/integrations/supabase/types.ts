@@ -110,6 +110,33 @@ export type Database = {
           },
         ]
       }
+      interviews: {
+        Row: {
+          answer: string
+          feedback: string | null
+          id: string
+          question: string
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          feedback?: string | null
+          id?: string
+          question: string
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          feedback?: string | null
+          id?: string
+          question?: string
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

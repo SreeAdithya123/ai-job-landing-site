@@ -4,6 +4,7 @@ import Layout from '../components/Layout';
 import ProgressTracking from '../components/ProgressTracking';
 import RecentInterviewAnalyses from '../components/RecentInterviewAnalyses';
 import InterviewResultsNotification from '../components/InterviewResultsNotification';
+import InterviewHistoryTable from '../components/InterviewHistoryTable';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { Download, Play, Menu, BarChart3, History, Video, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -213,6 +214,11 @@ const Dashboard = () => {
                 <History className="h-5 w-5" />
                 <span>View Interview History</span>
               </Button>
+            </div>
+
+            {/* Interview History Table */}
+            <div className="mb-12">
+              <InterviewHistoryTable />
             </div>
 
             {/* Recent Interview Analyses */}
