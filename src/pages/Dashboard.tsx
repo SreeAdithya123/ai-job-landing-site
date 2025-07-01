@@ -14,7 +14,8 @@ import { Button } from '@/components/ui/button';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { isNewUser, totalSessions, totalHours, completedInterviews, averageScore } = useUserStats();
+  const { totalSessions, totalHours, completedInterviews, averageScore } = useUserStats();
+  const isNewUser = totalSessions === 0;
 
   const generatePDFReport = () => {
     const doc = new jsPDF();
@@ -144,7 +145,7 @@ const Dashboard = () => {
               <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
                 {isNewUser 
                   ? 'Get started with your first AI interview to begin tracking your progress and improving your skills.'
-                  : 'Your personalized space to practice interviews, track progress, and land your dream job.'
+                  : `Your personalized space to practice interviews, track progress, and land your dream job. You've completed ${totalSessions} interview${totalSessions !== 1 ? 's' : ''} so far!`
                 }
               </p>
             </div>
