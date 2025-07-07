@@ -1,14 +1,28 @@
 
 import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Home } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 
 interface LayoutProps {
   children: React.ReactNode;
+  fullSize?: boolean;
 }
 
-const Layout = ({ children }: LayoutProps) => {
+const Layout = ({ children, fullSize = false }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const isNotDashboard = location.pathname !== '/dashboard';
+
+  if (fullSize) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -39,7 +53,16 @@ const Layout = ({ children }: LayoutProps) => {
             <Menu className="h-6 w-6" />
           </button>
           <h1 className="text-lg font-semibold">AI Interviewer</h1>
-          <div className="w-10" /> {/* Spacer */}
+          <div className="flex items-center space-x-2">
+            {isNotDashboard && (
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="p-2 rounded-md hover:bg-gray-100"
+              >
+                <Home className="h-5 w-5" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Main content area */}

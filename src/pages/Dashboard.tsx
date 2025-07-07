@@ -6,14 +6,16 @@ import RecentInterviewAnalyses from '../components/RecentInterviewAnalyses';
 import InterviewResultsNotification from '../components/InterviewResultsNotification';
 import InterviewHistoryTable from '../components/InterviewHistoryTable';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { Download, Play, Menu, BarChart3, History, Video, MessageSquare } from 'lucide-react';
+import { Download, Play, Menu, BarChart3, History, Video, MessageSquare, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStats } from '@/hooks/useUserStats';
+import { useAuth } from '@/contexts/AuthContext';
 import jsPDF from 'jspdf';
 import { Button } from '@/components/ui/button';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const { totalSessions, totalHours, completedInterviews, averageScore } = useUserStats();
   const isNewUser = totalSessions === 0;
 
@@ -56,6 +58,11 @@ const Dashboard = () => {
     doc.save('ai-interviewer-progress-report.pdf');
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   return (
     <ProtectedRoute>
       <Layout>
@@ -63,48 +70,72 @@ const Dashboard = () => {
           {/* Interview Results Notification */}
           <InterviewResultsNotification />
           
-          {/* Dashboard Navigation Bar */}
-          <div className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <button className="lg:hidden p-2 rounded-md hover:bg-gray-100">
-                  <Menu className="h-6 w-6" />
-                </button>
-                <h2 className="text-lg font-semibold text-gray-900">Dashboard Overview</h2>
+          {/* Enhanced Dashboard Header */}
+          <div className="bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
+            <div className="max-w-7xl mx-auto px-6 py-6">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-4">
+                  <button className="lg:hidden p-2 rounded-md hover:bg-gray-100">
+                    <Menu className="h-6 w-6" />
+                  </button>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-xl flex items-center justify-center shadow-lg">
+                      <BarChart3 className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
+                        Dashboard Overview
+                      </h1>
+                      <p className="text-slate-600 text-lg">Track your progress and manage interviews</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <nav className="hidden md:flex items-center space-x-6">
+                    <button
+                      onClick={() => navigate('/virtual-interviewer')}
+                      className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                      Virtual Interviewer
+                    </button>
+                    <button
+                      onClick={() => navigate('/interview-copilot')}
+                      className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                      AI Interviewer
+                    </button>
+                    <button
+                      onClick={() => navigate('/interview-history')}
+                      className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors flex items-center space-x-1"
+                    >
+                      <History className="h-4 w-4" />
+                      <span>History</span>
+                    </button>
+                    <button
+                      onClick={() => navigate('/resume-builder')}
+                      className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                      Resume Builder
+                    </button>
+                    <button
+                      onClick={() => navigate('/material-generator')}
+                      className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                      Materials
+                    </button>
+                  </nav>
+                  <button className="flex items-center space-x-2 px-6 py-3 bg-white/60 backdrop-blur-sm border border-slate-300/50 rounded-xl hover:bg-white/80 transition-all duration-200 shadow-sm">
+                    <Settings className="h-5 w-5 text-slate-600" />
+                    <span className="text-slate-700 font-medium">Settings</span>
+                  </button>
+                  <button 
+                    onClick={handleSignOut} 
+                    className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:shadow-lg transition-all duration-200 font-medium"
+                  >
+                    <span>Sign Out</span>
+                  </button>
+                </div>
               </div>
-              <nav className="hidden md:flex items-center space-x-6">
-                <button
-                  onClick={() => navigate('/virtual-interviewer')}
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Virtual Interviewer
-                </button>
-                <button
-                  onClick={() => navigate('/interview-copilot')}
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  AI Interviewer
-                </button>
-                <button
-                  onClick={() => navigate('/interview-history')}
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors flex items-center space-x-1"
-                >
-                  <History className="h-4 w-4" />
-                  <span>History</span>
-                </button>
-                <button
-                  onClick={() => navigate('/resume-builder')}
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Resume Builder
-                </button>
-                <button
-                  onClick={() => navigate('/material-generator')}
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Materials
-                </button>
-              </nav>
             </div>
           </div>
           
