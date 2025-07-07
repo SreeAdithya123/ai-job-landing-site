@@ -11,7 +11,7 @@ import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewControls from '../components/interview/InterviewControls';
 import InterviewTranscript from '../components/interview/InterviewTranscript';
 import InterviewStatus from '../components/interview/InterviewStatus';
-import { Laptop, Code, Star, Phone, Settings, Plus, ExternalLink, Users, ArrowLeft, Sparkles, Zap, Target, Brain } from 'lucide-react';
+import { Laptop, Code, Star, Phone, Settings, Plus, ExternalLink, Users, ArrowLeft, Sparkles, Zap, Target, Brain, LayoutDashboard } from 'lucide-react';
 
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
@@ -419,6 +419,13 @@ const InterviewCopilot = () => {
                 <button className="flex items-center space-x-2 px-6 py-3 bg-white/60 backdrop-blur-sm border border-slate-300/50 rounded-xl hover:bg-white/80 transition-all duration-200 shadow-sm">
                   <Settings className="h-5 w-5 text-slate-600" />
                   <span className="text-slate-700 font-medium">Settings</span>
+                </button>
+                <button 
+                  onClick={() => navigate('/dashboard')}
+                  className="flex items-center space-x-2 px-6 py-3 bg-white/60 backdrop-blur-sm border border-slate-300/50 rounded-xl hover:bg-white/80 transition-all duration-200 shadow-sm"
+                >
+                  <LayoutDashboard className="h-5 w-5 text-slate-600" />
+                  <span className="text-slate-700 font-medium">Dashboard</span>
                 </button>
                 <button 
                   onClick={handleSignOut} 
