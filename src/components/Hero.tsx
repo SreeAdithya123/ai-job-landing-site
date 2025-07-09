@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
-import TimelineSteps from './TimelineSteps';
+import { ArrowRight, Sparkles } from 'lucide-react';
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -12,35 +12,59 @@ const Hero = () => {
     navigate('/auth');
   };
 
-  const handleGoogleAuth = () => {
-    navigate('/auth');
+  const handleViewAIInterviewer = () => {
+    navigate('/interview-copilot');
   };
 
   return (
     <div className="bg-gradient-to-br from-background via-background to-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
         <div className="text-center">
-          <motion.h1 
-            className="text-4xl lg:text-6xl font-bold text-foreground mb-6 bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent"
+          <motion.div
+            className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full px-4 py-2 mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            Land Your Next Job in{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent animate-glow">
-              30 Days*
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-muted-foreground">Tools for the Minds Shaping Tomorrow</span>
+          </motion.div>
+
+          <motion.h1 
+            className="text-4xl lg:text-6xl font-bold text-foreground mb-6 leading-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            The Sky Isn't the{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+              Limit
             </span>
             <br />
-            or Less with AI Interviewer.
+            It's the{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-primary animate-glow">
+              Foundation
+            </span>
           </motion.h1>
           
           <motion.p 
-            className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto"
+            className="text-xl text-muted-foreground mb-8 max-w-4xl mx-auto leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            AI-powered tools to help you ace interviews, apply faster, and land offers with confidence.
+            At Vyoman, we understand that the future is not just something that happens; it's something we actively create. 
+            Our mission is to equip the architects of tomorrow with intelligent software that transforms potential into reality.
+          </motion.p>
+
+          <motion.p 
+            className="text-lg text-muted-foreground/80 mb-12 max-w-3xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            We craft tools that are not merely functional, but truly transformative — designed to foster deep learning, 
+            accelerate personal growth, and prepare you for the challenges and opportunities that lie ahead.
           </motion.p>
           
           <motion.div 
@@ -52,28 +76,52 @@ const Hero = () => {
             <Button 
               size="lg"
               onClick={handleGetStarted}
-              className="shadow-glow hover:shadow-xl"
+              className="shadow-glow hover:shadow-xl group"
             >
               Get Started for Free
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button 
               variant="secondary" 
               size="lg"
-              onClick={handleGoogleAuth}
-              className="flex items-center justify-center space-x-2 glass-card hover:bg-white/90"
+              onClick={handleViewAIInterviewer}
+              className="glass-card hover:bg-white/90"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              <span>Start free with Google</span>
+              View AI Interviewer Product
             </Button>
           </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
+            <div className="glass-card p-6 text-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <span className="text-white font-bold">🎯</span>
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Purpose-Built Intelligence</h3>
+              <p className="text-sm text-muted-foreground">Every feature designed with specific human needs in mind</p>
+            </div>
+
+            <div className="glass-card p-6 text-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-accent to-primary rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <span className="text-white font-bold">🔄</span>
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Adaptive Learning</h3>
+              <p className="text-sm text-muted-foreground">Systems that learn from your unique patterns and goals</p>
+            </div>
+
+            <div className="glass-card p-6 text-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <span className="text-white font-bold">⚖️</span>
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Ethical AI First</h3>
+              <p className="text-sm text-muted-foreground">Transparent, explainable AI that keeps you in control</p>
+            </div>
+          </motion.div>
         </div>
-        
-        <TimelineSteps />
       </div>
     </div>
   );
