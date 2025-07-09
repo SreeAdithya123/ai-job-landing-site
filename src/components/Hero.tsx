@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
@@ -30,22 +29,33 @@ const Hero = () => {
             <span className="text-sm font-medium text-muted-foreground">Tools for the Minds Shaping Tomorrow</span>
           </motion.div>
 
-          <motion.h1 
-            className="text-4xl lg:text-6xl font-bold text-foreground mb-6 leading-tight"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            The Sky Isn't the{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-              Limit
-            </span>
-            <br />
-            It's the{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-primary animate-glow">
-              Foundation
-            </span>
-          </motion.h1>
+          <div className="flex items-center justify-center gap-6 mb-6">
+            <motion.img
+              src="/lovable-uploads/22723f05-5380-4f62-bcda-0b7e7241bacf.png"
+              alt="Vyoman Logo"
+              className="h-16 lg:h-20 w-auto"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            />
+            
+            <motion.h1 
+              className="text-4xl lg:text-6xl font-bold text-foreground leading-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              The Sky Isn't the{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+                Limit
+              </span>
+              <br />
+              It's the{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-primary animate-glow">
+                Foundation
+              </span>
+            </motion.h1>
+          </div>
           
           <motion.p 
             className="text-xl text-muted-foreground mb-8 max-w-4xl mx-auto leading-relaxed"
