@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
@@ -33,7 +34,7 @@ const Hero = () => {
             <motion.img
               src="/lovable-uploads/22723f05-5380-4f62-bcda-0b7e7241bacf.png"
               alt="Vyoman Logo"
-              className="h-16 lg:h-20 w-auto"
+              className="h-24 lg:h-32 w-auto"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
