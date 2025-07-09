@@ -1,18 +1,17 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from './ui/card';
-import { Sky, Target, RefreshCw, Sparkles, Globe } from 'lucide-react';
+import { Cloud, Target, RefreshCw, Sparkles, Globe } from 'lucide-react';
 
 const AboutSection = () => {
   const principles = [
     {
       icon: Target,
-      title: "Human-Centric AI",
+      title: "Human-Centric AI", 
       description: "We design AI to augment human capabilities, not replace them. Our tools are intuitive partners that enhance your natural intelligence."
     },
     {
-      icon: Sky,
+      icon: Cloud,
       title: "Ethical Foundation",
       description: "Transparency, fairness, and accountability are non-negotiable. We build AI that is unbiased, respects privacy, and serves the greater good."
     },
