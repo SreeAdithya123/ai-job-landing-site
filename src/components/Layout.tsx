@@ -40,8 +40,10 @@ const Layout = ({ children, fullSize = false }: LayoutProps) => {
       
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:-translate-x-full'}
+        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:static lg:inset-0
+        ${sidebarOpen ? 'lg:translate-x-0' : 'lg:-translate-x-full lg:w-0'}
       `}>
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
@@ -51,7 +53,8 @@ const Layout = ({ children, fullSize = false }: LayoutProps) => {
         onClick={toggleSidebar}
         className={`
           fixed top-1/2 -translate-y-1/2 z-50 w-10 h-10 bg-white border border-gray-200 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out flex items-center justify-center hover:bg-gray-50
-          ${sidebarOpen ? 'left-60 lg:left-60' : 'left-4'}
+          ${sidebarOpen ? 'left-60' : 'left-4'}
+          ${sidebarOpen ? 'lg:left-60' : 'lg:left-4'}
         `}
       >
         {sidebarOpen ? (

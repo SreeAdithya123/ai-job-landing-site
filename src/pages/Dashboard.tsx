@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '../components/Layout';
 import ProgressTracking from '../components/ProgressTracking';
@@ -6,6 +5,7 @@ import RecentInterviewAnalyses from '../components/RecentInterviewAnalyses';
 import InterviewResultsNotification from '../components/InterviewResultsNotification';
 import InterviewHistoryTable from '../components/InterviewHistoryTable';
 import ProtectedRoute from '../components/ProtectedRoute';
+import AnalysisFeedbackButton from '../components/AnalysisFeedbackButton';
 import { Download, Play, Menu, BarChart3, History, Video, MessageSquare, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStats } from '@/hooks/useUserStats';
@@ -153,6 +153,7 @@ const Dashboard = () => {
                     <Download className="h-5 w-5" />
                     <span>Download Report</span>
                   </button>
+                  <AnalysisFeedbackButton className="inline-flex" />
                   {!isNewUser && (
                     <button
                       onClick={() => navigate('/interview-history')}
