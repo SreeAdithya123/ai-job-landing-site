@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface TranscriptEntry {
@@ -164,6 +165,95 @@ export const triggerInterviewAnalysis = async (
       throw new Error('Interview analysis service is currently unavailable. Please try again later.');
     }
     
+    throw error;
+  }
+};
+
+// New function to trigger analysis for existing transcripts
+export const triggerAnalysisForExistingTranscripts = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('User must be authenticated');
+  }
+
+  try {
+    console.log('🔍 Fetching existing interview sessions for analysis...');
+    
+    // Get all unique sessions that don't have analysis yet
+    const { data: sessions, error } = await supabase
+      .from('interview_sessions')
+      .select('session_id, interview_type, transcript, duration_minutes, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('❌ Error fetching sessions:', error);
+      throw error;
+    }
+
+    if (!sessions || sessions.length === 0) {
+      console.log('ℹ️ No interview sessions found');
+      return { message: 'No interview sessions found to analyze', count: 0 };
+    }
+
+    // Group by session_id to get unique sessions
+    const uniqueSessions = sessions.reduce((acc, session) => {
+      if (!acc.find(s => s.session_id === session.session_id)) {
+        acc.push(session);
+      }
+      return acc;
+    }, [] as typeof sessions);
+
+    console.log(`📊 Found ${uniqueSessions.length} unique sessions to analyze`);
+
+    // Check which sessions already have analysis
+    const { data: existingAnalyses } = await supabase
+      .from('interview_analyses')
+      .select('id')
+      .eq('user_id', user.id);
+
+    const analysisCount = existingAnalyses?.length || 0;
+    console.log(`📈 Found ${analysisCount} existing analyses`);
+
+    // Process sessions that need analysis (limit to recent ones to avoid overwhelming)
+    const sessionsToAnalyze = uniqueSessions.slice(0, 5); // Analyze up to 5 most recent sessions
+    const analysisPromises = [];
+
+    for (const session of sessionsToAnalyze) {
+      if (session.transcript && Array.isArray(session.transcript)) {
+        console.log(`🔄 Triggering analysis for session: ${session.session_id}`);
+        
+        const analysisPromise = triggerInterviewAnalysis(
+          session.session_id,
+          session.transcript as TranscriptEntry[],
+          session.interview_type || 'general',
+          session.duration_minutes || undefined
+        ).catch(error => {
+          console.error(`❌ Failed to analyze session ${session.session_id}:`, error);
+          return null; // Continue with other sessions even if one fails
+        });
+        
+        analysisPromises.push(analysisPromise);
+      }
+    }
+
+    const results = await Promise.all(analysisPromises);
+    const successfulAnalyses = results.filter(result => result !== null);
+
+    console.log(`✅ Successfully triggered ${successfulAnalyses.length} analyses`);
+
+    // Dispatch event to refresh data
+    window.dispatchEvent(new CustomEvent('refreshInterviewAnalyses'));
+
+    return {
+      message: `Successfully triggered analysis for ${successfulAnalyses.length} interview sessions`,
+      count: successfulAnalyses.length,
+      total: sessionsToAnalyze.length
+    };
+
+  } catch (error) {
+    console.error('❌ Error triggering analysis for existing transcripts:', error);
     throw error;
   }
 };

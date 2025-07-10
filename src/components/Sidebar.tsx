@@ -85,7 +85,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
             <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center shadow-glow">
               <Code className="h-4 w-4 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">AI Interviewer</span>
+            <span className="text-xl font-bold text-gray-900 whitespace-nowrap">AI Interviewer</span>
           </div>
           {onClose && (
             <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-100 rounded">
@@ -117,7 +117,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
                   onClick={onClose}
                 >
                   <item.icon className="mr-3 h-4 w-4" />
-                  {item.name}
+                  <span className="whitespace-nowrap">{item.name}</span>
                 </NavLink>
               ))}
             </div>
@@ -145,21 +145,21 @@ const Sidebar = ({ onClose }: SidebarProps) => {
               className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors"
             >
               <Settings className="h-3 w-3 mr-1" />
-              Manage Account
+              <span className="whitespace-nowrap">Manage Account</span>
             </button>
             <button 
               onClick={handleLogout}
               className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
             >
               <LogOut className="h-3 w-3 mr-1" />
-              Logout
+              <span className="whitespace-nowrap">Logout</span>
             </button>
           </div>
           
           <div className="space-y-2">
             <button className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors">
               <Crown className="h-3 w-3 mr-1" />
-              AI Interviewer Subscription
+              <span className="whitespace-nowrap">AI Interviewer Subscription</span>
             </button>
           </div>
         </div>

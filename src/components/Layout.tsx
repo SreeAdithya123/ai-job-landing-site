@@ -38,14 +38,14 @@ const Layout = ({ children, fullSize = false }: LayoutProps) => {
         />
       )}
       
-      {/* Sidebar */}
+      {/* Sidebar Container */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:static lg:inset-0
-        ${sidebarOpen ? 'lg:translate-x-0' : 'lg:-translate-x-full lg:w-0'}
+        fixed inset-y-0 left-0 z-50 bg-white shadow-lg transform transition-all duration-300 ease-in-out
+        ${sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full w-0'}
+        lg:static lg:inset-0 lg:transform-none
+        ${sidebarOpen ? 'lg:w-64' : 'lg:w-0'}
       `}>
-        <Sidebar onClose={() => setSidebarOpen(false)} />
+        {sidebarOpen && <Sidebar onClose={() => setSidebarOpen(false)} />}
       </div>
 
       {/* Round Arrow Toggle Button */}
@@ -65,7 +65,7 @@ const Layout = ({ children, fullSize = false }: LayoutProps) => {
       </button>
 
       {/* Main content */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${sidebarOpen ? 'lg:ml-0' : 'lg:ml-0'}`}>
+      <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out">
         {/* Mobile header */}
         <div className="lg:hidden bg-white shadow-sm px-4 py-3 flex items-center justify-between">
           <button
