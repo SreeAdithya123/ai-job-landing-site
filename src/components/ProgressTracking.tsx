@@ -6,7 +6,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { useUserStats } from '@/hooks/useUserStats';
 
 const ProgressTracking = () => {
-  const { isNewUser, totalSessions, totalHours, completedInterviews, averageScore, analyses, interviews } = useUserStats();
+  const { isNewUser, totalSessions, totalHours, completedInterviews, averageScore, analyses, interviewSessions } = useUserStats();
 
   const stats = [
     {
@@ -65,10 +65,10 @@ const ProgressTracking = () => {
 
   const skillProgress = calculateSkillProgress();
 
-  // Generate recent activities from actual interview data
-  const recentActivities = interviews.slice(0, 4).map((interview) => ({
-    type: 'AI Interview',
-    date: new Date(interview.timestamp).toLocaleDateString(),
+  // Generate recent activities from actual interview session data
+  const recentActivities = interviewSessions.slice(0, 4).map((session) => ({
+    type: `${session.interview_type} Interview`,
+    date: new Date(session.created_at).toLocaleDateString(),
     score: 'Completed',
     status: 'Completed'
   }));
@@ -97,12 +97,12 @@ const ProgressTracking = () => {
       ];
     }
 
-    // Group interviews by day of week
+    // Group interview sessions by day of week
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const dailyStats = weekDays.map(day => ({ name: day, interviews: 0, hours: 0 }));
 
-    interviews.forEach(interview => {
-      const dayIndex = new Date(interview.timestamp).getDay();
+    interviewSessions.forEach(session => {
+      const dayIndex = new Date(session.created_at).getDay();
       dailyStats[dayIndex].interviews += 1;
       dailyStats[dayIndex].hours = Math.round((dailyStats[dayIndex].interviews * 0.1) * 10) / 10; // Estimate hours
     });
