@@ -24,6 +24,23 @@ export interface InterviewSession {
   updated_at?: string;
 }
 
+// Helper function to safely convert JSON to TranscriptEntry[]
+const parseTranscriptFromJson = (transcript: any): TranscriptEntry[] => {
+  if (!Array.isArray(transcript)) {
+    console.warn('Transcript is not an array:', transcript);
+    return [];
+  }
+
+  return transcript.filter((entry: any) => {
+    return entry && 
+           typeof entry === 'object' && 
+           typeof entry.speaker === 'string' &&
+           typeof entry.text === 'string' &&
+           typeof entry.timestamp === 'string' &&
+           (entry.speaker === 'AI' || entry.speaker === 'User');
+  }) as TranscriptEntry[];
+};
+
 export const saveInterviewSession = async (sessionData: InterviewSession) => {
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -221,20 +238,27 @@ export const triggerAnalysisForExistingTranscripts = async () => {
     const analysisPromises = [];
 
     for (const session of sessionsToAnalyze) {
-      if (session.transcript && Array.isArray(session.transcript)) {
+      if (session.transcript) {
         console.log(`🔄 Triggering analysis for session: ${session.session_id}`);
         
-        const analysisPromise = triggerInterviewAnalysis(
-          session.session_id,
-          session.transcript as TranscriptEntry[],
-          session.interview_type || 'general',
-          session.duration_minutes || undefined
-        ).catch(error => {
-          console.error(`❌ Failed to analyze session ${session.session_id}:`, error);
-          return null; // Continue with other sessions even if one fails
-        });
+        // Safely parse the transcript JSON to TranscriptEntry[]
+        const parsedTranscript = parseTranscriptFromJson(session.transcript);
         
-        analysisPromises.push(analysisPromise);
+        if (parsedTranscript.length > 0) {
+          const analysisPromise = triggerInterviewAnalysis(
+            session.session_id,
+            parsedTranscript,
+            session.interview_type || 'general',
+            session.duration_minutes || undefined
+          ).catch(error => {
+            console.error(`❌ Failed to analyze session ${session.session_id}:`, error);
+            return null; // Continue with other sessions even if one fails
+          });
+          
+          analysisPromises.push(analysisPromise);
+        } else {
+          console.warn(`⚠️ Skipping session ${session.session_id}: invalid or empty transcript`);
+        }
       }
     }
 
