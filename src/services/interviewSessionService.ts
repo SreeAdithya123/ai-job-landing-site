@@ -145,7 +145,12 @@ export const triggerInterviewAnalysis = async (
 
     if (error) {
       console.error('❌ Error triggering interview analysis:', error);
-      throw error;
+      throw new Error(`Analysis failed: ${error.message || 'Edge function returned an error'}`);
+    }
+
+    if (!data?.success) {
+      console.error('❌ Analysis function returned error:', data);
+      throw new Error(`Analysis failed: ${data?.error || 'Unknown error from analysis function'}`);
     }
 
     console.log('✅ Interview analysis completed:', data);
@@ -153,6 +158,12 @@ export const triggerInterviewAnalysis = async (
 
   } catch (error) {
     console.error('❌ Failed to trigger interview analysis:', error);
+    
+    // Provide more specific error messages
+    if (error.message?.includes('Edge Function returned a non-2xx status code')) {
+      throw new Error('Interview analysis service is currently unavailable. Please try again later.');
+    }
+    
     throw error;
   }
 };

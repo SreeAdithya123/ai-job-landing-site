@@ -89,13 +89,11 @@ Focus on:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'command-xlarge-nightly',
+        model: 'command-r',
         prompt: analysisPrompt,
         max_tokens: 1000,
         temperature: 0.3,
-        k: 0,
         stop_sequences: [],
-        return_likelihoods: 'NONE',
       }),
     })
 
