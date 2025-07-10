@@ -115,6 +115,57 @@ export type Database = {
           },
         ]
       }
+      interview_sessions: {
+        Row: {
+          ai_feedback: string | null
+          audio_url: string | null
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          interview_type: string
+          question: string
+          session_id: string
+          timestamp_end: string | null
+          timestamp_start: string | null
+          transcript: Json
+          updated_at: string
+          user_id: string
+          user_response: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          audio_url?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          interview_type?: string
+          question: string
+          session_id: string
+          timestamp_end?: string | null
+          timestamp_start?: string | null
+          transcript?: Json
+          updated_at?: string
+          user_id: string
+          user_response: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          audio_url?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          interview_type?: string
+          question?: string
+          session_id?: string
+          timestamp_end?: string | null
+          timestamp_start?: string | null
+          transcript?: Json
+          updated_at?: string
+          user_id?: string
+          user_response?: string
+        }
+        Relationships: []
+      }
       interviews: {
         Row: {
           answer: string

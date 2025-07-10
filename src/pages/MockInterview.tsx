@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useConversation } from '@11labs/react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { processInterviewEnd } from '@/services/interviewSessionService';
 import Layout from '../components/Layout';
 import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewTranscript from '../components/interview/InterviewTranscript';
@@ -27,6 +28,8 @@ const MockInterview = () => {
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
   const [showMockInterface, setShowMockInterface] = useState(false);
+  const [sessionId, setSessionId] = useState<string>('');
+  const [interviewStartTime, setInterviewStartTime] = useState<Date | null>(null);
 
   const conversation = useConversation({
     onConnect: () => {

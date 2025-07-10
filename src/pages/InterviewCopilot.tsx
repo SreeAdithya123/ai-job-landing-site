@@ -4,6 +4,7 @@ import { useConversation } from '@11labs/react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { processInterviewEnd } from '@/services/interviewSessionService';
 import ProtectedRoute from '../components/ProtectedRoute';
 import InterviewHeader from '../components/interview/InterviewHeader';
 import InterviewHero from '../components/interview/InterviewHero';
@@ -32,74 +33,18 @@ const InterviewCopilot = () => {
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
   const [userIsSpeaking, setUserIsSpeaking] = useState(false);
+  const [interviewStartTime, setInterviewStartTime] = useState<Date | null>(null);
+  const [sessionId, setSessionId] = useState<string>('');
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
 
-  const saveInterviewData = async (transcript: TranscriptEntry[]) => {
-    if (!user?.id || transcript.length < 2) return;
-
-    try {
-      // Group transcript entries into Q&A pairs
-      const qaPairs = [];
-      let currentQuestion = '';
-      let currentAnswer = '';
-
-      for (const entry of transcript) {
-        if (entry.speaker === 'AI' && entry.text && !entry.text.includes('Thank you for your time')) {
-          // If we have a previous Q&A pair, save it
-          if (currentQuestion && currentAnswer) {
-            qaPairs.push({
-              question: currentQuestion,
-              answer: currentAnswer
-            });
-          }
-          currentQuestion = entry.text;
-          currentAnswer = '';
-        } else if (entry.speaker === 'User' && entry.text) {
-          currentAnswer = entry.text;
-        }
-      }
-
-      // Add the last Q&A pair if it exists
-      if (currentQuestion && currentAnswer) {
-        qaPairs.push({
-          question: currentQuestion,
-          answer: currentAnswer
-        });
-      }
-
-      // Save each Q&A pair to the interviews table
-      for (const qa of qaPairs) {
-        await supabase
-          .from('interviews')
-          .insert({
-            user_id: user.id,
-            question: qa.question,
-            answer: qa.answer,
-            feedback: null // Will be populated later by AI analysis if needed
-          });
-      }
-
-      console.log(`✅ Saved ${qaPairs.length} interview Q&A pairs to database`);
-      
-      toast({
-        title: "Interview Saved",
-        description: `Your interview with ${qaPairs.length} questions has been saved to your history.`,
-      });
-
-    } catch (error) {
-      console.error('❌ Error saving interview data:', error);
-      toast({
-        title: "Save Error",
-        description: "Failed to save interview data. Please try again later.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const conversation = useConversation({
     onConnect: () => {
       console.log('✅ Successfully connected to ElevenLabs Conversational AI');
+      const newSessionId = `interview_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setSessionId(newSessionId);
+      setInterviewStartTime(new Date());
       setIsInterviewActive(true);
       setConnectionStatus('connected');
       toast({
@@ -107,21 +52,39 @@ const InterviewCopilot = () => {
         description: "Connected to AI interviewer successfully"
       });
     },
-    onDisconnect: () => {
+    onDisconnect: async () => {
       console.log('🔌 Disconnected from ElevenLabs Conversational AI');
       setIsInterviewActive(false);
       setConnectionStatus('disconnected');
       setUserIsSpeaking(false);
       
-      // Save interview data when disconnecting
-      if (transcript.length > 0) {
-        saveInterviewData(transcript);
+      // Process interview end when disconnecting
+      if (transcript.length > 0 && sessionId) {
+        try {
+          const duration = interviewStartTime 
+            ? Math.round((new Date().getTime() - interviewStartTime.getTime()) / 60000)
+            : undefined;
+          
+          await processInterviewEnd(sessionId, transcript, selectedType, duration);
+          
+          toast({
+            title: "Interview Completed",
+            description: "Your interview has been saved and analyzed successfully."
+          });
+        } catch (error) {
+          console.error('❌ Error processing interview end:', error);
+          toast({
+            title: "Save Error",
+            description: "Interview ended but failed to save data.",
+            variant: "destructive"
+          });
+        }
+      } else {
+        toast({
+          title: "Interview Ended",
+          description: "Disconnected from AI interviewer"
+        });
       }
-      
-      toast({
-        title: "Interview Ended",
-        description: "Disconnected from AI interviewer"
-      });
     },
     onMessage: message => {
       console.log('📨 Message received:', message);
@@ -280,9 +243,27 @@ const InterviewCopilot = () => {
     try {
       console.log('🛑 Ending interview session...');
       
-      // Save interview data before ending the session
-      if (transcript.length > 0) {
-        await saveInterviewData(transcript);
+      // Process interview end before closing the session
+      if (transcript.length > 0 && sessionId) {
+        try {
+          const duration = interviewStartTime 
+            ? Math.round((new Date().getTime() - interviewStartTime.getTime()) / 60000)
+            : undefined;
+          
+          await processInterviewEnd(sessionId, transcript, selectedType, duration);
+          
+          toast({
+            title: "Interview Completed",
+            description: "Your interview has been saved and analyzed successfully."
+          });
+        } catch (error) {
+          console.error('❌ Error processing interview end:', error);
+          toast({
+            title: "Save Error",
+            description: "Interview ended but failed to save data.",
+            variant: "destructive"
+          });
+        }
       }
       
       await conversation.endSession();

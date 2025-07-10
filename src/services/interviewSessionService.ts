@@ -1,0 +1,217 @@
+import { supabase } from '@/integrations/supabase/client';
+
+export interface TranscriptEntry {
+  speaker: 'AI' | 'User';
+  text: string;
+  timestamp: string;
+}
+
+export interface InterviewSession {
+  id?: string;
+  session_id: string;
+  user_id?: string;
+  interview_type: string;
+  question: string;
+  user_response: string;
+  ai_feedback?: string;
+  transcript: TranscriptEntry[];
+  audio_url?: string;
+  duration_minutes?: number;
+  timestamp_start?: string;
+  timestamp_end?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export const saveInterviewSession = async (sessionData: InterviewSession) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('User must be authenticated to save interview session');
+  }
+
+  const sessionRecord = {
+    ...sessionData,
+    user_id: user.id,
+    transcript: sessionData.transcript as any, // Cast to Json type
+  };
+
+  const { data, error } = await supabase
+    .from('interview_sessions')
+    .insert([sessionRecord])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error saving interview session:', error);
+    throw error;
+  }
+
+  return data;
+};
+
+export const saveInterviewTranscript = async (
+  sessionId: string,
+  transcript: TranscriptEntry[],
+  interviewType: string = 'general',
+  duration?: number
+) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user?.id || transcript.length < 2) {
+    console.log('❌ Cannot save transcript: missing user or insufficient transcript data');
+    return;
+  }
+
+  try {
+    console.log(`💾 Saving transcript for session: ${sessionId}`);
+    
+    // Group transcript entries into Q&A pairs
+    const qaPairs = [];
+    let currentQuestion = '';
+    let currentAnswer = '';
+
+    for (const entry of transcript) {
+      if (entry.speaker === 'AI' && entry.text && !entry.text.includes('Thank you for your time')) {
+        // If we have a previous Q&A pair, save it
+        if (currentQuestion && currentAnswer) {
+          qaPairs.push({
+            question: currentQuestion,
+            answer: currentAnswer
+          });
+        }
+        currentQuestion = entry.text;
+        currentAnswer = '';
+      } else if (entry.speaker === 'User' && entry.text) {
+        currentAnswer = entry.text;
+      }
+    }
+
+    // Add the last Q&A pair if it exists
+    if (currentQuestion && currentAnswer) {
+      qaPairs.push({
+        question: currentQuestion,
+        answer: currentAnswer
+      });
+    }
+
+    console.log(`📝 Processing ${qaPairs.length} Q&A pairs`);
+
+    // Save each Q&A pair to the interview_sessions table
+    const sessionPromises = qaPairs.map((qa, index) => 
+      supabase
+        .from('interview_sessions')
+        .insert({
+          session_id: sessionId,
+          user_id: user.id,
+          interview_type: interviewType,
+          question: qa.question,
+          user_response: qa.answer,
+          transcript: transcript as any, // Cast to Json type
+          duration_minutes: duration,
+          timestamp_end: new Date().toISOString(),
+        })
+    );
+
+    await Promise.all(sessionPromises);
+
+    console.log(`✅ Saved ${qaPairs.length} interview sessions to database`);
+    
+    return qaPairs.length;
+
+  } catch (error) {
+    console.error('❌ Error saving interview transcript:', error);
+    throw error;
+  }
+};
+
+export const triggerInterviewAnalysis = async (
+  sessionId: string,
+  transcript: TranscriptEntry[],
+  interviewType: string = 'general',
+  duration?: number
+) => {
+  try {
+    console.log(`🧠 Triggering analysis for session: ${sessionId}`);
+    
+    const { data, error } = await supabase.functions.invoke('interview-analysis', {
+      body: {
+        sessionId,
+        transcript,
+        interviewType,
+        duration
+      }
+    });
+
+    if (error) {
+      console.error('❌ Error triggering interview analysis:', error);
+      throw error;
+    }
+
+    console.log('✅ Interview analysis completed:', data);
+    return data;
+
+  } catch (error) {
+    console.error('❌ Failed to trigger interview analysis:', error);
+    throw error;
+  }
+};
+
+export const processInterviewEnd = async (
+  sessionId: string,
+  transcript: TranscriptEntry[],
+  interviewType: string = 'general',
+  duration?: number,
+  audioUrl?: string
+) => {
+  try {
+    console.log(`🎯 Processing interview end for session: ${sessionId}`);
+    
+    // Step 1: Save transcript to database
+    const savedCount = await saveInterviewTranscript(sessionId, transcript, interviewType, duration);
+    
+    // Step 2: Trigger Cohere analysis (if we have enough data)
+    if (savedCount && savedCount > 0) {
+      await triggerInterviewAnalysis(sessionId, transcript, interviewType, duration);
+    }
+
+    // Step 3: If audio URL is available, we could save it here
+    if (audioUrl) {
+      // TODO: Implement audio storage logic if needed
+      console.log(`🔊 Audio URL available: ${audioUrl}`);
+    }
+
+    console.log('✅ Interview processing completed successfully');
+    
+    return {
+      success: true,
+      sessionsCount: savedCount,
+      message: `Interview completed with ${savedCount} Q&A pairs analyzed`
+    };
+
+  } catch (error) {
+    console.error('❌ Error processing interview end:', error);
+    throw error;
+  }
+};
+
+export const getUserInterviewSessions = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('User must be authenticated to fetch interview sessions');
+  }
+
+  const { data, error } = await supabase
+    .from('interview_sessions')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching interview sessions:', error);
+    throw error;
+  }
+
+  return data || [];
+};
