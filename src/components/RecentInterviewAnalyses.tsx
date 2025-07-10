@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getUserInterviewAnalyses, InterviewAnalysis } from '@/services/interviewAnalysisService';
 import InterviewAnalysisCard from './InterviewAnalysisCard';
 import InterviewDetailsModal from './InterviewDetailsModal';
+import AnalysisFeedbackButton from './AnalysisFeedbackButton';
 
 const RecentInterviewAnalyses = () => {
   const navigate = useNavigate();
@@ -62,14 +63,17 @@ const RecentInterviewAnalyses = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="flex items-center space-x-2 mb-6">
-          <BarChart3 className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">Recent Interview Analyses</h3>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-2">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold text-foreground">Recent Interview Analyses</h3>
+          </div>
+          <AnalysisFeedbackButton />
         </div>
         <div className="text-center py-8">
           <div className="text-muted-foreground mb-2">No interview analyses yet</div>
-          <div className="text-sm text-muted-foreground">
-            Complete an interview to see your analysis here
+          <div className="text-sm text-muted-foreground mb-4">
+            Complete an interview to see your analysis here, or trigger analysis for existing transcripts
           </div>
         </div>
       </motion.div>
@@ -94,15 +98,18 @@ const RecentInterviewAnalyses = () => {
             </div>
           </div>
           
-          {analyses.length > 2 && (
-            <button
-              onClick={() => navigate('/interview-history')}
-              className="flex items-center space-x-2 px-4 py-2 text-primary hover:bg-primary/10 rounded-lg transition-colors text-sm font-medium"
-            >
-              <span>View All</span>
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          )}
+          <div className="flex items-center space-x-3">
+            <AnalysisFeedbackButton />
+            {analyses.length > 2 && (
+              <button
+                onClick={() => navigate('/interview-history')}
+                className="flex items-center space-x-2 px-4 py-2 text-primary hover:bg-primary/10 rounded-lg transition-colors text-sm font-medium"
+              >
+                <span>View All</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
