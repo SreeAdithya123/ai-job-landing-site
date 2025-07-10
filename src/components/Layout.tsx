@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Menu, X, Home } from 'lucide-react';
+import { Menu, X, Home, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 
@@ -10,11 +10,15 @@ interface LayoutProps {
 }
 
 const Layout = ({ children, fullSize = false }: LayoutProps) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   
   const isNotDashboard = location.pathname !== '/dashboard';
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   if (fullSize) {
     return (
@@ -37,13 +41,28 @@ const Layout = ({ children, fullSize = false }: LayoutProps) => {
       {/* Sidebar */}
       <div className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:-translate-x-full'}
       `}>
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
+      {/* Round Arrow Toggle Button */}
+      <button
+        onClick={toggleSidebar}
+        className={`
+          fixed top-1/2 -translate-y-1/2 z-50 w-10 h-10 bg-white border border-gray-200 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out flex items-center justify-center hover:bg-gray-50
+          ${sidebarOpen ? 'left-60 lg:left-60' : 'left-4'}
+        `}
+      >
+        {sidebarOpen ? (
+          <ChevronLeft className="h-5 w-5 text-gray-600" />
+        ) : (
+          <ChevronRight className="h-5 w-5 text-gray-600" />
+        )}
+      </button>
+
       {/* Main content */}
-      <div className="flex-1 flex flex-col lg:ml-0">
+      <div className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${sidebarOpen ? 'lg:ml-0' : 'lg:ml-0'}`}>
         {/* Mobile header */}
         <div className="lg:hidden bg-white shadow-sm px-4 py-3 flex items-center justify-between">
           <button
