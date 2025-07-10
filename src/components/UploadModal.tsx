@@ -2,21 +2,20 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, FileText, ChevronDown, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedMaterial: string;
   onGenerateComplete: (fileName: string, type: string, content: string) => void;
-  apiKey: string;
 }
 
 const UploadModal: React.FC<UploadModalProps> = ({ 
   isOpen, 
   onClose, 
   selectedMaterial, 
-  onGenerateComplete,
-  apiKey 
+  onGenerateComplete
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -61,43 +60,14 @@ const UploadModal: React.FC<UploadModalProps> = ({
   };
 
   const generateContent = async (text: string, type: string): Promise<string> => {
-    const prompts = {
-      summary: `Create a comprehensive summary of the following text. Structure it with clear headings and bullet points:\n\n${text}`,
-      notes: `Convert the following text into student-friendly bullet notes with clear sections and subsections:\n\n${text}`,
-      flashcards: `Create Q&A flashcards from the following text. Format as "Q: [question]\nA: [answer]" pairs:\n\n${text}`,
-      qa: `Extract important questions and answers from the following text. Format as structured Q&A:\n\n${text}`
-    };
-
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an expert educational content creator. Generate well-structured, comprehensive study materials.'
-            },
-            {
-              role: 'user',
-              content: prompts[type as keyof typeof prompts] || prompts.summary
-            }
-          ],
-          max_tokens: 2000,
-          temperature: 0.7
-        })
+      const { data, error } = await supabase.functions.invoke('material-generator', {
+        body: { text, type }
       });
 
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
-      }
+      if (error) throw error;
 
-      const data = await response.json();
-      return data.choices[0].message.content;
+      return data.content;
     } catch (error) {
       console.error('Error generating content:', error);
       throw error;

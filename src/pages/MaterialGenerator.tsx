@@ -30,8 +30,6 @@ const MaterialGenerator = () => {
     content: string;
   } | null>(null);
 
-  // API key for Material Generator
-  const API_KEY = 'vaH5yXCtZMCYFFlljqJWzsVKcJO7Rs4eEglOAEOC';
 
   const materialTypes = [
     {
@@ -187,7 +185,6 @@ const MaterialGenerator = () => {
         onClose={() => setIsModalOpen(false)}
         selectedMaterial={selectedMaterial}
         onGenerateComplete={handleGenerateComplete}
-        apiKey={API_KEY}
       />
     </Layout>
   );

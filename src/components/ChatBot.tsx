@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   id: string;
@@ -17,11 +18,10 @@ interface ChatBotProps {
   title: string;
   placeholder?: string;
   initialMessage?: string;
-  apiKey?: string;
   context?: 'career' | 'recruiter';
 }
 
-const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, apiKey, context }: ChatBotProps) => {
+const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, context }: ChatBotProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -50,42 +50,17 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
   }, [messages]);
 
   const callOpenAI = async (userInput: string, context?: string): Promise<string> => {
-    if (!apiKey) {
-      throw new Error('API key not available');
-    }
-
-    const systemPrompts = {
-      career: 'You are an expert career coach with years of experience helping professionals advance their careers. Provide personalized, actionable advice on career development, resume optimization, interview preparation, skill development, and job search strategies.',
-      recruiter: 'You are a professional recruiter with extensive connections across top companies. Help users connect with recruiters, understand hiring processes, and navigate job opportunities at their target companies.'
-    };
-
-    const systemPrompt = systemPrompts[context as keyof typeof systemPrompts] || 
-      'You are a helpful AI assistant focused on career and professional development.';
-
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userInput }
-          ],
-          max_tokens: 500,
-          temperature: 0.7
-        })
+      const { data, error } = await supabase.functions.invoke('chat-assistant', {
+        body: { 
+          message: userInput, 
+          context: context || 'general'
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
-      }
+      if (error) throw error;
 
-      const data = await response.json();
-      return data.choices[0].message.content;
+      return data.response;
     } catch (error) {
       console.error('OpenAI API error:', error);
       throw error;
@@ -108,18 +83,10 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
     setIsLoading(true);
 
     try {
-      let botResponse: string;
+      console.log('Processing message with context:', context);
+      console.log('User input:', currentInput);
       
-      if (apiKey) {
-        console.log('Processing message with API key:', apiKey);
-        console.log('Context:', context);
-        console.log('User input:', currentInput);
-        
-        botResponse = await callOpenAI(currentInput, context);
-      } else {
-        // Fallback to basic responses
-        botResponse = getBotResponse(currentInput, title);
-      }
+      const botResponse = await callOpenAI(currentInput, context);
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -202,9 +169,7 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
         <div className="flex items-center space-x-2">
           <Bot className="h-6 w-6" />
           <h3 className="text-lg font-semibold">{title}</h3>
-          {apiKey && (
-            <span className="px-2 py-1 bg-white/20 rounded-full text-xs">Enhanced AI</span>
-          )}
+          <span className="px-2 py-1 bg-white/20 rounded-full text-xs">Enhanced AI</span>
         </div>
       </div>
 
