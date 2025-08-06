@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { askCareerCoach, chatWithRecruiter } from '@/services/unifiedAiService';
 
 interface Message {
   id: string;
@@ -49,24 +49,6 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
     scrollToBottom();
   }, [messages]);
 
-  const callOpenAI = async (userInput: string, context?: string): Promise<string> => {
-    try {
-      const { data, error } = await supabase.functions.invoke('chat-assistant', {
-        body: { 
-          message: userInput, 
-          context: context || 'general'
-        }
-      });
-
-      if (error) throw error;
-
-      return data.response;
-    } catch (error) {
-      console.error('OpenAI API error:', error);
-      throw error;
-    }
-  };
-
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
@@ -86,11 +68,19 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
       console.log('Processing message with context:', context);
       console.log('User input:', currentInput);
       
-      const botResponse = await callOpenAI(currentInput, context);
+      let response;
+      if (context === 'career') {
+        response = await askCareerCoach(currentInput);
+      } else if (context === 'recruiter') {
+        response = await chatWithRecruiter(currentInput);
+      } else {
+        // Default fallback
+        response = await askCareerCoach(currentInput);
+      }
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: botResponse,
+        content: response.content || "I'm here to help! Please try asking your question again.",
         sender: 'bot',
         timestamp: new Date()
       };
@@ -112,46 +102,6 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const getEnhancedBotResponse = (userInput: string, botTitle: string, context?: string): string => {
-    const input = userInput.toLowerCase();
-    
-    if (context === 'career') {
-      return "Thank you for your question! With our enhanced AI capabilities, I can provide you with personalized career guidance based on current market trends and your specific situation. Let me analyze your query and provide detailed insights...";
-    } else if (context === 'recruiter') {
-      return "Great! I'm connecting you with our enhanced recruiter network. Based on your profile and preferences, I can match you with the most suitable opportunities from our partner companies. Let me process your request...";
-    }
-    
-    return getBotResponse(userInput, botTitle);
-  };
-
-  const getBotResponse = (userInput: string, botTitle: string): string => {
-    const input = userInput.toLowerCase();
-    
-    if (botTitle.includes('Career Coach')) {
-      if (input.includes('resume') || input.includes('cv')) {
-        return "I'd be happy to help you with your resume! Focus on highlighting your achievements with specific metrics, use action verbs, and tailor it to each job application. Would you like specific tips for any particular section?";
-      }
-      if (input.includes('interview') || input.includes('job')) {
-        return "Great question about interviews! Preparation is key - research the company, practice common questions, and prepare specific examples using the STAR method. What type of interview are you preparing for?";
-      }
-      if (input.includes('career') || input.includes('path')) {
-        return "Career planning is crucial for long-term success. Consider your values, interests, and skills when exploring career paths. What industry or role are you most interested in?";
-      }
-      return "I'm here to help guide your career journey! I can assist with resume optimization, interview preparation, career planning, and skill development. What specific area would you like to focus on today?";
-    } else {
-      if (input.includes('recruiter') || input.includes('hiring')) {
-        return "I can help you connect with recruiters from top companies! They're looking for talented candidates like you. What type of role or industry are you targeting?";
-      }
-      if (input.includes('company') || input.includes('job')) {
-        return "Excellent! I have connections with recruiters from various industries including tech, finance, healthcare, and more. What's your dream company or preferred company size?";
-      }
-      if (input.includes('salary') || input.includes('compensation')) {
-        return "Salary negotiations are important! I can connect you with recruiters who are transparent about compensation ranges. What's your experience level and target salary range?";
-      }
-      return "I'm here to connect you with recruiters from your dream companies! Whether you're looking for startups, Fortune 500 companies, or specific industries, I can help make those connections. What type of opportunity interests you most?";
     }
   };
 
