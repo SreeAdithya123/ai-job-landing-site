@@ -17,7 +17,7 @@ export interface TranscriptAnalysis {
   recommendations: string[];
 }
 
-// Store ElevenLabs transcript
+// Store ElevenLabs transcript using raw SQL since table isn't in types yet
 export const storeTranscript = async (transcript: ElevenLabsTranscript) => {
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -30,18 +30,20 @@ export const storeTranscript = async (transcript: ElevenLabsTranscript) => {
     user_id: user.id,
   };
 
-  const { data, error } = await supabase
-    .from('elevenlabs_transcripts')
-    .insert([transcriptData])
-    .select()
-    .single();
+  const { data, error } = await supabase.rpc('store_elevenlabs_transcript', {
+    p_user_id: user.id,
+    p_interview_id: transcript.interview_id,
+    p_content: transcript.content,
+    p_timestamp: transcript.timestamp,
+    p_conversation_id: transcript.conversation_id || null
+  });
 
   if (error) {
     console.error('Error storing transcript:', error);
     throw error;
   }
 
-  return data;
+  return { id: data, ...transcriptData };
 };
 
 // Analyze transcript using OpenRouter API

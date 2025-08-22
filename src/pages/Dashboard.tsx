@@ -254,6 +254,11 @@ const Dashboard = () => {
               <InterviewHistoryTable />
             </div>
 
+            {/* Analytics Visualizations */}
+            <div className="mb-12">
+              <ElevenLabsAnalyticsDashboard />
+            </div>
+
             {/* Recent Interview Analyses */}
             <div data-interview-analyses>
               <RecentInterviewAnalyses />
