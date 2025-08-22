@@ -258,7 +258,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      store_elevenlabs_transcript: {
+        Args: {
+          p_content: string
+          p_conversation_id?: string
+          p_interview_id: string
+          p_timestamp: string
+          p_user_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

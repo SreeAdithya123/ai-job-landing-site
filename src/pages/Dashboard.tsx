@@ -6,6 +6,7 @@ import InterviewResultsNotification from '../components/InterviewResultsNotifica
 import InterviewHistoryTable from '../components/InterviewHistoryTable';
 import ProtectedRoute from '../components/ProtectedRoute';
 import AnalysisFeedbackButton from '../components/AnalysisFeedbackButton';
+import ElevenLabsAnalyticsDashboard from '../components/dashboard/ElevenLabsAnalyticsDashboard';
 import { Download, Play, Menu, BarChart3, History, Video, MessageSquare, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStats } from '@/hooks/useUserStats';
