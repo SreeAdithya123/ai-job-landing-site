@@ -35,6 +35,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       items: [
         { name: 'AI Interviewer', href: '/interview-copilot', icon: Laptop },
         { name: 'Virtual Interviewer', href: '/virtual-interviewer', icon: Video },
+        { name: 'Practice Interview', href: '/practice-interview', icon: Phone },
         { name: 'Virtual Practice', href: '/virtual-practice', icon: Users },
         { name: 'AI Resume Builder', href: '/resume-builder', icon: FileText },
         { name: 'Resume Scanner', href: '/resume-scanner', icon: Scan },
