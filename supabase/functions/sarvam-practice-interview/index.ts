@@ -38,7 +38,7 @@ async function callSarvamSTT(audioBase64: string): Promise<string> {
   formData.append('model', 'saarika:v2.5');
   formData.append('language_code', 'en-IN');
 
-  const response = await fetch('https://api.sarvam.ai/speech-to-text', {
+  const response = await fetch('https://api.sarvam.ai/speech-to-text/transcribe', {
     method: 'POST',
     headers: {
       'API-Subscription-Key': sarvamApiKey,
@@ -81,7 +81,7 @@ async function callSarvamLLM(transcript: string): Promise<string> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'sarvam-2b-v0.5',
+      model: 'sarvam-m',
       messages: messages,
       temperature: 0.7,
       max_tokens: 200,
@@ -105,17 +105,17 @@ async function callSarvamTTS(text: string): Promise<string> {
     throw new Error('Sarvam API key not configured');
   }
 
-  const response = await fetch('https://api.sarvam.ai/text-to-speech', {
+  const response = await fetch('https://api.sarvam.ai/text-to-speech/convert', {
     method: 'POST',
     headers: {
       'API-Subscription-Key': sarvamApiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      inputs: [text],
+      text: text,
       target_language_code: 'en-IN',
       speaker: 'meera',
-      model: 'bulbul:v1',
+      model: 'bulbul:v2',
     }),
   });
 
