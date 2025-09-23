@@ -38,10 +38,10 @@ async function callSarvamSTT(audioBase64: string): Promise<string> {
   formData.append('model', 'saarika:v2.5');
   formData.append('language_code', 'en-IN');
 
-  const response = await fetch('https://api.sarvam.ai/speech-to-text', {
+  const response = await fetch('https://api.sarvam.ai/speech-to-text/transcribe', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${sarvamApiKey}`,
+      'api-subscription-key': sarvamApiKey,
     },
     body: formData,
   });
@@ -49,7 +49,7 @@ async function callSarvamSTT(audioBase64: string): Promise<string> {
   if (!response.ok) {
     const errorText = await response.text();
     console.error('Sarvam STT error:', response.status, errorText);
-    throw new Error(`STT API error: ${response.status}`);
+    throw new Error(`STT API error: ${response.status} - ${errorText}`);
   }
 
   const data: SarvamSTTResponse = await response.json();
@@ -77,19 +77,21 @@ async function callSarvamLLM(transcript: string): Promise<string> {
   const response = await fetch('https://api.sarvam.ai/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${sarvamApiKey}`,
+      'api-subscription-key': sarvamApiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'sarvam-gpt',
+      model: 'sarvam-m',
       messages: messages,
+      temperature: 0.7,
+      max_tokens: 200,
     }),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
     console.error('Sarvam LLM error:', response.status, errorText);
-    throw new Error(`LLM API error: ${response.status}`);
+    throw new Error(`LLM API error: ${response.status} - ${errorText}`);
   }
 
   const data: SarvamLLMResponse = await response.json();
@@ -103,23 +105,24 @@ async function callSarvamTTS(text: string): Promise<string> {
     throw new Error('Sarvam API key not configured');
   }
 
-  const response = await fetch('https://api.sarvam.ai/text-to-speech', {
+  const response = await fetch('https://api.sarvam.ai/text-to-speech/convert', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${sarvamApiKey}`,
+      'api-subscription-key': sarvamApiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      input: text,
-      language_code: 'en-IN',
-      voice: 'default',
+      text: text,
+      target_language_code: 'en-IN',
+      speaker: 'anushka',
+      model: 'bulbul:v2',
     }),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
     console.error('Sarvam TTS error:', response.status, errorText);
-    throw new Error(`TTS API error: ${response.status}`);
+    throw new Error(`TTS API error: ${response.status} - ${errorText}`);
   }
 
   const data: SarvamTTSResponse = await response.json();
