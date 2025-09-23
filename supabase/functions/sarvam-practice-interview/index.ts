@@ -123,7 +123,7 @@ async function callSarvamTTS(text: string): Promise<string> {
   }
 
   const data: SarvamTTSResponse = await response.json();
-  return data.audios[0] || '';
+  return data.audios?.[0] || '';
 }
 
 serve(async (req) => {
@@ -134,6 +134,8 @@ serve(async (req) => {
 
   try {
     const { audioData, getQuestion } = await req.json();
+
+    console.log('Request received:', { hasAudioData: !!audioData, getQuestion });
 
     // If just getting a question without audio
     if (getQuestion) {
@@ -188,10 +190,18 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in sarvam-practice-interview function:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      cause: error.cause
+    });
+    
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error',
-        message: error.message 
+        message: error.message,
+        details: error.toString()
       }),
       {
         status: 500,
