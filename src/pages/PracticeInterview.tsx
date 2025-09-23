@@ -181,8 +181,8 @@ const PracticeInterview: React.FC = () => {
                 <Mic className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">Practice AI Interview</h1>
-                <p className="text-sm text-slate-400">Speech & Voice Training</p>
+                <h1 className="text-xl font-bold text-white">Practice Interview (Powered by Sarvam AI)</h1>
+                <p className="text-sm text-slate-400">Record your answers and get instant AI-powered feedback, questions, and voice responses!</p>
               </div>
             </div>
           </div>
@@ -332,7 +332,7 @@ const PracticeInterview: React.FC = () => {
                 <div className="max-w-md mx-auto">
                   <h3 className="text-xl font-semibold text-white mb-4">Ready to Practice?</h3>
                   <p className="text-slate-400 mb-6">
-                    Record your answer to practice for real interviews. AI will give instant feedback, questions, and voice responses!
+                    Record your answers and get instant AI-powered feedback, questions, and voice responses powered by Sarvam AI!
                   </p>
                   <Button 
                     onClick={getNextQuestion}

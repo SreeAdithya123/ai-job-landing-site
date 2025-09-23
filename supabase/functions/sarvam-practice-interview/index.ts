@@ -38,10 +38,10 @@ async function callSarvamSTT(audioBase64: string): Promise<string> {
   formData.append('model', 'saarika:v2.5');
   formData.append('language_code', 'en-IN');
 
-  const response = await fetch('https://api.sarvam.ai/speech-to-text/transcribe', {
+  const response = await fetch('https://api.sarvam.ai/speech-to-text', {
     method: 'POST',
     headers: {
-      'API-Subscription-Key': sarvamApiKey,
+      'Authorization': `Bearer ${sarvamApiKey}`,
     },
     body: formData,
   });
@@ -66,7 +66,7 @@ async function callSarvamLLM(transcript: string): Promise<string> {
   const messages = [
     {
       role: "system",
-      content: "You are an AI interviewer for practice mode. Ask friendly, varied interview questions and give positive, constructive feedback. Make it engaging and help the candidate improve. Keep responses concise but helpful."
+      content: "You are a professional interviewer. Ask the next question based on the candidate's response."
     },
     {
       role: "user",
@@ -77,14 +77,12 @@ async function callSarvamLLM(transcript: string): Promise<string> {
   const response = await fetch('https://api.sarvam.ai/chat/completions', {
     method: 'POST',
     headers: {
-      'API-Subscription-Key': sarvamApiKey,
+      'Authorization': `Bearer ${sarvamApiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'sarvam-m',
+      model: 'sarvam-gpt',
       messages: messages,
-      temperature: 0.7,
-      max_tokens: 200,
     }),
   });
 
@@ -105,17 +103,16 @@ async function callSarvamTTS(text: string): Promise<string> {
     throw new Error('Sarvam API key not configured');
   }
 
-  const response = await fetch('https://api.sarvam.ai/text-to-speech/convert', {
+  const response = await fetch('https://api.sarvam.ai/text-to-speech', {
     method: 'POST',
     headers: {
-      'API-Subscription-Key': sarvamApiKey,
+      'Authorization': `Bearer ${sarvamApiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      text: text,
-      target_language_code: 'en-IN',
-      speaker: 'meera',
-      model: 'bulbul:v2',
+      input: text,
+      language_code: 'en-IN',
+      voice: 'default',
     }),
   });
 
