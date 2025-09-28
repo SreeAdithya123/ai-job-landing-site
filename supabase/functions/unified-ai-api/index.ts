@@ -266,7 +266,7 @@ Please provide your analysis in this JSON format:
       },
     );
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Unified AI API error:', error);
     
     return new Response(

@@ -187,7 +187,7 @@ Focus on:
       },
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Interview analysis error:', error)
     
     return new Response(

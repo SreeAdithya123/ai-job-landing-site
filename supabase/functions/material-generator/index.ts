@@ -68,7 +68,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({ content: generatedContent }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in material-generator function:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,

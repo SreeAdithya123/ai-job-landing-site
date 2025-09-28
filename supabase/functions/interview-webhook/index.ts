@@ -47,7 +47,7 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
     
     // For now, we'll implement basic verification
     // In production, you'd want to implement proper HMAC-SHA256 verification
-    return signature && signature.length > 0;
+    return !!(signature && signature.length > 0);
   } catch (error) {
     console.error('Webhook signature verification failed:', error);
     return false;
@@ -190,11 +190,11 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error processing webhook:', error);
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
-      message: error.message 
+      message: error.message
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
