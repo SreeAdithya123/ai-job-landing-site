@@ -19,7 +19,7 @@ interface SarvamLLMResponse {
 }
 
 interface SarvamTTSResponse {
-  audios: string[];
+  audio: string;
 }
 
 async function callSarvamSTT(audioBase64: string): Promise<string> {
@@ -35,11 +35,11 @@ async function callSarvamSTT(audioBase64: string): Promise<string> {
   
   const formData = new FormData();
   formData.append('file', audioBlob, 'audio.wav');
-  formData.append('model', 'saarika:v2.5');
+  formData.append('model', 'saarika');
   formData.append('language_code', 'en-IN');
 
   console.log('Calling Sarvam STT API...');
-  const response = await fetch('https://api.sarvam.ai/speech-to-text', {
+  const response = await fetch('https://api.sarvam.ai/speech-to-text/transcribe', {
     method: 'POST',
     headers: {
       'API-Subscription-Key': sarvamApiKey,
@@ -84,7 +84,7 @@ async function callSarvamLLM(transcript: string): Promise<string> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'sarvam-2b-v0.5',
+      model: 'sarvam-m',
       messages: messages,
       max_tokens: 150,
       temperature: 0.7,
@@ -110,22 +110,17 @@ async function callSarvamTTS(text: string): Promise<string> {
   }
 
   console.log('Calling Sarvam TTS API...');
-  const response = await fetch('https://api.sarvam.ai/text-to-speech', {
+  const response = await fetch('https://api.sarvam.ai/text-to-speech/convert', {
     method: 'POST',
     headers: {
       'API-Subscription-Key': sarvamApiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      inputs: [text],
-      target_language_code: 'en-IN',
-      speaker: 'meera',
-      model: 'bulbul:v1',
-      pitch: 0,
-      pace: 1.0,
-      loudness: 1.0,
-      speech_sample_rate: 16000,
-      enable_preprocessing: true,
+      text: text,
+      speaker: 'anushka',
+      target_language_code: 'en',
+      model: 'bulbul-v2',
     }),
   });
 
@@ -136,8 +131,8 @@ async function callSarvamTTS(text: string): Promise<string> {
   }
 
   const data: SarvamTTSResponse = await response.json();
-  console.log('TTS Response received, audio length:', data.audios?.[0]?.length || 0);
-  return data.audios?.[0] || '';
+  console.log('TTS Response received, audio length:', data.audio?.length || 0);
+  return data.audio || '';
 }
 
 serve(async (req) => {
