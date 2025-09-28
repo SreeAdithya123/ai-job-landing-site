@@ -26,6 +26,16 @@ const PracticeInterview: React.FC = () => {
 
   const startRecording = async () => {
     try {
+      // If no AI question yet, get one first
+      if (!aiQuestion) {
+        toast({
+          title: "Getting interview question...",
+          description: "Please wait while we prepare your interview question.",
+        });
+        await getNextQuestion();
+        return;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -47,9 +57,10 @@ const PracticeInterview: React.FC = () => {
         description: "Speak your answer now...",
       });
     } catch (error) {
+      console.error('Recording error:', error);
       toast({
         title: "Error",
-        description: "Could not access microphone. Please check permissions.",
+        description: "Could not access microphone. Please check permissions and try again.",
         variant: "destructive",
       });
     }
@@ -261,11 +272,11 @@ const PracticeInterview: React.FC = () => {
                   
                   <Button 
                     onClick={startRecording}
-                    disabled={!aiQuestion}
+                    disabled={isProcessing}
                     className="flex items-center space-x-3 px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Mic className="h-5 w-5" />
-                    <span>Start Recording</span>
+                    <span>{!aiQuestion ? 'Start Interview' : 'Start Recording'}</span>
                   </Button>
                 </>
               ) : isRecording ? (
@@ -332,14 +343,11 @@ const PracticeInterview: React.FC = () => {
                 <div className="max-w-md mx-auto">
                   <h3 className="text-xl font-semibold text-white mb-4">Ready to Practice?</h3>
                   <p className="text-slate-400 mb-6">
-                    Record your answers and get instant AI-powered feedback, questions, and voice responses powered by Sarvam AI!
+                    Click "Start Interview" to begin your AI-powered interview practice session. We'll generate questions and provide voice feedback!
                   </p>
-                  <Button 
-                    onClick={getNextQuestion}
-                    className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-200"
-                  >
-                    Start Practice Session
-                  </Button>
+                  <div className="text-sm text-slate-500">
+                    💡 Tip: Click the green button above to start immediately
+                  </div>
                 </div>
               </div>
             )}
