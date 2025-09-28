@@ -38,10 +38,11 @@ async function callSarvamSTT(audioBase64: string): Promise<string> {
   formData.append('model', 'saarika:v2.5');
   formData.append('language_code', 'en-IN');
 
+  console.log('Calling Sarvam STT API...');
   const response = await fetch('https://api.sarvam.ai/speech-to-text', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${sarvamApiKey}`,
+      'API-Subscription-Key': sarvamApiKey,
     },
     body: formData,
   });
@@ -53,6 +54,7 @@ async function callSarvamSTT(audioBase64: string): Promise<string> {
   }
 
   const data: SarvamSTTResponse = await response.json();
+  console.log('STT Response:', data);
   return data.transcript;
 }
 
@@ -66,7 +68,7 @@ async function callSarvamLLM(transcript: string): Promise<string> {
   const messages = [
     {
       role: "system",
-      content: "You are a professional interviewer. Ask the next question based on the candidate's response."
+      content: "You are an AI interviewer for Indian job seekers. Ask relevant, professional interview questions based on the candidate's response. Provide constructive feedback when appropriate. Keep responses conversational and under 100 words. Focus on technical skills, experience, and problem-solving abilities."
     },
     {
       role: "user",
@@ -74,15 +76,18 @@ async function callSarvamLLM(transcript: string): Promise<string> {
     }
   ];
 
+  console.log('Calling Sarvam LLM API...');
   const response = await fetch('https://api.sarvam.ai/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${sarvamApiKey}`,
+      'API-Subscription-Key': sarvamApiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'sarvam-gpt',
+      model: 'sarvam-2b-v0.5',
       messages: messages,
+      max_tokens: 150,
+      temperature: 0.7,
     }),
   });
 
@@ -93,6 +98,7 @@ async function callSarvamLLM(transcript: string): Promise<string> {
   }
 
   const data: SarvamLLMResponse = await response.json();
+  console.log('LLM Response:', data);
   return data.choices[0]?.message?.content || 'Could not generate response.';
 }
 
@@ -103,16 +109,23 @@ async function callSarvamTTS(text: string): Promise<string> {
     throw new Error('Sarvam API key not configured');
   }
 
+  console.log('Calling Sarvam TTS API...');
   const response = await fetch('https://api.sarvam.ai/text-to-speech', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${sarvamApiKey}`,
+      'API-Subscription-Key': sarvamApiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      input: text,
-      language_code: 'en-IN',
-      voice: 'default',
+      inputs: [text],
+      target_language_code: 'en-IN',
+      speaker: 'meera',
+      model: 'bulbul:v1',
+      pitch: 0,
+      pace: 1.0,
+      loudness: 1.0,
+      speech_sample_rate: 16000,
+      enable_preprocessing: true,
     }),
   });
 
@@ -123,6 +136,7 @@ async function callSarvamTTS(text: string): Promise<string> {
   }
 
   const data: SarvamTTSResponse = await response.json();
+  console.log('TTS Response received, audio length:', data.audios?.[0]?.length || 0);
   return data.audios?.[0] || '';
 }
 
@@ -188,20 +202,20 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in sarvam-practice-interview function:', error);
-    console.error('Error stack:', error.stack);
+    console.error('Error stack:', error?.stack);
     console.error('Error details:', {
-      name: error.name,
-      message: error.message,
-      cause: error.cause
+      name: error?.name,
+      message: error?.message,
+      cause: error?.cause
     });
     
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error',
-        message: error.message,
-        details: error.toString()
+        message: error?.message || 'Unknown error',
+        details: error?.toString() || 'Unknown error'
       }),
       {
         status: 500,
