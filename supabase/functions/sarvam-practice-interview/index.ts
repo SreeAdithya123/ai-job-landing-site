@@ -39,7 +39,7 @@ async function callSarvamSTT(audioBase64: string): Promise<string> {
   formData.append('language_code', 'en-IN');
 
   console.log('Calling Sarvam STT API...');
-  const response = await fetch('https://api.sarvam.ai/speech-to-text/transcribe', {
+  const response = await fetch('https://api.sarvam.ai/speech-to-text', {
     method: 'POST',
     headers: {
       'API-Subscription-Key': sarvamApiKey,
