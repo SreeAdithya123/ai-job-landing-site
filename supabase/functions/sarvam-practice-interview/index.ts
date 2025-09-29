@@ -19,7 +19,7 @@ interface SarvamLLMResponse {
 }
 
 interface SarvamTTSResponse {
-  audio: string;
+  audios: string[];
 }
 
 async function callSarvamSTT(audioBase64: string): Promise<string> {
@@ -35,11 +35,11 @@ async function callSarvamSTT(audioBase64: string): Promise<string> {
   
   const formData = new FormData();
   formData.append('file', audioBlob, 'audio.wav');
-  formData.append('model', 'saarika');
+  formData.append('model', 'saarika:v2.5');
   formData.append('language_code', 'en-IN');
 
   console.log('Calling Sarvam STT API...');
-  const response = await fetch('https://api.sarvam.ai/speech-to-text/transcribe', {
+  const response = await fetch('https://api.sarvam.ai/speech-to-text', {
     method: 'POST',
     headers: {
       'API-Subscription-Key': sarvamApiKey,
@@ -68,7 +68,7 @@ async function callSarvamLLM(transcript: string): Promise<string> {
   const messages = [
     {
       role: "system",
-      content: "You are an AI interviewer for Indian job seekers. Ask relevant, professional interview questions based on the candidate's response. Provide constructive feedback when appropriate. Keep responses conversational and under 100 words. Focus on technical skills, experience, and problem-solving abilities."
+      content: "You are an AI interviewer. Ask one relevant follow-up question based on the candidate's answer. Keep it under 50 words."
     },
     {
       role: "user",
@@ -84,9 +84,9 @@ async function callSarvamLLM(transcript: string): Promise<string> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'sarvam-m',
+      model: 'sarvam-2b-v0.5',
       messages: messages,
-      max_tokens: 150,
+      max_tokens: 100,
       temperature: 0.7,
     }),
   });
@@ -110,17 +110,22 @@ async function callSarvamTTS(text: string): Promise<string> {
   }
 
   console.log('Calling Sarvam TTS API...');
-  const response = await fetch('https://api.sarvam.ai/text-to-speech/convert', {
+  const response = await fetch('https://api.sarvam.ai/text-to-speech', {
     method: 'POST',
     headers: {
       'API-Subscription-Key': sarvamApiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      text: text,
-      speaker: 'anushka',
-      target_language_code: 'en',
-      model: 'bulbul-v2',
+      inputs: [text],
+      target_language_code: 'en-IN',
+      speaker: 'meera',
+      model: 'bulbul:v1',
+      pitch: 0,
+      pace: 1.0,
+      loudness: 1.0,
+      speech_sample_rate: 16000,
+      enable_preprocessing: true,
     }),
   });
 
@@ -131,8 +136,8 @@ async function callSarvamTTS(text: string): Promise<string> {
   }
 
   const data: SarvamTTSResponse = await response.json();
-  console.log('TTS Response received, audio length:', data.audio?.length || 0);
-  return data.audio || '';
+  console.log('TTS Response received, audio length:', data.audios?.[0]?.length || 0);
+  return data.audios?.[0] || '';
 }
 
 serve(async (req) => {
