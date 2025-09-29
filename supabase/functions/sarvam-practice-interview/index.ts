@@ -39,7 +39,7 @@ async function callSarvamSTT(audioBase64: string): Promise<string> {
   formData.append('language_code', 'en-IN');
 
   console.log('Calling Sarvam STT API...');
-  const response = await fetch('https://api.sarvam.ai/speech-to-text', {
+  const response = await fetch('https://api.sarvam.ai/speech-to-text/transcribe', {
     method: 'POST',
     headers: {
       'API-Subscription-Key': sarvamApiKey,
@@ -84,7 +84,7 @@ async function callSarvamLLM(transcript: string): Promise<string> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'sarvam-2b-v0.5',
+      model: 'sarvam-m',
       messages: messages,
       max_tokens: 100,
       temperature: 0.7,
