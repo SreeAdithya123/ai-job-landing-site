@@ -42,7 +42,7 @@ async function callSarvamSTT(audioBase64: string): Promise<string> {
   const response = await fetch('https://api.sarvam.ai/speech-to-text', {
     method: 'POST',
     headers: {
-      'API-Subscription-Key': sarvamApiKey,
+      'api-subscription-key': sarvamApiKey,
     },
     body: formData,
   });
@@ -80,7 +80,7 @@ async function callSarvamLLM(transcript: string): Promise<string> {
   const response = await fetch('https://api.sarvam.ai/chat/completions', {
     method: 'POST',
     headers: {
-      'API-Subscription-Key': sarvamApiKey,
+      'api-subscription-key': sarvamApiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -113,7 +113,7 @@ async function callSarvamTTS(text: string): Promise<string> {
   const response = await fetch('https://api.sarvam.ai/text-to-speech', {
     method: 'POST',
     headers: {
-      'API-Subscription-Key': sarvamApiKey,
+      'api-subscription-key': sarvamApiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
