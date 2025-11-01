@@ -152,13 +152,19 @@ export const triggerInterviewAnalysis = async (
   try {
     console.log(`🧠 Triggering analysis for session: ${sessionId}`);
     
+    // Get the current session to pass auth token
+    const { data: { session } } = await supabase.auth.getSession()
+    
     const { data, error } = await supabase.functions.invoke('interview-analysis', {
       body: {
         sessionId,
         transcript,
         interviewType,
         duration
-      }
+      },
+      headers: session?.access_token ? {
+        Authorization: `Bearer ${session.access_token}`
+      } : {}
     });
 
     if (error) {

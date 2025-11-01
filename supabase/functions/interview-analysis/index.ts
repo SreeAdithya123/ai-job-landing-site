@@ -28,6 +28,7 @@ serve(async (req) => {
   try {
     // Get the authorization header from the request
     const authHeader = req.headers.get('authorization')
+    console.log('🔑 Auth header present:', !!authHeader)
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -147,9 +148,17 @@ Return ONLY the JSON object, no additional text.
       }
     }
 
-    // Get user from session
-    const { data: { user } } = await supabaseClient.auth.getUser()
-    if (!user) {
+    // Get user from JWT token
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
+    
+    console.log('🔐 Auth check:', { 
+      hasUser: !!user, 
+      userId: user?.id,
+      authError: authError?.message 
+    })
+    
+    if (authError || !user) {
+      console.error('❌ Authentication failed:', authError)
       throw new Error('User not authenticated')
     }
 
