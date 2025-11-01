@@ -87,7 +87,7 @@ Focus on:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'command-r',
+        model: 'command-r-plus',
         message: analysisPrompt,
         max_tokens: 1000,
         temperature: 0.3,
