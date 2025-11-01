@@ -20,6 +20,7 @@ import VirtualPractice from "./pages/VirtualPractice";
 import UPSCInterviewer from "./pages/UPSCInterviewer";
 import PracticeInterview from "./pages/PracticeInterview";
 import Recruiters from "./pages/Recruiters";
+import CodingInterview from "./pages/CodingInterview";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -39,6 +40,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/mock-interview" element={<MockInterview />} />
               <Route path="/interview-copilot" element={<InterviewCopilot />} />
+              <Route path="/interview-copilot/coding" element={<CodingInterview />} />
               <Route path="/interview-history" element={<InterviewHistory />} />
               <Route path="/resume-builder" element={<ResumeBuilder />} />
               <Route path="/resume-scanner" element={<ResumeScanner />} />

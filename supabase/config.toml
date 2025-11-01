@@ -1,1 +1,10 @@
 project_id = "gsqiupbfspkatnvvllzc"
+
+[functions.unified-ai-api]
+verify_jwt = false
+
+[functions.coding-problem-generator]
+verify_jwt = false
+
+[functions.coding-evaluate]
+verify_jwt = true

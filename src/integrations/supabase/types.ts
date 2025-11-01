@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      coding_interview_results: {
+        Row: {
+          ai_feedback: string | null
+          code_output: string | null
+          created_at: string | null
+          difficulty: string
+          execution_time: number | null
+          id: string
+          is_correct: boolean | null
+          language: string
+          problem_description: string
+          problem_id: string
+          problem_title: string
+          score: number | null
+          space_complexity: string | null
+          time_complexity: string | null
+          updated_at: string | null
+          user_code: string
+          user_id: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          code_output?: string | null
+          created_at?: string | null
+          difficulty: string
+          execution_time?: number | null
+          id?: string
+          is_correct?: boolean | null
+          language: string
+          problem_description: string
+          problem_id: string
+          problem_title: string
+          score?: number | null
+          space_complexity?: string | null
+          time_complexity?: string | null
+          updated_at?: string | null
+          user_code: string
+          user_id: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          code_output?: string | null
+          created_at?: string | null
+          difficulty?: string
+          execution_time?: number | null
+          id?: string
+          is_correct?: boolean | null
+          language?: string
+          problem_description?: string
+          problem_id?: string
+          problem_title?: string
+          score?: number | null
+          space_complexity?: string | null
+          time_complexity?: string | null
+          updated_at?: string | null
+          user_code?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       elevenlabs_transcripts: {
         Row: {
           content: string

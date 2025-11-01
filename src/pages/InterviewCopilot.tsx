@@ -169,7 +169,9 @@ const InterviewCopilot = () => {
   }];
 
   const handleSelectInterview = (type: string) => {
-    if (type === 'general' || type === 'coding') {
+    if (type === 'coding') {
+      navigate('/interview-copilot/coding');
+    } else if (type === 'general') {
       setSelectedType(type);
       setShowInterviewInterface(true);
     } else if (type === 'upsc') {
@@ -299,8 +301,8 @@ const InterviewCopilot = () => {
     navigate('/');
   };
 
-  // Show interview interface for general and coding interviews
-  if (showInterviewInterface && (selectedType === 'general' || selectedType === 'coding')) {
+  // Show interview interface for general interviews only (coding has its own page)
+  if (showInterviewInterface && selectedType === 'general') {
     return (
       <ProtectedRoute>
         <InterviewActiveInterface
