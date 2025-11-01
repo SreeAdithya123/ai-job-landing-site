@@ -1,8 +1,5 @@
-import React, { Suspense, lazy } from 'react';
-import { Loader2 } from 'lucide-react';
-
-// Dynamically import Monaco Editor to prevent React version conflicts
-const MonacoEditor = lazy(() => import('@monaco-editor/react'));
+import React from 'react';
+import { Textarea } from '@/components/ui/textarea';
 
 interface CodeEditorProps {
   language: string;
@@ -13,35 +10,24 @@ interface CodeEditorProps {
 
 const CodeEditor: React.FC<CodeEditorProps> = ({ language, value, onChange, height = "400px" }) => {
   return (
-    <Suspense 
-      fallback={
-        <div className="flex items-center justify-center h-[400px] bg-slate-900">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
-            <p className="text-slate-400">Loading editor...</p>
-          </div>
-        </div>
-      }
-    >
-      <MonacoEditor
-        height={height}
-        language={language === 'cpp' ? 'cpp' : language === 'c' ? 'c' : language}
+    <div className="relative" style={{ height }}>
+      <Textarea
         value={value}
-        onChange={(value) => onChange(value || '')}
-        theme="vs-dark"
-        options={{
-          minimap: { enabled: false },
-          fontSize: 14,
-          lineNumbers: 'on',
-          scrollBeyondLastLine: false,
-          automaticLayout: true,
-          padding: { top: 16, bottom: 16 },
-          suggestOnTriggerCharacters: true,
-          quickSuggestions: true,
-          wordWrap: 'on',
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full h-full resize-none bg-slate-900 text-slate-100 font-mono text-sm p-4 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+        style={{ 
+          height: '100%',
+          minHeight: height,
+          lineHeight: '1.5',
+          tabSize: 2
         }}
+        placeholder={`// Write your ${language} code here...`}
+        spellCheck={false}
       />
-    </Suspense>
+      <div className="absolute top-2 right-2 px-2 py-1 bg-slate-800 rounded text-xs text-slate-400 font-mono">
+        {language.toUpperCase()}
+      </div>
+    </div>
   );
 };
 
