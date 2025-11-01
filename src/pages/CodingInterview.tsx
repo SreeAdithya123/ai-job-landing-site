@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Play, Send, RotateCcw, Code2, Timer, CheckCircle, XCircle, Sparkles } from 'lucide-react';
-import Editor from '@monaco-editor/react';
+import CodeEditor from '../components/CodeEditor';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 interface Problem {
@@ -284,19 +284,11 @@ const CodingInterview = () => {
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="border-t border-slate-700">
-                    <Editor
-                      height="400px"
-                      language={language === 'cpp' ? 'cpp' : language === 'c' ? 'c' : language}
+                    <CodeEditor
+                      language={language}
                       value={code}
-                      onChange={(value) => setCode(value || '')}
-                      theme="vs-dark"
-                      options={{
-                        minimap: { enabled: false },
-                        fontSize: 14,
-                        lineNumbers: 'on',
-                        scrollBeyondLastLine: false,
-                        automaticLayout: true,
-                      }}
+                      onChange={setCode}
+                      height="400px"
                     />
                   </div>
                   <div className="flex gap-3 p-4 border-t border-slate-700">
