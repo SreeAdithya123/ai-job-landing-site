@@ -86,7 +86,7 @@ Please provide your analysis in this JSON format:
       }
 
       case 'career-coach': {
-        model = 'deepseek/deepseek-r1-0528:free';
+        model = 'google/gemini-flash-1.5';
         systemPrompt = `You are an expert career coach with years of experience helping professionals advance their careers. Provide personalized, actionable advice on career development, resume optimization, interview preparation, skill development, and job search strategies.`;
         userMessage = data.message || data.query || '';
         break;
@@ -109,7 +109,7 @@ Please provide your analysis in this JSON format:
       }
 
       case 'recruiter-chat': {
-        model = 'deepseek/deepseek-r1-0528:free';
+        model = 'google/gemini-flash-1.5';
         systemPrompt = `You are a professional recruiter with extensive connections across top companies. Help users connect with recruiters, understand hiring processes, and navigate job opportunities at their target companies.`;
         userMessage = data.message || data.query || '';
         break;
