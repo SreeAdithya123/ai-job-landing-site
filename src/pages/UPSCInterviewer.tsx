@@ -106,11 +106,12 @@ const UPSCInterviewer = () => {
 
   const handleStartInterview = async () => {
     try {
-      console.log('🎤 Requesting microphone access...');
+      console.log('🎤 Requesting microphone and camera access...');
       setConnectionStatus('requesting-mic');
       
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-      console.log('✅ Microphone access granted');
+      // Request both audio and video permissions
+      await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+      console.log('✅ Microphone and camera access granted');
       
       setConnectionStatus('fetching-config');
       console.log('🔧 Fetching ElevenLabs configuration...');
@@ -244,8 +245,16 @@ const UPSCInterviewer = () => {
               </div>
             </div>
             
-            <div className="px-4 py-2 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-lg">
-              <span className="text-slate-300 text-sm font-medium">AI Powered Interview</span>
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => navigate('/profile')}
+                className="px-4 py-2 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-lg hover:bg-slate-700/80 transition-colors"
+              >
+                <span className="text-slate-300 text-sm font-medium">View Profile</span>
+              </button>
+              <div className="px-4 py-2 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-lg">
+                <span className="text-slate-300 text-sm font-medium">AI Powered Interview</span>
+              </div>
             </div>
           </div>
 

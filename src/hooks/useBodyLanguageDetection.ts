@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Pose, Results } from '@mediapipe/pose';
-import { Camera } from '@mediapipe/camera_utils';
 
 export interface BodyLanguageMetrics {
   postureScore: number;
@@ -35,9 +34,10 @@ export const useBodyLanguageDetection = () => {
   });
 
   const poseRef = useRef<Pose | null>(null);
-  const cameraRef = useRef<Camera | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
   
   // Store pose history for analysis
   const poseHistoryRef = useRef<Results[]>([]);
@@ -140,10 +140,47 @@ export const useBodyLanguageDetection = () => {
     canvasCtx.restore();
   }, [analyzePosture]);
 
+  const processFrame = useCallback(async () => {
+    if (!videoRef.current || !poseRef.current || !isActive) return;
+
+    try {
+      await poseRef.current.send({ image: videoRef.current });
+    } catch (error) {
+      console.error('Error processing frame:', error);
+    }
+
+    animationFrameRef.current = requestAnimationFrame(processFrame);
+  }, [isActive, onResults]);
+
   const startDetection = useCallback(async (videoElement: HTMLVideoElement, canvasElement: HTMLCanvasElement) => {
     try {
+      console.log('🎥 Starting camera and body language detection...');
       videoRef.current = videoElement;
       canvasRef.current = canvasElement;
+
+      // Request camera access with proper constraints
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: 'user'
+        },
+        audio: false
+      });
+
+      console.log('✅ Camera stream obtained');
+      streamRef.current = stream;
+      videoElement.srcObject = stream;
+
+      // Wait for video to be ready
+      await new Promise<void>((resolve) => {
+        videoElement.onloadedmetadata = () => {
+          videoElement.play();
+          resolve();
+        };
+      });
+
+      console.log('✅ Video element ready');
 
       // Initialize MediaPipe Pose
       const pose = new Pose({
@@ -164,41 +201,48 @@ export const useBodyLanguageDetection = () => {
       pose.onResults(onResults);
       poseRef.current = pose;
 
-      // Start camera
-      const camera = new Camera(videoElement, {
-        onFrame: async () => {
-          if (poseRef.current && videoElement) {
-            await poseRef.current.send({ image: videoElement });
-          }
-        },
-        width: 640,
-        height: 480
-      });
-
-      await camera.start();
-      cameraRef.current = camera;
+      console.log('✅ MediaPipe Pose initialized');
+      
       setIsActive(true);
 
-      console.log('✅ Body language detection started');
+      // Start processing frames
+      animationFrameRef.current = requestAnimationFrame(processFrame);
+
+      console.log('✅ Body language detection started successfully');
     } catch (error) {
       console.error('❌ Error starting body language detection:', error);
       throw error;
     }
-  }, [onResults]);
+  }, [onResults, processFrame]);
 
   const stopDetection = useCallback(() => {
-    if (cameraRef.current) {
-      cameraRef.current.stop();
-      cameraRef.current = null;
+    console.log('🛑 Stopping body language detection...');
+    
+    // Stop animation frame
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+
+    // Stop camera stream
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+
+    // Clear video source
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
     
+    // Close pose detector
     if (poseRef.current) {
       poseRef.current.close();
       poseRef.current = null;
     }
 
     setIsActive(false);
-    console.log('🛑 Body language detection stopped');
+    console.log('✅ Body language detection stopped');
   }, []);
 
   const getAnalysisSummary = useCallback(() => {

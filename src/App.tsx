@@ -22,6 +22,7 @@ import PracticeInterview from "./pages/PracticeInterview";
 import Recruiters from "./pages/Recruiters";
 import CodingInterview from "./pages/CodingInterview";
 import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="/mock-interview" element={<MockInterview />} />
               <Route path="/interview-copilot" element={<InterviewCopilot />} />
               <Route path="/interview-copilot/coding" element={<CodingInterview />} />

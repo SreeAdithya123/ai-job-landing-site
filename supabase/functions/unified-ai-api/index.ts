@@ -240,6 +240,7 @@ Please provide your analysis in this JSON format:
           strengths: analysisResult.strengths || [],
           areas_for_improvement: analysisResult.areas_for_improvement || [],
           feedback: analysisResult.feedback || '',
+          body_language_feedback: analysisResult.body_language_feedback || null,
           transcript_summary: analysisResult.transcript_summary || '',
         };
 
