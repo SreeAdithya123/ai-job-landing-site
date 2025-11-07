@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart3, TrendingUp, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getUserInterviewAnalyses, InterviewAnalysis } from '@/services/interviewAnalysisService';
 import InterviewAnalysisCard from './InterviewAnalysisCard';
 import InterviewDetailsModal from './InterviewDetailsModal';
@@ -11,11 +11,25 @@ import AnalysisFeedbackButton from './AnalysisFeedbackButton';
 
 const RecentInterviewAnalyses = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedAnalysis, setSelectedAnalysis] = useState<InterviewAnalysis | null>(null);
   const { data: analyses, isLoading, error } = useQuery({
     queryKey: ['interview-analyses'],
     queryFn: getUserInterviewAnalyses,
   });
+
+  // Listen for new analysis events and refresh data
+  useEffect(() => {
+    const handleNewAnalysis = () => {
+      console.log('🔄 New analysis event received, refreshing data...');
+      queryClient.invalidateQueries({ queryKey: ['interview-analyses'] });
+    };
+
+    window.addEventListener('newInterviewAnalysis', handleNewAnalysis);
+    return () => {
+      window.removeEventListener('newInterviewAnalysis', handleNewAnalysis);
+    };
+  }, [queryClient]);
 
   if (isLoading) {
     return (

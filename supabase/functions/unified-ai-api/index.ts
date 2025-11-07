@@ -54,9 +54,17 @@ serve(async (req) => {
       throw new Error('OpenRouter API key not configured');
     }
 
+    // Get the authorization header for authenticated requests
+    const authHeader = req.headers.get('Authorization');
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: authHeader ? { Authorization: authHeader } : {},
+        },
+      }
     );
 
     const { type, data }: RequestPayload = await req.json();
@@ -222,10 +230,19 @@ Please provide your analysis in this JSON format:
         }
 
         // Get user from session
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (!user) {
-          throw new Error('User not authenticated');
+        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+        
+        if (userError) {
+          console.error('Error getting user:', userError);
+          throw new Error('Authentication error: ' + userError.message);
         }
+        
+        if (!user) {
+          console.error('No user found in session');
+          throw new Error('User not authenticated. Please log in and try again.');
+        }
+        
+        console.log('User authenticated:', user.id);
 
         // Save analysis to database
         const analysisRecord = {

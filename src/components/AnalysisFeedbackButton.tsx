@@ -54,6 +54,9 @@ const AnalysisFeedbackButton = ({
     
     try {
       console.log('🔄 Starting analysis using unified AI API...');
+      console.log('Session ID:', sessionId);
+      console.log('Transcript entries:', transcript.length);
+      console.log('Has body language metrics:', !!bodyLanguageMetrics);
       
       const result = await analyzeInterview(
         sessionId, 
@@ -63,22 +66,39 @@ const AnalysisFeedbackButton = ({
         bodyLanguageMetrics
       );
       
-      toast({
-        title: "Analysis Completed",
-        description: "Your interview analysis has been completed successfully.",
-      });
-
       console.log('✅ Analysis completed successfully:', result);
       
+      // Show success message with analysis ID if available
+      const description = result.analysisId 
+        ? `Your interview analysis has been saved successfully (ID: ${result.analysisId.slice(0, 8)}...)`
+        : "Your interview analysis has been completed successfully.";
+      
+      toast({
+        title: "Analysis Completed",
+        description: description,
+      });
+      
       // Trigger a custom event to notify other components
-      window.dispatchEvent(new CustomEvent('newInterviewAnalysis'));
+      window.dispatchEvent(new CustomEvent('newInterviewAnalysis', { 
+        detail: result 
+      }));
       
     } catch (error) {
       console.error('❌ Error during analysis:', error);
       
+      const errorMessage = error instanceof Error ? error.message : "Failed to analyze interview. Please try again.";
+      
+      // More specific error messages
+      let description = errorMessage;
+      if (errorMessage.includes('not authenticated') || errorMessage.includes('Authentication')) {
+        description = "Please log in to save your analysis. Your session may have expired.";
+      } else if (errorMessage.includes('Failed to save')) {
+        description = "Analysis generated but couldn't be saved. Please check your connection and try again.";
+      }
+      
       toast({
         title: "Analysis Failed",
-        description: error instanceof Error ? error.message : "Failed to analyze interview. Please try again.",
+        description: description,
         variant: "destructive",
       });
     } finally {
