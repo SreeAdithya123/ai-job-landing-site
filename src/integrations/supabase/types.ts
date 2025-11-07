@@ -110,6 +110,7 @@ export type Database = {
       interview_analyses: {
         Row: {
           areas_for_improvement: string[] | null
+          body_language_feedback: string | null
           communication_score: number | null
           confidence_score: number | null
           created_at: string
@@ -127,6 +128,7 @@ export type Database = {
         }
         Insert: {
           areas_for_improvement?: string[] | null
+          body_language_feedback?: string | null
           communication_score?: number | null
           confidence_score?: number | null
           created_at?: string
@@ -144,6 +146,7 @@ export type Database = {
         }
         Update: {
           areas_for_improvement?: string[] | null
+          body_language_feedback?: string | null
           communication_score?: number | null
           confidence_score?: number | null
           created_at?: string
