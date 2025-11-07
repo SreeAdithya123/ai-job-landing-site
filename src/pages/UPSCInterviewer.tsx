@@ -25,6 +25,7 @@ const UPSCInterviewer = () => {
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
   const [sessionId, setSessionId] = useState<string>('');
+  const [showSkeletonOverlay, setShowSkeletonOverlay] = useState(true);
   const navigate = useNavigate();
 
   const bodyLanguage = useUPSCBodyLanguageDetection();
@@ -274,6 +275,8 @@ const UPSCInterviewer = () => {
             error={bodyLanguage.error}
             onStartDetection={bodyLanguage.startDetection}
             onStopDetection={bodyLanguage.stopDetection}
+            showOverlay={showSkeletonOverlay}
+            onToggleOverlay={setShowSkeletonOverlay}
           />
 
           <InterviewStatus isInterviewActive={isInterviewActive} />

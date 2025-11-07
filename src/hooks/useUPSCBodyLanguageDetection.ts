@@ -13,6 +13,7 @@ export const useUPSCBodyLanguageDetection = () => {
   const analyzerRef = useRef<UPSCBodyLanguageAnalyzer>(new UPSCBodyLanguageAnalyzer());
   const animationFrameRef = useRef<number>();
   const drawingUtilsRef = useRef<DrawingUtils | null>(null);
+  const showOverlayRef = useRef<boolean>(true);
 
   // Initialize MediaPipe Pose Landmarker
   const initializePoseDetection = useCallback(async () => {
@@ -48,8 +49,10 @@ export const useUPSCBodyLanguageDetection = () => {
   // Start detection on video stream
   const startDetection = useCallback(async (
     video: HTMLVideoElement,
-    canvas: HTMLCanvasElement
+    canvas: HTMLCanvasElement,
+    showOverlay: boolean = true
   ) => {
+    showOverlayRef.current = showOverlay;
     if (!poseLandmarkerRef.current) {
       console.error("Pose landmarker not initialized");
       return;
@@ -86,29 +89,33 @@ export const useUPSCBodyLanguageDetection = () => {
           if (results.landmarks && results.landmarks.length > 0) {
             const landmarks = results.landmarks[0];
 
-            // Scale landmarks to canvas size
-            const scaledLandmarks = landmarks.map(landmark => ({
-              x: landmark.x * canvas.width,
-              y: landmark.y * canvas.height,
-              z: landmark.z,
-              visibility: landmark.visibility
-            }));
+            // Only draw skeleton if overlay is enabled
+            if (showOverlayRef.current) {
+              // Scale landmarks to canvas size
+              const scaledLandmarks = landmarks.map(landmark => ({
+                x: landmark.x * canvas.width,
+                y: landmark.y * canvas.height,
+                z: landmark.z,
+                visibility: landmark.visibility
+              }));
 
-            // Draw connections (skeleton) - bright green
-            drawingUtilsRef.current?.drawConnectors(
-              scaledLandmarks,
-              PoseLandmarker.POSE_CONNECTIONS,
-              { color: '#00FF00', lineWidth: 3 }
-            );
+              // Draw connections (skeleton) - bright green
+              drawingUtilsRef.current?.drawConnectors(
+                scaledLandmarks,
+                PoseLandmarker.POSE_CONNECTIONS,
+                { color: '#00FF00', lineWidth: 3 }
+              );
 
-            // Draw landmarks (keypoints) - bright red
-            drawingUtilsRef.current?.drawLandmarks(
-              scaledLandmarks,
-              { color: '#FF0000', lineWidth: 2, radius: 5 }
-            );
+              // Draw landmarks (keypoints) - bright red
+              drawingUtilsRef.current?.drawLandmarks(
+                scaledLandmarks,
+                { color: '#FF0000', lineWidth: 2, radius: 5 }
+              );
+            }
 
             ctx.restore();
 
+            // Always run analysis regardless of overlay visibility
             const analysis = analyzerRef.current.analyzePose(results);
             setMetrics(analysis);
           } else {

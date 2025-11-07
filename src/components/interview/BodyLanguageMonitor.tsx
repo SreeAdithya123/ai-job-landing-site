@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
-import { Camera, Eye, Hand, Sparkles, AlertCircle } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Camera, Eye, EyeOff, Hand, Sparkles, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { UPSCBodyLanguageMetrics } from '@/types/bodyLanguageTypes';
 
 interface BodyLanguageMonitorProps {
@@ -10,8 +11,10 @@ interface BodyLanguageMonitorProps {
   metrics: UPSCBodyLanguageMetrics | null;
   isLoading: boolean;
   error: string | null;
-  onStartDetection: (video: HTMLVideoElement, canvas: HTMLCanvasElement) => void;
+  onStartDetection: (video: HTMLVideoElement, canvas: HTMLCanvasElement, showOverlay?: boolean) => void;
   onStopDetection: () => void;
+  showOverlay?: boolean;
+  onToggleOverlay?: (show: boolean) => void;
 }
 
 const BodyLanguageMonitor: React.FC<BodyLanguageMonitorProps> = ({
@@ -21,10 +24,19 @@ const BodyLanguageMonitor: React.FC<BodyLanguageMonitorProps> = ({
   error,
   onStartDetection,
   onStopDetection,
+  showOverlay = true,
+  onToggleOverlay,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [internalShowOverlay, setInternalShowOverlay] = useState(showOverlay);
+
+  const handleToggleOverlay = () => {
+    const newValue = !internalShowOverlay;
+    setInternalShowOverlay(newValue);
+    onToggleOverlay?.(newValue);
+  };
 
   // Sync canvas size with video display size
   useEffect(() => {
@@ -44,9 +56,9 @@ const BodyLanguageMonitor: React.FC<BodyLanguageMonitorProps> = ({
 
   useEffect(() => {
     if (isActive && videoRef.current && canvasRef.current) {
-      onStartDetection(videoRef.current, canvasRef.current);
+      onStartDetection(videoRef.current, canvasRef.current, internalShowOverlay);
     }
-  }, [isActive, onStartDetection]);
+  }, [isActive, onStartDetection, internalShowOverlay]);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-400';
@@ -72,12 +84,34 @@ const BodyLanguageMonitor: React.FC<BodyLanguageMonitorProps> = ({
             <Camera className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-semibold text-white">Body Language Monitor</h3>
           </div>
-          {isActive && (
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-slate-400">Recording</span>
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {isActive && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleToggleOverlay}
+                  className="gap-2"
+                >
+                  {internalShowOverlay ? (
+                    <>
+                      <EyeOff className="h-4 w-4" />
+                      Hide Skeleton
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-4 w-4" />
+                      Show Skeleton
+                    </>
+                  )}
+                </Button>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-slate-400">Recording</span>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <div ref={containerRef} className="relative bg-slate-900 rounded-lg overflow-hidden aspect-video">
