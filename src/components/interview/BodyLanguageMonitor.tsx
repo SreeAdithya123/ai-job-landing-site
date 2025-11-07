@@ -1,12 +1,15 @@
 import React, { useEffect, useRef } from 'react';
-import { Camera, Eye, Hand, Sparkles } from 'lucide-react';
+import { Camera, Eye, Hand, Sparkles, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { BodyLanguageMetrics } from '@/hooks/useBodyLanguageDetection';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { UPSCBodyLanguageMetrics } from '@/types/bodyLanguageTypes';
 
 interface BodyLanguageMonitorProps {
   isActive: boolean;
-  metrics: BodyLanguageMetrics;
+  metrics: UPSCBodyLanguageMetrics | null;
+  isLoading: boolean;
+  error: string | null;
   onStartDetection: (video: HTMLVideoElement, canvas: HTMLCanvasElement) => void;
   onStopDetection: () => void;
 }
@@ -14,6 +17,8 @@ interface BodyLanguageMonitorProps {
 const BodyLanguageMonitor: React.FC<BodyLanguageMonitorProps> = ({
   isActive,
   metrics,
+  isLoading,
+  error,
   onStartDetection,
   onStopDetection,
 }) => {
@@ -32,14 +37,17 @@ const BodyLanguageMonitor: React.FC<BodyLanguageMonitorProps> = ({
     return 'text-red-400';
   };
 
-  const getProgressColor = (score: number) => {
-    if (score >= 80) return 'bg-green-500';
-    if (score >= 60) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <Alert className="bg-red-900/20 border-red-800">
+          <AlertCircle className="h-4 w-4 text-red-400" />
+          <AlertDescription className="text-red-300">{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Video Feed */}
       <Card className="lg:col-span-2 bg-slate-800/50 border-slate-700 p-4">
         <div className="flex items-center justify-between mb-4">
@@ -74,7 +82,9 @@ const BodyLanguageMonitor: React.FC<BodyLanguageMonitorProps> = ({
             <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80">
               <div className="text-center">
                 <Camera className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                <p className="text-slate-400">Start interview to enable body language detection</p>
+                <p className="text-slate-400">
+                  {isLoading ? 'Initializing pose detection...' : 'Start interview to enable body language detection'}
+                </p>
               </div>
             </div>
           )}
@@ -88,93 +98,135 @@ const BodyLanguageMonitor: React.FC<BodyLanguageMonitorProps> = ({
           <h3 className="text-lg font-semibold text-white">Live Metrics</h3>
         </div>
 
-        <div className="space-y-4">
-          {/* Overall Confidence */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-slate-400">Overall Confidence</span>
-              <span className={`text-lg font-bold ${getScoreColor(metrics.confidenceLevel)}`}>
-                {metrics.confidenceLevel}%
-              </span>
+        {metrics ? (
+          <div className="space-y-4">
+            {/* Overall Performance */}
+            <div className="p-4 bg-slate-900/50 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-slate-400">Overall Performance</span>
+                <span className={`text-2xl font-bold ${getScoreColor(metrics.overallScore)}`}>
+                  {metrics.overallScore}%
+                </span>
+              </div>
+              <Progress 
+                value={metrics.overallScore} 
+                className="h-3"
+              />
             </div>
-            <Progress 
-              value={metrics.confidenceLevel} 
-              className="h-2"
-            />
-          </div>
 
-          {/* Posture */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-blue-500/20 rounded flex items-center justify-center">
-                  <span className="text-xs">🧍</span>
+            {/* Primary Metrics */}
+            <div className="space-y-3">
+              {/* Posture */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-slate-400">Sitting Posture</span>
+                  <span className={`text-sm font-semibold ${getScoreColor(metrics.postureScore)}`}>
+                    {metrics.postureScore}%
+                  </span>
                 </div>
-                <span className="text-sm text-slate-400">Posture</span>
+                <Progress value={metrics.postureScore} className="h-2" />
               </div>
-              <span className={`text-sm font-semibold ${getScoreColor(metrics.postureScore)}`}>
-                {metrics.postureScore}%
-              </span>
-            </div>
-            <Progress value={metrics.postureScore} className="h-1.5" />
-          </div>
 
-          {/* Eye Contact */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-green-500/20 rounded flex items-center justify-center">
-                  <Eye className="h-3 w-3 text-green-400" />
+              {/* Eye Contact */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center space-x-2">
+                    <Eye className="h-3 w-3 text-green-400" />
+                    <span className="text-sm text-slate-400">Eye Contact</span>
+                  </div>
+                  <span className={`text-sm font-semibold ${getScoreColor(metrics.eyeContactScore)}`}>
+                    {metrics.eyeContactScore}%
+                  </span>
                 </div>
-                <span className="text-sm text-slate-400">Eye Contact</span>
+                <Progress value={metrics.eyeContactScore} className="h-2" />
               </div>
-              <span className={`text-sm font-semibold ${getScoreColor(metrics.eyeContactScore)}`}>
-                {metrics.eyeContactScore}%
-              </span>
-            </div>
-            <Progress value={metrics.eyeContactScore} className="h-1.5" />
-          </div>
 
-          {/* Gestures */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-purple-500/20 rounded flex items-center justify-center">
-                  <Hand className="h-3 w-3 text-purple-400" />
+              {/* Hand Gestures */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center space-x-2">
+                    <Hand className="h-3 w-3 text-purple-400" />
+                    <span className="text-sm text-slate-400">Hand Gestures</span>
+                  </div>
+                  <span className={`text-sm font-semibold ${getScoreColor(metrics.handGestureScore)}`}>
+                    {metrics.handGestureScore}%
+                  </span>
                 </div>
-                <span className="text-sm text-slate-400">Gestures</span>
+                <Progress value={metrics.handGestureScore} className="h-2" />
               </div>
-              <span className={`text-sm font-semibold ${getScoreColor(metrics.gestureScore)}`}>
-                {metrics.gestureScore}%
-              </span>
-            </div>
-            <Progress value={metrics.gestureScore} className="h-1.5" />
-          </div>
 
-          {/* Detailed Metrics */}
-          <div className="pt-4 border-t border-slate-700">
-            <h4 className="text-xs font-semibold text-slate-400 mb-3">Detailed Analysis</h4>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-500">Shoulder Alignment</span>
-                <span className="text-xs text-slate-300">{metrics.detailedMetrics.shoulderAlignment}%</span>
+              {/* Facial Expression */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-slate-400">Facial Expression</span>
+                  <span className={`text-sm font-semibold ${getScoreColor(metrics.facialExpressionScore)}`}>
+                    {metrics.facialExpressionScore}%
+                  </span>
+                </div>
+                <Progress value={metrics.facialExpressionScore} className="h-2" />
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-500">Head Stability</span>
-                <span className="text-xs text-slate-300">{metrics.detailedMetrics.headTilt}%</span>
+            </div>
+
+            {/* Alerts */}
+            {metrics.alerts.length > 0 && (
+              <div className="pt-3 border-t border-slate-700">
+                <h4 className="text-xs font-semibold text-red-400 mb-2">⚠️ Alerts</h4>
+                <div className="space-y-1">
+                  {metrics.alerts.map((alert, index) => (
+                    <p key={index} className="text-xs text-red-300">{alert}</p>
+                  ))}
+                </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-500">Body Stillness</span>
-                <span className="text-xs text-slate-300">{metrics.detailedMetrics.bodyStillness}%</span>
+            )}
+
+            {/* Suggestions */}
+            {metrics.suggestions.length > 0 && (
+              <div className="pt-3 border-t border-slate-700">
+                <h4 className="text-xs font-semibold text-blue-400 mb-2">💡 Suggestions</h4>
+                <div className="space-y-1">
+                  {metrics.suggestions.map((suggestion, index) => (
+                    <p key={index} className="text-xs text-blue-300">{suggestion}</p>
+                  ))}
+                </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-500">Engagement</span>
-                <span className="text-xs text-slate-300">{metrics.detailedMetrics.overallEngagement}%</span>
+            )}
+
+            {/* Detailed Metrics */}
+            <div className="pt-3 border-t border-slate-700">
+              <h4 className="text-xs font-semibold text-slate-400 mb-3">Detailed Analysis</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Back Straightness</span>
+                  <span className="text-xs text-slate-300">{metrics.detailedMetrics.backStraightness}%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Shoulder Alignment</span>
+                  <span className="text-xs text-slate-300">{metrics.detailedMetrics.shoulderAlignment}%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Gaze Stability</span>
+                  <span className="text-xs text-slate-300">{metrics.detailedMetrics.gazeStability}%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Fidgeting Control</span>
+                  <span className="text-xs text-slate-300">{metrics.detailedMetrics.fidgetingDetection}%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Professional Demeanor</span>
+                  <span className="text-xs text-slate-300">{metrics.detailedMetrics.professionalism}%</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-slate-500 text-sm">
+              {isActive ? 'Analyzing your body language...' : 'Start interview to see analysis'}
+            </p>
+          </div>
+        )}
       </Card>
+      </div>
     </div>
   );
 };

@@ -12,7 +12,7 @@ import InterviewTranscript from '../components/interview/InterviewTranscript';
 import InterviewStatus from '../components/interview/InterviewStatus';
 import BodyLanguageMonitor from '../components/interview/BodyLanguageMonitor';
 import AnalysisFeedbackButton from '../components/AnalysisFeedbackButton';
-import { useBodyLanguageDetection } from '@/hooks/useBodyLanguageDetection';
+import { useUPSCBodyLanguageDetection } from '@/hooks/useUPSCBodyLanguageDetection';
 
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
@@ -27,13 +27,7 @@ const UPSCInterviewer = () => {
   const [sessionId, setSessionId] = useState<string>('');
   const navigate = useNavigate();
 
-  const {
-    isActive: isBodyLanguageActive,
-    metrics: bodyLanguageMetrics,
-    startDetection,
-    stopDetection,
-    getAnalysisSummary,
-  } = useBodyLanguageDetection();
+  const bodyLanguage = useUPSCBodyLanguageDetection();
 
   const conversation = useConversation({
     onConnect: () => {
@@ -186,8 +180,8 @@ const UPSCInterviewer = () => {
       console.log('🛑 Ending interview session...');
       
       // Stop body language detection
-      if (isBodyLanguageActive) {
-        stopDetection();
+      if (bodyLanguage.isActive) {
+        bodyLanguage.stopDetection();
       }
 
       await conversation.endSession();
@@ -274,10 +268,12 @@ const UPSCInterviewer = () => {
 
           {/* Body Language Monitor */}
           <BodyLanguageMonitor
-            isActive={isInterviewActive}
-            metrics={bodyLanguageMetrics}
-            onStartDetection={startDetection}
-            onStopDetection={stopDetection}
+            isActive={bodyLanguage.isActive}
+            metrics={bodyLanguage.metrics}
+            isLoading={bodyLanguage.isLoading}
+            error={bodyLanguage.error}
+            onStartDetection={bodyLanguage.startDetection}
+            onStopDetection={bodyLanguage.stopDetection}
           />
 
           <InterviewStatus isInterviewActive={isInterviewActive} />
@@ -295,7 +291,19 @@ const UPSCInterviewer = () => {
                 sessionId={sessionId || 'upsc-interview-session'}
                 transcript={transcript}
                 interviewType="UPSC Civil Services Interview"
-                bodyLanguageMetrics={bodyLanguageMetrics}
+                bodyLanguageMetrics={bodyLanguage.metrics ? {
+                  postureScore: bodyLanguage.metrics.postureScore,
+                  eyeContactScore: bodyLanguage.metrics.eyeContactScore,
+                  gestureScore: bodyLanguage.metrics.handGestureScore,
+                  confidenceLevel: bodyLanguage.metrics.overallScore,
+                  detailedMetrics: {
+                    shoulderAlignment: bodyLanguage.metrics.detailedMetrics.shoulderAlignment,
+                    headTilt: bodyLanguage.metrics.detailedMetrics.headStability,
+                    handMovement: bodyLanguage.metrics.detailedMetrics.fidgetingDetection,
+                    bodyStillness: bodyLanguage.metrics.detailedMetrics.bodyStillness,
+                    overallEngagement: bodyLanguage.metrics.detailedMetrics.engagement,
+                  },
+                } : undefined}
                 className="w-full max-w-md"
               />
             </div>
