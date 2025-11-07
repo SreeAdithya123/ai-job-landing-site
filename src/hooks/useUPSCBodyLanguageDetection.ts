@@ -79,37 +79,52 @@ export const useUPSCBodyLanguageDetection = () => {
         try {
           const results = poseLandmarkerRef.current.detectForVideo(video, currentTime);
 
+          // Clear canvas with proper dimensions
+          ctx.save();
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           if (results.landmarks && results.landmarks.length > 0) {
             const landmarks = results.landmarks[0];
 
+            // Scale landmarks to canvas size
+            const scaledLandmarks = landmarks.map(landmark => ({
+              x: landmark.x * canvas.width,
+              y: landmark.y * canvas.height,
+              z: landmark.z,
+              visibility: landmark.visibility
+            }));
+
+            // Draw connections (skeleton) - bright green
             drawingUtilsRef.current?.drawConnectors(
-              landmarks,
+              scaledLandmarks,
               PoseLandmarker.POSE_CONNECTIONS,
-              { color: '#00FF00', lineWidth: 2 }
+              { color: '#00FF00', lineWidth: 3 }
             );
 
+            // Draw landmarks (keypoints) - bright red
             drawingUtilsRef.current?.drawLandmarks(
-              landmarks,
-              { color: '#FF0000', lineWidth: 1, radius: 3 }
+              scaledLandmarks,
+              { color: '#FF0000', lineWidth: 2, radius: 5 }
             );
+
+            ctx.restore();
 
             const analysis = analyzerRef.current.analyzePose(results);
             setMetrics(analysis);
+          } else {
+            ctx.restore();
           }
         } catch (err) {
           console.error("Detection error:", err);
+          ctx.restore();
         }
       }
 
-      if (isActive) {
-        animationFrameRef.current = requestAnimationFrame(detectPose);
-      }
+      animationFrameRef.current = requestAnimationFrame(detectPose);
     };
 
     detectPose();
-  }, [isActive]);
+  }, []);
 
   // Stop detection
   const stopDetection = useCallback(() => {

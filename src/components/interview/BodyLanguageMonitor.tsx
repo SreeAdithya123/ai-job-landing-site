@@ -24,6 +24,23 @@ const BodyLanguageMonitor: React.FC<BodyLanguageMonitorProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Sync canvas size with video display size
+  useEffect(() => {
+    const updateCanvasSize = () => {
+      if (videoRef.current && canvasRef.current && containerRef.current) {
+        const container = containerRef.current;
+        canvasRef.current.width = container.clientWidth;
+        canvasRef.current.height = container.clientHeight;
+      }
+    };
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    
+    return () => window.removeEventListener('resize', updateCanvasSize);
+  }, []);
 
   useEffect(() => {
     if (isActive && videoRef.current && canvasRef.current) {
@@ -63,7 +80,7 @@ const BodyLanguageMonitor: React.FC<BodyLanguageMonitorProps> = ({
           )}
         </div>
 
-        <div className="relative bg-slate-900 rounded-lg overflow-hidden aspect-video">
+        <div ref={containerRef} className="relative bg-slate-900 rounded-lg overflow-hidden aspect-video">
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
@@ -73,9 +90,8 @@ const BodyLanguageMonitor: React.FC<BodyLanguageMonitorProps> = ({
           />
           <canvas
             ref={canvasRef}
-            className="absolute inset-0 w-full h-full"
-            width={640}
-            height={480}
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{ mixBlendMode: 'screen' }}
           />
           
           {!isActive && (
