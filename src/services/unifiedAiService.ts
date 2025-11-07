@@ -19,6 +19,19 @@ interface InterviewAnalysisRequest extends BaseAIRequest {
     }>;
     interviewType: string;
     duration?: number;
+    bodyLanguageMetrics?: {
+      postureScore: number;
+      eyeContactScore: number;
+      gestureScore: number;
+      confidenceLevel: number;
+      detailedMetrics: {
+        shoulderAlignment: number;
+        headTilt: number;
+        handMovement: number;
+        bodyStillness: number;
+        overallEngagement: number;
+      };
+    };
   };
 }
 
@@ -74,7 +87,8 @@ export const analyzeInterview = async (
   sessionId: string,
   transcript: Array<{ speaker: 'AI' | 'User'; text: string; timestamp: string }>,
   interviewType: string,
-  duration?: number
+  duration?: number,
+  bodyLanguageMetrics?: any
 ) => {
   return callUnifiedAI({
     type: 'interview-analysis',
@@ -82,7 +96,8 @@ export const analyzeInterview = async (
       sessionId,
       transcript,
       interviewType,
-      duration
+      duration,
+      bodyLanguageMetrics
     }
   });
 };

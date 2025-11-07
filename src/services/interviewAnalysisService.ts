@@ -14,6 +14,7 @@ export interface InterviewAnalysis {
   strengths?: string[];
   areas_for_improvement?: string[];
   feedback?: string;
+  body_language_feedback?: string;
   transcript_summary?: string;
   created_at?: string;
   updated_at?: string;

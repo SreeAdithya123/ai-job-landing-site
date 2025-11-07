@@ -15,6 +15,19 @@ interface AnalysisFeedbackButtonProps {
   }>;
   interviewType?: string;
   duration?: number;
+  bodyLanguageMetrics?: {
+    postureScore: number;
+    eyeContactScore: number;
+    gestureScore: number;
+    confidenceLevel: number;
+    detailedMetrics: {
+      shoulderAlignment: number;
+      headTilt: number;
+      handMovement: number;
+      bodyStillness: number;
+      overallEngagement: number;
+    };
+  };
 }
 
 const AnalysisFeedbackButton = ({ 
@@ -22,7 +35,8 @@ const AnalysisFeedbackButton = ({
   sessionId = 'demo-session',
   transcript = [],
   interviewType = 'General Interview',
-  duration
+  duration,
+  bodyLanguageMetrics
 }: AnalysisFeedbackButtonProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -41,7 +55,13 @@ const AnalysisFeedbackButton = ({
     try {
       console.log('🔄 Starting analysis using unified AI API...');
       
-      const result = await analyzeInterview(sessionId, transcript, interviewType, duration);
+      const result = await analyzeInterview(
+        sessionId, 
+        transcript, 
+        interviewType, 
+        duration, 
+        bodyLanguageMetrics
+      );
       
       toast({
         title: "Analysis Completed",

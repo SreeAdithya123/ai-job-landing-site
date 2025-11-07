@@ -26,6 +26,19 @@ interface InterviewAnalysisData {
   }>;
   interviewType: string;
   duration?: number;
+  bodyLanguageMetrics?: {
+    postureScore: number;
+    eyeContactScore: number;
+    gestureScore: number;
+    confidenceLevel: number;
+    detailedMetrics: {
+      shoulderAlignment: number;
+      headTilt: number;
+      handMovement: number;
+      bodyStillness: number;
+      overallEngagement: number;
+    };
+  };
 }
 
 serve(async (req) => {
@@ -60,27 +73,46 @@ serve(async (req) => {
           .map(entry => `${entry.speaker}: ${entry.text}`)
           .join('\n');
 
-        systemPrompt = `You are an expert interview analyzer. Analyze job interview transcripts and provide comprehensive evaluations with scores, strengths, areas for improvement, and detailed feedback.`;
+        const bodyLanguageSection = analysisData.bodyLanguageMetrics 
+          ? `
+BODY LANGUAGE ANALYSIS:
+- Posture Score: ${analysisData.bodyLanguageMetrics.postureScore}/100
+- Eye Contact Score: ${analysisData.bodyLanguageMetrics.eyeContactScore}/100
+- Gesture Score: ${analysisData.bodyLanguageMetrics.gestureScore}/100
+- Overall Confidence Level: ${analysisData.bodyLanguageMetrics.confidenceLevel}/100
+
+DETAILED BODY LANGUAGE METRICS:
+- Shoulder Alignment: ${analysisData.bodyLanguageMetrics.detailedMetrics.shoulderAlignment}/100
+- Head Stability: ${analysisData.bodyLanguageMetrics.detailedMetrics.headTilt}/100
+- Hand Movement: ${analysisData.bodyLanguageMetrics.detailedMetrics.handMovement}/100
+- Body Stillness: ${analysisData.bodyLanguageMetrics.detailedMetrics.bodyStillness}/100
+- Overall Engagement: ${analysisData.bodyLanguageMetrics.detailedMetrics.overallEngagement}/100
+`
+          : '';
+
+        systemPrompt = `You are an expert interview analyzer with expertise in both verbal communication and non-verbal body language. Analyze job interview transcripts and body language data to provide comprehensive evaluations with scores, strengths, areas for improvement, and detailed feedback.`;
         
-        userMessage = `Analyze the following job interview transcript and provide a detailed analysis in JSON format:
+        userMessage = `Analyze the following job interview transcript${analysisData.bodyLanguageMetrics ? ' along with body language data' : ''} and provide a detailed analysis in JSON format:
 
 INTERVIEW TYPE: ${analysisData.interviewType}
 DURATION: ${analysisData.duration || 'Unknown'} minutes
 
 TRANSCRIPT:
 ${formattedTranscript}
+${bodyLanguageSection}
 
 Please provide your analysis in this JSON format:
 {
-  "overall_score": [score from 1-100],
+  "overall_score": [score from 1-100, incorporate body language if available],
   "communication_score": [score from 1-100],
   "technical_score": [score from 1-100],
-  "confidence_score": [score from 1-100],
+  "confidence_score": [score from 1-100, heavily influenced by body language if available],
   "problem_solving_score": [score from 1-100],
   "strengths": ["strength1", "strength2", "strength3"],
   "areas_for_improvement": ["area1", "area2", "area3"],
-  "feedback": "Detailed constructive feedback paragraph",
-  "transcript_summary": "Brief summary of the interview content"
+  "feedback": "Detailed constructive feedback paragraph${analysisData.bodyLanguageMetrics ? ' including body language observations' : ''}",
+  "transcript_summary": "Brief summary of the interview content",
+  "body_language_feedback": "${analysisData.bodyLanguageMetrics ? 'Detailed feedback on posture, eye contact, gestures, and overall non-verbal communication' : 'Not available'}"
 }`;
         break;
       }

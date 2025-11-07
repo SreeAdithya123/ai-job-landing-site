@@ -10,6 +10,9 @@ import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewControls from '../components/interview/InterviewControls';
 import InterviewTranscript from '../components/interview/InterviewTranscript';
 import InterviewStatus from '../components/interview/InterviewStatus';
+import BodyLanguageMonitor from '../components/interview/BodyLanguageMonitor';
+import AnalysisFeedbackButton from '../components/AnalysisFeedbackButton';
+import { useBodyLanguageDetection } from '@/hooks/useBodyLanguageDetection';
 
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
@@ -21,7 +24,16 @@ const UPSCInterviewer = () => {
   const [isInterviewActive, setIsInterviewActive] = useState(false);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
+  const [sessionId, setSessionId] = useState<string>('');
   const navigate = useNavigate();
+
+  const {
+    isActive: isBodyLanguageActive,
+    metrics: bodyLanguageMetrics,
+    startDetection,
+    stopDetection,
+    getAnalysisSummary,
+  } = useBodyLanguageDetection();
 
   const conversation = useConversation({
     onConnect: () => {
@@ -135,6 +147,7 @@ const UPSCInterviewer = () => {
       });
       
       console.log('✅ UPSC Interview started with conversation ID:', conversationId);
+      setSessionId(conversationId);
       setConnectionStatus('connected');
       
     } catch (error) {
@@ -170,6 +183,12 @@ const UPSCInterviewer = () => {
   const handleExitInterview = async () => {
     try {
       console.log('🛑 Ending interview session...');
+      
+      // Stop body language detection
+      if (isBodyLanguageActive) {
+        stopDetection();
+      }
+
       await conversation.endSession();
       
       const currentTime = new Date().toLocaleTimeString();
@@ -180,6 +199,11 @@ const UPSCInterviewer = () => {
       }]);
       
       console.log('✅ UPSC Interview ended successfully');
+      
+      toast({
+        title: "Interview Complete",
+        description: "Body language analysis ready. Click 'Analyze Interview' to view detailed feedback.",
+      });
     } catch (error) {
       console.error('❌ Error ending interview:', error);
       setIsInterviewActive(false);
@@ -239,6 +263,14 @@ const UPSCInterviewer = () => {
 
           <InterviewInterface conversation={conversation} />
 
+          {/* Body Language Monitor */}
+          <BodyLanguageMonitor
+            isActive={isInterviewActive}
+            metrics={bodyLanguageMetrics}
+            onStartDetection={startDetection}
+            onStopDetection={stopDetection}
+          />
+
           <InterviewStatus isInterviewActive={isInterviewActive} />
 
           <InterviewControls
@@ -246,6 +278,19 @@ const UPSCInterviewer = () => {
             onStartInterview={handleStartInterview}
             onExitInterview={handleExitInterview}
           />
+
+          {/* Analysis Button */}
+          {!isInterviewActive && transcript.length > 0 && (
+            <div className="flex justify-center">
+              <AnalysisFeedbackButton
+                sessionId={sessionId || 'upsc-interview-session'}
+                transcript={transcript}
+                interviewType="UPSC Civil Services Interview"
+                bodyLanguageMetrics={bodyLanguageMetrics}
+                className="w-full max-w-md"
+              />
+            </div>
+          )}
 
           <InterviewTranscript
             transcript={transcript}
