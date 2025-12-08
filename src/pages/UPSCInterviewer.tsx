@@ -26,11 +26,13 @@ const UPSCInterviewer = () => {
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
   const [sessionId, setSessionId] = useState<string>('');
   const [showSkeletonOverlay, setShowSkeletonOverlay] = useState(true);
+  const [isMicMuted, setIsMicMuted] = useState(false);
   const navigate = useNavigate();
 
   const bodyLanguage = useUPSCBodyLanguageDetection();
 
   const conversation = useConversation({
+    micMuted: isMicMuted,
     onConnect: () => {
       console.log('✅ Successfully connected to ElevenLabs Conversational AI');
       setIsInterviewActive(true);
@@ -285,6 +287,8 @@ const UPSCInterviewer = () => {
             isInterviewActive={isInterviewActive}
             onStartInterview={handleStartInterview}
             onExitInterview={handleExitInterview}
+            isMuted={isMicMuted}
+            onToggleMute={() => setIsMicMuted(prev => !prev)}
           />
 
           {/* Analysis Button */}
