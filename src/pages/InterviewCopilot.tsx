@@ -12,6 +12,7 @@ import InterviewTypeCard from '../components/interview/InterviewTypeCard';
 import InterviewSessionsPanel from '../components/interview/InterviewSessionsPanel';
 import InterviewActiveInterface from '../components/interview/InterviewActiveInterface';
 import { Laptop, Code, Star, Users } from 'lucide-react';
+import { useInterviewRecording } from '@/hooks/useInterviewRecording';
 
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
@@ -37,6 +38,7 @@ const InterviewCopilot = () => {
   const [sessionId, setSessionId] = useState<string>('');
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  const recording = useInterviewRecording();
 
 
   const conversation = useConversation({
@@ -183,12 +185,15 @@ const InterviewCopilot = () => {
 
   const handleStartInterview = async () => {
     try {
-      console.log('🎤 Requesting microphone access...');
+      console.log('🎤 Requesting microphone and camera access...');
       setConnectionStatus('requesting-mic');
-      await navigator.mediaDevices.getUserMedia({
-        audio: true
-      });
-      console.log('✅ Microphone access granted');
+      
+      // Start recording (this also requests camera/mic permissions)
+      const stream = await recording.startRecording();
+      if (!stream) {
+        throw new Error('Failed to start recording');
+      }
+      console.log('✅ Microphone and camera access granted, recording started');
       setConnectionStatus('fetching-config');
       console.log('🔧 Fetching ElevenLabs configuration...');
       const {
@@ -244,6 +249,9 @@ const InterviewCopilot = () => {
   const handleExitInterview = async () => {
     try {
       console.log('🛑 Ending interview session...');
+      
+      // Stop recording
+      recording.stopRecording();
       
       // Process interview end before closing the session
       if (transcript.length > 0 && sessionId) {
@@ -316,6 +324,11 @@ const InterviewCopilot = () => {
           onStartInterview={handleStartInterview}
           onExitInterview={handleExitInterview}
           onClearTranscript={handleClearTranscript}
+          isRecording={recording.isRecording}
+          recordingDuration={recording.recordingDuration}
+          hasRecording={!!recording.recordedBlob}
+          videoStream={recording.videoStream}
+          onDownloadRecording={recording.downloadRecording}
         />
       </ProtectedRoute>
     );
