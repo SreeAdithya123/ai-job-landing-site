@@ -352,10 +352,18 @@ export const processInterviewEnd = async (
             console.error('❌ Failed to update analysis with recording URL');
           }
         } else {
-          console.error('❌ Failed to get recording URL after upload');
+          console.error('❌ Recording upload returned null (upload or permissions failure)');
+          await supabase
+            .from('interview_analyses')
+            .update({ feedback: 'Recording upload failed. Please try again.' })
+            .eq('id', analysisId);
         }
       } catch (uploadError) {
         console.error('❌ Recording upload failed:', uploadError);
+        await supabase
+          .from('interview_analyses')
+          .update({ feedback: 'Recording upload failed. Please try again.' })
+          .eq('id', analysisId);
       }
     }
     

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Video, Play, Calendar, Clock, Download, Search } from 'lucide-react';
@@ -7,6 +7,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import { useInterviewAnalyses } from '@/hooks/useInterviewAnalysis';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getRecordingUrl } from '@/services/recordingStorageService';
 
 const InterviewRecordings = () => {
   const navigate = useNavigate();
@@ -15,16 +16,54 @@ const InterviewRecordings = () => {
   const { data: analyses, isLoading } = useInterviewAnalyses();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRecording, setSelectedRecording] = useState<string | null>(playId);
+  const [playbackUrl, setPlaybackUrl] = useState<string | null>(null);
+  const [isLoadingPlayback, setIsLoadingPlayback] = useState(false);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
 
   // Show all analyses, highlight those with recordings
-  const allAnalyses = analyses || [];
-  const recordingsWithUrl = allAnalyses.filter(a => a.recording_url);
-  
-  const filteredRecordings = allAnalyses.filter(recording =>
-    recording.interview_type.toLowerCase().includes(searchTerm.toLowerCase())
+  const allAnalyses = useMemo(() => analyses || [], [analyses]);
+
+  const filteredRecordings = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return allAnalyses;
+    return allAnalyses.filter((recording) =>
+      recording.interview_type.toLowerCase().includes(term)
+    );
+  }, [allAnalyses, searchTerm]);
+
+  const currentRecording = useMemo(
+    () => allAnalyses.find((r) => r.id === selectedRecording) || null,
+    [allAnalyses, selectedRecording]
   );
 
-  const currentRecording = allAnalyses.find(r => r.id === selectedRecording);
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadPlaybackUrl = async () => {
+      setPlaybackError(null);
+      setPlaybackUrl(null);
+
+      if (!currentRecording?.recording_url) return;
+
+      setIsLoadingPlayback(true);
+      try {
+        const signed = await getRecordingUrl(currentRecording.recording_url);
+        if (!signed) throw new Error('Could not generate playback URL');
+        if (!cancelled) setPlaybackUrl(signed);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : 'Failed to load recording';
+        if (!cancelled) setPlaybackError(message);
+      } finally {
+        if (!cancelled) setIsLoadingPlayback(false);
+      }
+    };
+
+    loadPlaybackUrl();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentRecording?.id, currentRecording?.recording_url]);
 
   if (isLoading) {
     return (
@@ -173,14 +212,26 @@ const InterviewRecordings = () => {
                   >
                     {currentRecording.recording_url ? (
                       <div className="aspect-video bg-black">
-                        <video
-                          key={currentRecording.recording_url}
-                          controls
-                          className="w-full h-full"
-                          src={currentRecording.recording_url}
-                        >
-                          Your browser does not support the video tag.
-                        </video>
+                        {isLoadingPlayback ? (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <p className="text-muted-foreground">Loading recording…</p>
+                          </div>
+                        ) : playbackUrl ? (
+                          <video
+                            key={playbackUrl}
+                            controls
+                            className="w-full h-full"
+                            src={playbackUrl}
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <p className="text-muted-foreground">
+                              {playbackError || 'Recording is unavailable'}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="aspect-video bg-muted flex items-center justify-center">
@@ -201,13 +252,15 @@ const InterviewRecordings = () => {
                             Recorded on {new Date(currentRecording.created_at || '').toLocaleDateString()}
                           </p>
                         </div>
-                        {currentRecording.recording_url && (
+                        {(!!playbackUrl || isLoadingPlayback) && (
                           <Button
                             variant="outline"
                             size="sm"
+                            disabled={!playbackUrl}
                             onClick={() => {
+                              if (!playbackUrl) return;
                               const a = document.createElement('a');
-                              a.href = currentRecording.recording_url!;
+                              a.href = playbackUrl;
                               a.download = `interview-${currentRecording.id}.webm`;
                               a.click();
                             }}
