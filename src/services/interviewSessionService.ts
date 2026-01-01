@@ -299,6 +299,12 @@ export const processInterviewEnd = async (
 ) => {
   try {
     console.log(`🎯 Processing interview end for session: ${sessionId}`);
+    console.log(`📹 Recording blob provided: ${recordingBlob ? (recordingBlob.size / 1024 / 1024).toFixed(2) + 'MB' : 'None'}`);
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User must be authenticated to process interview');
+    }
     
     // Step 1: Save transcript to database
     const savedCount = await saveInterviewTranscript(sessionId, transcript, interviewType, duration);
@@ -306,44 +312,32 @@ export const processInterviewEnd = async (
     let analysisId: string | null = null;
     let recordingUrl: string | null = null;
     
-    // Step 2: Trigger Cohere analysis (if we have enough data)
-    if (savedCount && savedCount > 0) {
-      try {
-        const analysisResult = await triggerInterviewAnalysis(sessionId, transcript, interviewType, duration);
-        analysisId = analysisResult?.analysisId || null;
-        console.log('✅ Analysis completed with ID:', analysisId);
-      } catch (analysisError) {
-        console.error('❌ Analysis failed, but continuing with recording upload:', analysisError);
-        // Create a minimal analysis record to attach the recording
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: fallbackAnalysis } = await supabase
-            .from('interview_analyses')
-            .insert({
-              user_id: user.id,
-              interview_type: interviewType,
-              duration_minutes: duration || null,
-              feedback: 'Analysis pending - please try again later',
-            })
-            .select('id')
-            .single();
-          
-          if (fallbackAnalysis) {
-            analysisId = fallbackAnalysis.id;
-            console.log('📝 Created fallback analysis record:', analysisId);
-          }
-        }
+    // Step 2: ALWAYS create an analysis record first if we have a recording
+    // This ensures we have an ID to link the recording to
+    if (recordingBlob) {
+      console.log('📝 Creating analysis record for recording...');
+      const { data: initialAnalysis, error: createError } = await supabase
+        .from('interview_analyses')
+        .insert({
+          user_id: user.id,
+          interview_type: interviewType,
+          duration_minutes: duration || null,
+          feedback: 'Processing interview...',
+        })
+        .select('id')
+        .single();
+      
+      if (createError) {
+        console.error('❌ Failed to create analysis record:', createError);
+      } else if (initialAnalysis) {
+        analysisId = initialAnalysis.id;
+        console.log('✅ Created analysis record:', analysisId);
       }
     }
-
-    // Step 3: If audio URL is available, we could save it here
-    if (audioUrl) {
-      console.log(`🔊 Audio URL available: ${audioUrl}`);
-    }
-
-    // Step 4: Upload recording if available and we have an analysis ID
+    
+    // Step 3: Upload recording IMMEDIATELY if we have the analysis ID
     if (recordingBlob && analysisId) {
-      console.log('☁️ Auto-uploading interview recording...', {
+      console.log('☁️ Uploading interview recording...', {
         blobSize: (recordingBlob.size / 1024 / 1024).toFixed(2) + 'MB',
         analysisId
       });
@@ -354,8 +348,6 @@ export const processInterviewEnd = async (
           const updated = await updateAnalysisWithRecording(analysisId, recordingUrl);
           if (updated) {
             console.log('✅ Recording uploaded and linked to analysis');
-            // Dispatch event to refresh analyses with new recording
-            window.dispatchEvent(new CustomEvent('refreshInterviewAnalyses'));
           } else {
             console.error('❌ Failed to update analysis with recording URL');
           }
@@ -365,9 +357,45 @@ export const processInterviewEnd = async (
       } catch (uploadError) {
         console.error('❌ Recording upload failed:', uploadError);
       }
-    } else if (recordingBlob && !analysisId) {
-      console.warn('⚠️ Recording available but no analysis ID to link it to');
     }
+    
+    // Step 4: Trigger AI analysis (this updates the existing record or creates new one)
+    if (savedCount && savedCount > 0) {
+      try {
+        const analysisResult = await triggerInterviewAnalysis(sessionId, transcript, interviewType, duration);
+        if (analysisResult?.analysisId) {
+          // If a new analysis was created by triggerInterviewAnalysis, update recording URL
+          if (analysisResult.analysisId !== analysisId && recordingUrl) {
+            await updateAnalysisWithRecording(analysisResult.analysisId, recordingUrl);
+          }
+          analysisId = analysisResult.analysisId;
+          console.log('✅ Analysis completed with ID:', analysisId);
+        }
+      } catch (analysisError) {
+        console.error('❌ Analysis failed:', analysisError);
+        // Update the analysis record we created earlier with error message
+        if (analysisId) {
+          await supabase
+            .from('interview_analyses')
+            .update({ feedback: 'Analysis failed - please try again later' })
+            .eq('id', analysisId);
+        }
+      }
+    } else if (analysisId) {
+      // No transcript data to analyze, but we have a recording
+      await supabase
+        .from('interview_analyses')
+        .update({ feedback: 'Interview recorded. No transcript data available for analysis.' })
+        .eq('id', analysisId);
+    }
+
+    // Step 5: If audio URL is available, save it
+    if (audioUrl) {
+      console.log(`🔊 Audio URL available: ${audioUrl}`);
+    }
+
+    // Dispatch event to refresh UI
+    window.dispatchEvent(new CustomEvent('refreshInterviewAnalyses'));
 
     console.log('✅ Interview processing completed successfully');
     
