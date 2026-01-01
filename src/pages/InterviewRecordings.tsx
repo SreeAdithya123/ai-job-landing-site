@@ -16,13 +16,15 @@ const InterviewRecordings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRecording, setSelectedRecording] = useState<string | null>(playId);
 
-  const recordingsWithUrl = analyses?.filter(a => a.recording_url) || [];
+  // Show all analyses, highlight those with recordings
+  const allAnalyses = analyses || [];
+  const recordingsWithUrl = allAnalyses.filter(a => a.recording_url);
   
-  const filteredRecordings = recordingsWithUrl.filter(recording =>
+  const filteredRecordings = allAnalyses.filter(recording =>
     recording.interview_type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const currentRecording = recordingsWithUrl.find(r => r.id === selectedRecording);
+  const currentRecording = allAnalyses.find(r => r.id === selectedRecording);
 
   if (isLoading) {
     return (
@@ -84,9 +86,9 @@ const InterviewRecordings = () => {
                   {filteredRecordings.length === 0 ? (
                     <div className="text-center py-12 glass-card rounded-xl">
                       <Video className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-foreground mb-2">No Recordings Yet</h3>
+                      <h3 className="text-lg font-medium text-foreground mb-2">No Interviews Yet</h3>
                       <p className="text-muted-foreground text-sm mb-4">
-                        Complete an interview to see your recordings here
+                        Complete an interview to see your sessions here
                       </p>
                       <Button onClick={() => navigate('/interview-copilot')}>
                         Start Interview
@@ -107,8 +109,10 @@ const InterviewRecordings = () => {
                         onClick={() => setSelectedRecording(recording.id)}
                       >
                         <div className="flex items-start space-x-3">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <Play className="h-5 w-5 text-primary" />
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                            recording.recording_url ? 'bg-primary/10' : 'bg-muted'
+                          }`}>
+                            <Play className={`h-5 w-5 ${recording.recording_url ? 'text-primary' : 'text-muted-foreground'}`} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="font-medium text-foreground truncate">
@@ -127,7 +131,7 @@ const InterviewRecordings = () => {
                               )}
                             </div>
                             {recording.overall_score && (
-                              <div className="mt-2">
+                              <div className="mt-2 flex items-center">
                                 <span className={`text-xs px-2 py-0.5 rounded-full ${
                                   recording.overall_score >= 85 
                                     ? 'bg-green-100 text-green-700'
@@ -136,6 +140,18 @@ const InterviewRecordings = () => {
                                     : 'bg-red-100 text-red-700'
                                 }`}>
                                   Score: {recording.overall_score}%
+                                </span>
+                                {!recording.recording_url && (
+                                  <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground ml-2">
+                                    No Recording
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {!recording.overall_score && !recording.recording_url && (
+                              <div className="mt-2">
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                                  No Recording
                                 </span>
                               </div>
                             )}
@@ -155,16 +171,26 @@ const InterviewRecordings = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="glass-card rounded-xl overflow-hidden"
                   >
-                    <div className="aspect-video bg-black">
-                      <video
-                        key={currentRecording.recording_url}
-                        controls
-                        className="w-full h-full"
-                        src={currentRecording.recording_url || ''}
-                      >
-                        Your browser does not support the video tag.
-                      </video>
-                    </div>
+                    {currentRecording.recording_url ? (
+                      <div className="aspect-video bg-black">
+                        <video
+                          key={currentRecording.recording_url}
+                          controls
+                          className="w-full h-full"
+                          src={currentRecording.recording_url}
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
+                    ) : (
+                      <div className="aspect-video bg-muted flex items-center justify-center">
+                        <div className="text-center">
+                          <Video className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                          <p className="text-muted-foreground">No recording available for this interview</p>
+                          <p className="text-xs text-muted-foreground mt-2">Recording was not captured during this session</p>
+                        </div>
+                      </div>
+                    )}
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div>
@@ -175,21 +201,21 @@ const InterviewRecordings = () => {
                             Recorded on {new Date(currentRecording.created_at || '').toLocaleDateString()}
                           </p>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (currentRecording.recording_url) {
+                        {currentRecording.recording_url && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
                               const a = document.createElement('a');
-                              a.href = currentRecording.recording_url;
+                              a.href = currentRecording.recording_url!;
                               a.download = `interview-${currentRecording.id}.webm`;
                               a.click();
-                            }
-                          }}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
+                            }}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                        )}
                       </div>
 
                       {/* Score Summary */}
