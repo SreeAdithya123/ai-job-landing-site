@@ -304,11 +304,36 @@ export const processInterviewEnd = async (
     const savedCount = await saveInterviewTranscript(sessionId, transcript, interviewType, duration);
     
     let analysisId: string | null = null;
+    let recordingUrl: string | null = null;
     
     // Step 2: Trigger Cohere analysis (if we have enough data)
     if (savedCount && savedCount > 0) {
-      const analysisResult = await triggerInterviewAnalysis(sessionId, transcript, interviewType, duration);
-      analysisId = analysisResult?.analysisId || null;
+      try {
+        const analysisResult = await triggerInterviewAnalysis(sessionId, transcript, interviewType, duration);
+        analysisId = analysisResult?.analysisId || null;
+        console.log('✅ Analysis completed with ID:', analysisId);
+      } catch (analysisError) {
+        console.error('❌ Analysis failed, but continuing with recording upload:', analysisError);
+        // Create a minimal analysis record to attach the recording
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: fallbackAnalysis } = await supabase
+            .from('interview_analyses')
+            .insert({
+              user_id: user.id,
+              interview_type: interviewType,
+              duration_minutes: duration || null,
+              feedback: 'Analysis pending - please try again later',
+            })
+            .select('id')
+            .single();
+          
+          if (fallbackAnalysis) {
+            analysisId = fallbackAnalysis.id;
+            console.log('📝 Created fallback analysis record:', analysisId);
+          }
+        }
+      }
     }
 
     // Step 3: If audio URL is available, we could save it here
@@ -318,12 +343,30 @@ export const processInterviewEnd = async (
 
     // Step 4: Upload recording if available and we have an analysis ID
     if (recordingBlob && analysisId) {
-      console.log('☁️ Auto-uploading interview recording...');
-      const recordingUrl = await uploadRecording(recordingBlob, analysisId);
-      if (recordingUrl) {
-        await updateAnalysisWithRecording(analysisId, recordingUrl);
-        console.log('✅ Recording uploaded and linked to analysis');
+      console.log('☁️ Auto-uploading interview recording...', {
+        blobSize: (recordingBlob.size / 1024 / 1024).toFixed(2) + 'MB',
+        analysisId
+      });
+      
+      try {
+        recordingUrl = await uploadRecording(recordingBlob, analysisId);
+        if (recordingUrl) {
+          const updated = await updateAnalysisWithRecording(analysisId, recordingUrl);
+          if (updated) {
+            console.log('✅ Recording uploaded and linked to analysis');
+            // Dispatch event to refresh analyses with new recording
+            window.dispatchEvent(new CustomEvent('refreshInterviewAnalyses'));
+          } else {
+            console.error('❌ Failed to update analysis with recording URL');
+          }
+        } else {
+          console.error('❌ Failed to get recording URL after upload');
+        }
+      } catch (uploadError) {
+        console.error('❌ Recording upload failed:', uploadError);
       }
+    } else if (recordingBlob && !analysisId) {
+      console.warn('⚠️ Recording available but no analysis ID to link it to');
     }
 
     console.log('✅ Interview processing completed successfully');
@@ -332,6 +375,7 @@ export const processInterviewEnd = async (
       success: true,
       sessionsCount: savedCount,
       analysisId,
+      recordingUrl,
       message: `Interview completed with ${savedCount} Q&A pairs analyzed`
     };
 
