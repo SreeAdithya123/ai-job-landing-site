@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { uploadRecording, updateAnalysisWithRecording } from './recordingStorageService';
 
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
@@ -293,7 +294,8 @@ export const processInterviewEnd = async (
   transcript: TranscriptEntry[],
   interviewType: string = 'general',
   duration?: number,
-  audioUrl?: string
+  audioUrl?: string,
+  recordingBlob?: Blob
 ) => {
   try {
     console.log(`🎯 Processing interview end for session: ${sessionId}`);
@@ -301,15 +303,27 @@ export const processInterviewEnd = async (
     // Step 1: Save transcript to database
     const savedCount = await saveInterviewTranscript(sessionId, transcript, interviewType, duration);
     
+    let analysisId: string | null = null;
+    
     // Step 2: Trigger Cohere analysis (if we have enough data)
     if (savedCount && savedCount > 0) {
-      await triggerInterviewAnalysis(sessionId, transcript, interviewType, duration);
+      const analysisResult = await triggerInterviewAnalysis(sessionId, transcript, interviewType, duration);
+      analysisId = analysisResult?.analysisId || null;
     }
 
     // Step 3: If audio URL is available, we could save it here
     if (audioUrl) {
-      // TODO: Implement audio storage logic if needed
       console.log(`🔊 Audio URL available: ${audioUrl}`);
+    }
+
+    // Step 4: Upload recording if available and we have an analysis ID
+    if (recordingBlob && analysisId) {
+      console.log('☁️ Auto-uploading interview recording...');
+      const recordingUrl = await uploadRecording(recordingBlob, analysisId);
+      if (recordingUrl) {
+        await updateAnalysisWithRecording(analysisId, recordingUrl);
+        console.log('✅ Recording uploaded and linked to analysis');
+      }
     }
 
     console.log('✅ Interview processing completed successfully');
@@ -317,6 +331,7 @@ export const processInterviewEnd = async (
     return {
       success: true,
       sessionsCount: savedCount,
+      analysisId,
       message: `Interview completed with ${savedCount} Q&A pairs analyzed`
     };
 

@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useConversation } from '@11labs/react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { processInterviewEnd } from '@/services/interviewSessionService';
 import Layout from '../components/Layout';
 import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewTranscript from '../components/interview/InterviewTranscript';
@@ -165,8 +166,22 @@ const FriendlyInterviewer = () => {
     try {
       console.log('🛑 Ending friendly chat session...');
       
-      // Stop recording
-      recording.stopRecording();
+      // Stop recording and get the blob
+      const recordingBlob = await recording.stopRecording();
+      
+      // Save interview data with recording
+      if (transcript.length > 0) {
+        const sessionId = `friendly_${Date.now()}`;
+        try {
+          await processInterviewEnd(sessionId, transcript, 'friendly', undefined, undefined, recordingBlob || undefined);
+          toast({
+            title: "Chat Complete",
+            description: "Your conversation has been saved and recording uploaded.",
+          });
+        } catch (error) {
+          console.error('❌ Error processing interview end:', error);
+        }
+      }
       
       await conversation.endSession();
       

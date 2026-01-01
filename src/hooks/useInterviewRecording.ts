@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 export interface RecordingState {
   isRecording: boolean;
@@ -14,12 +13,12 @@ export const useInterviewRecording = () => {
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+  const pendingBlobRef = useRef<Blob | null>(null);
 
   const startRecording = useCallback(async (): Promise<MediaStream | null> => {
     try {
@@ -82,6 +81,7 @@ export const useInterviewRecording = () => {
         console.log('📹 Recording stopped, processing chunks...');
         const blob = new Blob(chunksRef.current, { type: selectedMimeType });
         setRecordedBlob(blob);
+        pendingBlobRef.current = blob;
         console.log('✅ Recording saved, size:', (blob.size / 1024 / 1024).toFixed(2), 'MB');
       };
 
@@ -141,108 +141,58 @@ export const useInterviewRecording = () => {
     }
   }, []);
 
-  const stopRecording = useCallback(() => {
-    console.log('🛑 Stopping recording...');
+  const stopRecording = useCallback((): Promise<Blob | null> => {
+    return new Promise((resolve) => {
+      console.log('🛑 Stopping recording...');
 
-    // Stop duration counter
-    if (durationIntervalRef.current) {
-      clearInterval(durationIntervalRef.current);
-      durationIntervalRef.current = null;
-    }
-
-    // Stop MediaRecorder
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
-
-    // Stop all tracks
-    if (videoStream) {
-      videoStream.getTracks().forEach((track) => {
-        track.stop();
-        console.log(`🛑 Stopped track: ${track.kind}`);
-      });
-    }
-
-    setIsRecording(false);
-    setVideoStream(null);
-
-    toast({
-      title: "Recording Stopped",
-      description: `Interview recording saved (${formatDuration(recordingDuration)})`,
-    });
-
-    console.log('✅ Recording stopped successfully');
-  }, [videoStream, recordingDuration]);
-
-  const uploadRecording = useCallback(async (analysisId: string): Promise<string | null> => {
-    if (!recordedBlob) {
-      console.log('No recording to upload');
-      return null;
-    }
-
-    try {
-      setIsUploading(true);
-      console.log('☁️ Uploading recording to storage...');
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error('No authenticated user found');
-        return null;
+      // Stop duration counter
+      if (durationIntervalRef.current) {
+        clearInterval(durationIntervalRef.current);
+        durationIntervalRef.current = null;
       }
 
-      const fileName = `${user.id}/${analysisId}-${Date.now()}.webm`;
+      // If MediaRecorder is not active, resolve with existing blob
+      if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
+        setIsRecording(false);
+        resolve(recordedBlob);
+        return;
+      }
+
+      // Set up listener for when recording is fully stopped
+      const currentRecorder = mediaRecorderRef.current;
+      const originalOnStop = currentRecorder.onstop;
       
-      const { data, error } = await supabase.storage
-        .from('interview-recordings')
-        .upload(fileName, recordedBlob, {
-          contentType: 'video/webm',
-          upsert: false,
-        });
+      currentRecorder.onstop = (event) => {
+        console.log('📹 Recording stopped, processing chunks...');
+        const mimeType = currentRecorder.mimeType || 'video/webm';
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        setRecordedBlob(blob);
+        pendingBlobRef.current = blob;
+        console.log('✅ Recording saved, size:', (blob.size / 1024 / 1024).toFixed(2), 'MB');
+        
+        // Stop all tracks
+        if (videoStream) {
+          videoStream.getTracks().forEach((track) => {
+            track.stop();
+            console.log(`🛑 Stopped track: ${track.kind}`);
+          });
+        }
 
-      if (error) {
-        console.error('Error uploading recording:', error);
+        setIsRecording(false);
+        setVideoStream(null);
+
         toast({
-          title: "Upload Failed",
-          description: "Failed to upload recording. You can still download it locally.",
-          variant: "destructive",
+          title: "Recording Stopped",
+          description: `Interview recording saved (${formatDuration(recordingDuration)})`,
         });
-        return null;
-      }
 
-      // Get the signed URL for playback (7 days validity)
-      const { data: urlData } = await supabase.storage
-        .from('interview-recordings')
-        .createSignedUrl(fileName, 60 * 60 * 24 * 7);
+        console.log('✅ Recording stopped successfully');
+        resolve(blob);
+      };
 
-      const recordingUrl = urlData?.signedUrl || null;
-
-      if (recordingUrl) {
-        // Update the analysis record with the recording URL
-        await supabase
-          .from('interview_analyses')
-          .update({ recording_url: recordingUrl })
-          .eq('id', analysisId);
-
-        console.log('✅ Recording uploaded successfully');
-        toast({
-          title: "Recording Uploaded",
-          description: "Your interview recording has been saved to the cloud.",
-        });
-      }
-
-      return recordingUrl;
-    } catch (error) {
-      console.error('Error in uploadRecording:', error);
-      toast({
-        title: "Upload Error",
-        description: "An error occurred while uploading the recording.",
-        variant: "destructive",
-      });
-      return null;
-    } finally {
-      setIsUploading(false);
-    }
-  }, [recordedBlob]);
+      currentRecorder.stop();
+    });
+  }, [videoStream, recordingDuration, recordedBlob]);
 
   const downloadRecording = useCallback(() => {
     if (!recordedBlob) {
@@ -273,19 +223,23 @@ export const useInterviewRecording = () => {
     setRecordedBlob(null);
     setRecordingDuration(0);
     chunksRef.current = [];
+    pendingBlobRef.current = null;
   }, []);
+
+  const getRecordingBlob = useCallback((): Blob | null => {
+    return pendingBlobRef.current || recordedBlob;
+  }, [recordedBlob]);
 
   return {
     isRecording,
     recordedBlob,
     recordingDuration,
     videoStream,
-    isUploading,
     startRecording,
     stopRecording,
-    uploadRecording,
     downloadRecording,
     clearRecording,
+    getRecordingBlob,
   };
 };
 

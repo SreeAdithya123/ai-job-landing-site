@@ -176,8 +176,22 @@ const MockInterview = () => {
     try {
       console.log('🛑 Ending mock interview session...');
       
-      // Stop recording
-      recording.stopRecording();
+      // Stop recording and get the blob
+      const recordingBlob = await recording.stopRecording();
+      
+      // Save interview data with recording
+      if (transcript.length > 0) {
+        const sessionId = `mock_${Date.now()}`;
+        try {
+          await processInterviewEnd(sessionId, transcript, 'mock', undefined, undefined, recordingBlob || undefined);
+          toast({
+            title: "Mock Interview Complete",
+            description: "Your interview has been saved and recording uploaded.",
+          });
+        } catch (error) {
+          console.error('❌ Error processing interview end:', error);
+        }
+      }
       
       await conversation.endSession();
       

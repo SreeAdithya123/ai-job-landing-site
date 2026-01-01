@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useConversation } from '@11labs/react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { processInterviewEnd } from '@/services/interviewSessionService';
 import Layout from '../components/Layout';
 import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewControls from '../components/interview/InterviewControls';
@@ -189,12 +190,25 @@ const UPSCInterviewer = () => {
     try {
       console.log('🛑 Ending interview session...');
       
-      // Stop recording
-      recording.stopRecording();
+      // Stop recording and get the blob
+      const recordingBlob = await recording.stopRecording();
       
       // Stop body language detection
       if (bodyLanguage.isActive) {
         bodyLanguage.stopDetection();
+      }
+
+      // Save interview data with recording
+      if (transcript.length > 0 && sessionId) {
+        try {
+          await processInterviewEnd(sessionId, transcript, 'upsc', undefined, undefined, recordingBlob || undefined);
+          toast({
+            title: "Interview Complete",
+            description: "Your interview has been saved and analyzed. Recording uploaded successfully.",
+          });
+        } catch (error) {
+          console.error('❌ Error processing interview end:', error);
+        }
       }
 
       await conversation.endSession();
@@ -207,11 +221,6 @@ const UPSCInterviewer = () => {
       }]);
       
       console.log('✅ UPSC Interview ended successfully');
-      
-      toast({
-        title: "Interview Complete",
-        description: "Body language analysis ready. Click 'Analyze Interview' to view detailed feedback.",
-      });
     } catch (error) {
       console.error('❌ Error ending interview:', error);
       setIsInterviewActive(false);
