@@ -27,7 +27,7 @@ export const uploadRecording = async (
       .from('interview-recordings')
       .upload(fileName, blob, {
         contentType: blob.type || 'video/webm',
-        upsert: true, // Allow overwrite if exists
+        upsert: false,
       });
 
     if (error) {
@@ -38,18 +38,8 @@ export const uploadRecording = async (
 
     console.log('✅ File uploaded successfully:', data);
 
-    // Get the signed URL for playback (30 days validity)
-    const { data: urlData, error: urlError } = await supabase.storage
-      .from('interview-recordings')
-      .createSignedUrl(fileName, 60 * 60 * 24 * 30);
-
-    if (urlError) {
-      console.error('❌ Error creating signed URL:', urlError);
-      return null;
-    }
-
-    console.log('✅ Signed URL created successfully');
-    return urlData?.signedUrl || null;
+    // Return the file path (store this in DB). Generate signed URLs only when playing.
+    return fileName;
   } catch (error) {
     console.error('❌ Error in uploadRecording:', error);
     return null;
