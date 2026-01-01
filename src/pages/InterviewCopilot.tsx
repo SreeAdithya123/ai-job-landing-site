@@ -60,33 +60,10 @@ const InterviewCopilot = () => {
       setConnectionStatus('disconnected');
       setUserIsSpeaking(false);
       
-      // Process interview end when disconnecting
-      if (transcript.length > 0 && sessionId) {
-        try {
-          const duration = interviewStartTime 
-            ? Math.round((new Date().getTime() - interviewStartTime.getTime()) / 60000)
-            : undefined;
-          
-          await processInterviewEnd(sessionId, transcript, selectedType, duration);
-          
-          toast({
-            title: "Interview Completed",
-            description: "Your interview has been saved and analyzed successfully."
-          });
-        } catch (error) {
-          console.error('❌ Error processing interview end:', error);
-          toast({
-            title: "Save Error",
-            description: "Interview ended but failed to save data.",
-            variant: "destructive"
-          });
-        }
-      } else {
-        toast({
-          title: "Interview Ended",
-          description: "Disconnected from AI interviewer"
-        });
-      }
+      toast({
+        title: "Interview Ended",
+        description: "Disconnected from AI interviewer"
+      });
     },
     onMessage: message => {
       console.log('📨 Message received:', message);
@@ -250,8 +227,8 @@ const InterviewCopilot = () => {
     try {
       console.log('🛑 Ending interview session...');
       
-      // Stop recording
-      recording.stopRecording();
+      // Stop recording and get the blob
+      const recordingBlob = await recording.stopRecording();
       
       // Process interview end before closing the session
       if (transcript.length > 0 && sessionId) {
@@ -260,7 +237,7 @@ const InterviewCopilot = () => {
             ? Math.round((new Date().getTime() - interviewStartTime.getTime()) / 60000)
             : undefined;
           
-          await processInterviewEnd(sessionId, transcript, selectedType, duration);
+          await processInterviewEnd(sessionId, transcript, selectedType, duration, undefined, recordingBlob || undefined);
           
           toast({
             title: "Interview Completed",
