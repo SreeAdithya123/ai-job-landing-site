@@ -9,6 +9,9 @@ import { supabase } from '@/integrations/supabase/client';
 import Layout from '../components/Layout';
 import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewTranscript from '../components/interview/InterviewTranscript';
+import { useInterviewRecording } from '@/hooks/useInterviewRecording';
+import InterviewRecordingIndicator from '@/components/interview/InterviewRecordingIndicator';
+import CameraPreview from '@/components/interview/CameraPreview';
 
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
@@ -21,6 +24,7 @@ const FriendlyInterviewer = () => {
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
   const navigate = useNavigate();
+  const recording = useInterviewRecording();
 
   const conversation = useConversation({
     onConnect: () => {
@@ -90,11 +94,15 @@ const FriendlyInterviewer = () => {
 
   const handleStartInterview = async () => {
     try {
-      console.log('🎤 Requesting microphone access...');
+      console.log('🎤 Requesting microphone and camera access...');
       setConnectionStatus('requesting-mic');
       
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-      console.log('✅ Microphone access granted');
+      // Start recording (this also requests camera/mic permissions)
+      const stream = await recording.startRecording();
+      if (!stream) {
+        throw new Error('Failed to start recording');
+      }
+      console.log('✅ Microphone and camera access granted, recording started');
       
       setConnectionStatus('fetching-config');
       console.log('🔧 Fetching ElevenLabs configuration...');
@@ -156,6 +164,10 @@ const FriendlyInterviewer = () => {
   const handleExitInterview = async () => {
     try {
       console.log('🛑 Ending friendly chat session...');
+      
+      // Stop recording
+      recording.stopRecording();
+      
       await conversation.endSession();
       
       const currentTime = new Date().toLocaleTimeString();
@@ -206,10 +218,29 @@ const FriendlyInterviewer = () => {
               </div>
             </div>
             
-            <div className="px-4 py-2 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-lg">
-              <span className="text-slate-300 text-sm font-medium">AI Powered Chat</span>
+            <div className="flex items-center space-x-3">
+              <InterviewRecordingIndicator
+                isRecording={recording.isRecording}
+                recordingDuration={recording.recordingDuration}
+                hasRecording={!!recording.recordedBlob}
+                onDownload={recording.downloadRecording}
+              />
+              <div className="px-4 py-2 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-lg">
+                <span className="text-slate-300 text-sm font-medium">AI Powered Chat</span>
+              </div>
             </div>
           </div>
+
+          {/* Camera Preview */}
+          {isInterviewActive && (
+            <div className="mb-6">
+              <CameraPreview
+                videoStream={recording.videoStream}
+                isRecording={recording.isRecording}
+                className="w-48 h-36 mx-auto"
+              />
+            </div>
+          )}
 
           {/* Debug Status Display */}
           <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl p-4 mb-6">
