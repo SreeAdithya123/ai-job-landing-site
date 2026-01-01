@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface RecordingState {
   isRecording: boolean;
@@ -13,6 +14,7 @@ export const useInterviewRecording = () => {
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -172,6 +174,76 @@ export const useInterviewRecording = () => {
     console.log('✅ Recording stopped successfully');
   }, [videoStream, recordingDuration]);
 
+  const uploadRecording = useCallback(async (analysisId: string): Promise<string | null> => {
+    if (!recordedBlob) {
+      console.log('No recording to upload');
+      return null;
+    }
+
+    try {
+      setIsUploading(true);
+      console.log('☁️ Uploading recording to storage...');
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No authenticated user found');
+        return null;
+      }
+
+      const fileName = `${user.id}/${analysisId}-${Date.now()}.webm`;
+      
+      const { data, error } = await supabase.storage
+        .from('interview-recordings')
+        .upload(fileName, recordedBlob, {
+          contentType: 'video/webm',
+          upsert: false,
+        });
+
+      if (error) {
+        console.error('Error uploading recording:', error);
+        toast({
+          title: "Upload Failed",
+          description: "Failed to upload recording. You can still download it locally.",
+          variant: "destructive",
+        });
+        return null;
+      }
+
+      // Get the signed URL for playback (7 days validity)
+      const { data: urlData } = await supabase.storage
+        .from('interview-recordings')
+        .createSignedUrl(fileName, 60 * 60 * 24 * 7);
+
+      const recordingUrl = urlData?.signedUrl || null;
+
+      if (recordingUrl) {
+        // Update the analysis record with the recording URL
+        await supabase
+          .from('interview_analyses')
+          .update({ recording_url: recordingUrl })
+          .eq('id', analysisId);
+
+        console.log('✅ Recording uploaded successfully');
+        toast({
+          title: "Recording Uploaded",
+          description: "Your interview recording has been saved to the cloud.",
+        });
+      }
+
+      return recordingUrl;
+    } catch (error) {
+      console.error('Error in uploadRecording:', error);
+      toast({
+        title: "Upload Error",
+        description: "An error occurred while uploading the recording.",
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  }, [recordedBlob]);
+
   const downloadRecording = useCallback(() => {
     if (!recordedBlob) {
       toast({
@@ -208,8 +280,10 @@ export const useInterviewRecording = () => {
     recordedBlob,
     recordingDuration,
     videoStream,
+    isUploading,
     startRecording,
     stopRecording,
+    uploadRecording,
     downloadRecording,
     clearRecording,
   };
