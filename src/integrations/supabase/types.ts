@@ -74,6 +74,33 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_usage: {
+        Row: {
+          created_at: string
+          credits_used: number
+          duration_minutes: number | null
+          id: string
+          interview_type: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_used?: number
+          duration_minutes?: number | null
+          id?: string
+          interview_type?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_used?: number
+          duration_minutes?: number | null
+          id?: string
+          interview_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       elevenlabs_transcripts: {
         Row: {
           content: string
@@ -319,11 +346,69 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          billing_cycle_start: string
+          created_at: string
+          credits_per_month: number
+          credits_remaining: number
+          id: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_cycle_start?: string
+          created_at?: string
+          credits_per_month?: number
+          credits_remaining?: number
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_cycle_start?: string
+          created_at?: string
+          credits_per_month?: number
+          credits_remaining?: number
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      admin_update_subscription: {
+        Args: {
+          p_new_plan: Database["public"]["Enums"]["subscription_plan"]
+          p_target_user_id: string
+        }
+        Returns: boolean
+      }
+      deduct_credit: {
+        Args: {
+          p_duration_minutes?: number
+          p_interview_type?: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      get_subscription: {
+        Args: { p_user_id: string }
+        Returns: {
+          billing_cycle_start: string
+          credits_per_month: number
+          credits_remaining: number
+          plan: Database["public"]["Enums"]["subscription_plan"]
+        }[]
+      }
+      has_credits: { Args: { p_user_id: string }; Returns: boolean }
       store_elevenlabs_transcript: {
         Args: {
           p_content: string
@@ -336,7 +421,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      subscription_plan: "free" | "plus" | "pro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -463,6 +548,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      subscription_plan: ["free", "plus", "pro"],
+    },
   },
 } as const

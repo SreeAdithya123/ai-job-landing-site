@@ -7,6 +7,7 @@ import InterviewHistoryTable from '../components/InterviewHistoryTable';
 import ProtectedRoute from '../components/ProtectedRoute';
 import AnalysisFeedbackButton from '../components/AnalysisFeedbackButton';
 import ElevenLabsAnalyticsDashboard from '../components/dashboard/ElevenLabsAnalyticsDashboard';
+import SubscriptionCard from '../components/SubscriptionCard';
 import { Download, Play, Menu, BarChart3, History, Video, MessageSquare, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStats } from '@/hooks/useUserStats';
@@ -446,9 +447,14 @@ const Dashboard = () => {
               </p>
             </div>
 
-            {/* Progress Tracking Dashboard */}
-            <div className="mb-12">
-              <ProgressTracking />
+            {/* Subscription and Progress Cards */}
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
+              <div className="md:col-span-1">
+                <SubscriptionCard />
+              </div>
+              <div className="md:col-span-2">
+                <ProgressTracking />
+              </div>
             </div>
 
             {/* Interview Options Grid */}
