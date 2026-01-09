@@ -18,7 +18,8 @@ import {
   Settings,
   LogOut,
   Scan,
-  Video
+  Video,
+  CreditCard
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -158,10 +159,20 @@ const Sidebar = ({ onClose }: SidebarProps) => {
           </div>
           
           <div className="space-y-2">
-            <button className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors">
-              <Crown className="h-3 w-3 mr-1" />
-              <span className="whitespace-nowrap">AI Interviewer Subscription</span>
-            </button>
+            <NavLink
+              to="/payments"
+              onClick={onClose}
+              className={({ isActive }) => `
+                w-full flex items-center justify-center px-3 py-2 text-xs font-medium rounded-md transition-colors
+                ${isActive 
+                  ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg' 
+                  : 'text-primary bg-primary/10 border border-primary/20 hover:bg-primary/20'
+                }
+              `}
+            >
+              <CreditCard className="h-3 w-3 mr-1" />
+              <span className="whitespace-nowrap">Plans & Pricing</span>
+            </NavLink>
           </div>
         </div>
       )}
