@@ -41,64 +41,24 @@ export const storeTranscript = async (transcript: ElevenLabsTranscript) => {
   return { id: transcriptId, ...transcript, user_id: user.id };
 };
 
-// Analyze transcript using OpenRouter API
+// Analyze transcript using Edge Function (secure server-side API call)
 export const analyzeTranscript = async (transcriptContent: string): Promise<TranscriptAnalysis> => {
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer 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',
-      },
-      body: JSON.stringify({
-        model: 'deepseek/deepseek-chat-v3-0324:free',
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert interview analyst. Analyze the following interview transcript and provide feedback in this exact JSON format:
-            {
-              "strengths": ["strength1", "strength2", "strength3"],
-              "weaknesses": ["weakness1", "weakness2", "weakness3"],
-              "score": 85,
-              "recommendations": ["recommendation1", "recommendation2", "recommendation3"]
-            }
-            
-            Score should be 0-100. Focus on communication skills, technical knowledge, confidence, and problem-solving abilities.`
-          },
-          {
-            role: 'user',
-            content: `Please analyze this interview transcript: ${transcriptContent}`
-          }
-        ]
-      })
+    const { data, error } = await supabase.functions.invoke('analyze-transcript', {
+      body: { transcriptContent }
     });
 
-    if (!response.ok) {
-      throw new Error(`OpenRouter API error: ${response.statusText}`);
+    if (error) {
+      console.error('Error calling analyze-transcript function:', error);
+      throw error;
     }
 
-    const data = await response.json();
-    const analysisText = data.choices[0].message.content;
-    
-    // Parse JSON response
-    try {
-      const analysis = JSON.parse(analysisText);
-      return {
-        strengths: analysis.strengths || [],
-        weaknesses: analysis.weaknesses || [],
-        score: analysis.score || 0,
-        recommendations: analysis.recommendations || []
-      };
-    } catch (parseError) {
-      console.error('Failed to parse analysis JSON:', parseError);
-      // Fallback to basic analysis
-      return {
-        strengths: ['Communication clarity', 'Professional demeanor'],
-        weaknesses: ['Could provide more specific examples'],
-        score: 75,
-        recommendations: ['Practice with specific examples', 'Work on storytelling']
-      };
-    }
+    return {
+      strengths: data.strengths || [],
+      weaknesses: data.weaknesses || [],
+      score: data.score || 0,
+      recommendations: data.recommendations || []
+    };
   } catch (error) {
     console.error('Error analyzing transcript:', error);
     throw error;
