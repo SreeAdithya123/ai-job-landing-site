@@ -3,26 +3,31 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Check, Star, Zap, Shield, Users, Clock } from 'lucide-react';
+import { Check, Star, Zap, Shield, Crown, Clock, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription, PLAN_DETAILS, SubscriptionPlan } from '@/hooks/useSubscription';
+import { Badge } from './ui/badge';
 
 const Pricing = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { subscription } = useSubscription();
 
   const plans = [
     {
+      id: 'free' as SubscriptionPlan,
       name: "Free",
       price: "0",
-      period: "forever",
+      period: "month",
       description: "Perfect for getting started with AI interview practice",
       originalPrice: null,
       features: [
-        "3 practice interviews per month",
+        "2 interviews per month (1 credit = 10 min)",
         "Basic feedback and scoring",
         "General interview questions",
         "Email support",
         "Progress tracking",
-        "Basic performance analytics"
       ],
       buttonText: "Get Started Free",
       buttonVariant: "outline" as const,
@@ -31,54 +36,62 @@ const Pricing = () => {
       highlight: "Great for beginners"
     },
     {
-      name: "Pro",
+      id: 'plus' as SubscriptionPlan,
+      name: "Plus",
       price: "19",
-      originalPrice: "39",
+      originalPrice: null,
       period: "month",
-      description: "Everything you need to master your interview skills",
+      description: "More practice time for serious job seekers",
       features: [
-        "Unlimited practice interviews",
+        "5 interviews per month",
         "Advanced AI feedback & analysis",
         "Industry-specific questions",
         "Video interview practice",
         "Performance analytics dashboard",
-        "Priority support",
-        "Resume optimization tips",
-        "Mock panel interviews"
+        "Priority email support",
       ],
-      buttonText: "Start 7-Day Free Trial",
-      buttonVariant: "default" as const,
-      popular: true,
-      icon: Zap,
-      highlight: "Most popular choice"
-    },
-    {
-      name: "Enterprise",
-      price: "99",
-      originalPrice: "149",
-      period: "month",
-      description: "For teams and organizations training multiple candidates",
-      features: [
-        "Everything in Pro",
-        "Team management dashboard",
-        "Custom question banks",
-        "Bulk user management",
-        "Advanced reporting & analytics",
-        "API access & integrations",
-        "Dedicated account manager",
-        "Custom branding options",
-        "SSO integration"
-      ],
-      buttonText: "Contact Sales",
+      buttonText: "Upgrade to Plus",
       buttonVariant: "outline" as const,
       popular: false,
-      icon: Users,
-      highlight: "Best for teams"
+      icon: Star,
+      highlight: "More practice time"
+    },
+    {
+      id: 'pro' as SubscriptionPlan,
+      name: "Pro",
+      price: "49",
+      originalPrice: null,
+      period: "month",
+      description: "Maximum interviews + all premium features",
+      features: [
+        "10 interviews per month",
+        "All Plus features included",
+        "AI Career Coach",
+        "Priority Support",
+        "Advanced Analytics",
+        "Resume Builder Access",
+        "Mock panel interviews",
+        "Custom question banks",
+      ],
+      buttonText: "Upgrade to Pro",
+      buttonVariant: "default" as const,
+      popular: true,
+      icon: Crown,
+      highlight: "Best value"
     }
   ];
 
-  const handleGetStarted = () => {
-    navigate('/auth');
+  const handleGetStarted = (planId: SubscriptionPlan) => {
+    if (!user) {
+      navigate('/auth');
+    } else {
+      // For manual admin assignment, redirect to contact or show info
+      navigate('/profile');
+    }
+  };
+
+  const isCurrentPlan = (planId: SubscriptionPlan) => {
+    return subscription?.plan === planId;
   };
 
   return (
@@ -107,9 +120,10 @@ const Pricing = () => {
             Start free and upgrade as you grow. All plans include our core AI interview technology with no hidden fees.
           </p>
           
-          {/* Pricing toggle or promotion */}
-          <div className="mt-8 inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-full border border-green-200">
-            <span className="text-green-600 font-medium">🎉 Limited Time: 50% off all paid plans</span>
+          {/* Credit info */}
+          <div className="mt-8 inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full border border-primary/20">
+            <Zap className="h-4 w-4 text-primary" />
+            <span className="text-primary font-medium">1 credit = 10 minutes of interview time</span>
           </div>
         </motion.div>
 
@@ -126,9 +140,14 @@ const Pricing = () => {
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                   <div className="bg-gradient-to-r from-primary to-accent text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg flex items-center space-x-2 border-2 border-white">
-                    <Star className="h-4 w-4 fill-current" />
-                    <span>Most Popular</span>
+                    <Crown className="h-4 w-4 fill-current" />
+                    <span>Best Value</span>
                   </div>
+                </div>
+              )}
+              {isCurrentPlan(plan.id) && (
+                <div className="absolute -top-4 right-4 z-10">
+                  <Badge className="bg-accent text-accent-foreground">Current Plan</Badge>
                 </div>
               )}
               
@@ -195,21 +214,22 @@ const Pricing = () => {
                   </ul>
 
                   <Button
-                    onClick={handleGetStarted}
+                    onClick={() => handleGetStarted(plan.id)}
                     variant={plan.buttonVariant}
+                    disabled={isCurrentPlan(plan.id)}
                     className={`w-full h-12 font-semibold ${
                       plan.popular 
                         ? 'shadow-xl hover:shadow-2xl scale-105 bg-gradient-to-r from-primary to-accent text-white' 
                         : 'hover:bg-primary/10 hover:border-primary/30'
-                    }`}
+                    } ${isCurrentPlan(plan.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {plan.buttonText}
+                    {isCurrentPlan(plan.id) ? 'Current Plan' : plan.buttonText}
                   </Button>
                   
-                  {plan.popular && (
+                  {plan.id !== 'free' && (
                     <div className="text-center">
                       <p className="text-xs text-muted-foreground">
-                        No credit card required • Cancel anytime
+                        Contact admin for plan upgrades
                       </p>
                     </div>
                   )}
