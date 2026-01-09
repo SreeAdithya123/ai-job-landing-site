@@ -1,6 +1,6 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +14,31 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authorization header required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      console.error('Authentication error:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const elevenlabsApiKey = Deno.env.get('ELEVENLABS_API_KEY');
     const elevenlabsAgentId = Deno.env.get('ELEVENLABS_AGENT_ID');
 
@@ -25,7 +50,7 @@ serve(async (req) => {
       throw new Error('ElevenLabs Agent ID not configured');
     }
 
-    console.log('Requesting signed URL for agent:', elevenlabsAgentId);
+    console.log('Requesting signed URL for agent:', elevenlabsAgentId, 'user:', user.id);
 
     // Get signed URL from ElevenLabs for private agent access
     const response = await fetch(
@@ -46,7 +71,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log('Successfully obtained signed URL from ElevenLabs');
+    console.log('Successfully obtained signed URL from ElevenLabs for user:', user.id);
 
     return new Response(
       JSON.stringify({

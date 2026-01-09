@@ -120,6 +120,7 @@ export type Database = {
           interview_type: string
           overall_score: number | null
           problem_solving_score: number | null
+          recording_url: string | null
           strengths: string[] | null
           technical_score: number | null
           transcript_summary: string | null
@@ -138,6 +139,7 @@ export type Database = {
           interview_type: string
           overall_score?: number | null
           problem_solving_score?: number | null
+          recording_url?: string | null
           strengths?: string[] | null
           technical_score?: number | null
           transcript_summary?: string | null
@@ -156,6 +158,7 @@ export type Database = {
           interview_type?: string
           overall_score?: number | null
           problem_solving_score?: number | null
+          recording_url?: string | null
           strengths?: string[] | null
           technical_score?: number | null
           transcript_summary?: string | null

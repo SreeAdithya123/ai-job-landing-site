@@ -8,3 +8,15 @@ verify_jwt = false
 
 [functions.coding-evaluate]
 verify_jwt = true
+
+[functions.analyze-transcript]
+verify_jwt = false
+
+[functions.get-elevenlabs-config]
+verify_jwt = false
+
+[functions.get-elevenlabs-signed-url]
+verify_jwt = false
+
+[functions.interview-webhook]
+verify_jwt = false

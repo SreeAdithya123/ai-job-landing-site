@@ -38,18 +38,72 @@ interface ElevenLabsWebhookPayload {
   interview_type?: string;
 }
 
-function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
+// Convert hex string to Uint8Array
+function hexToBytes(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+  }
+  return bytes;
+}
+
+// Convert Uint8Array to hex string
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+async function verifyWebhookSignature(payload: string, signature: string, secret: string): Promise<boolean> {
   try {
-    // ElevenLabs uses HMAC-SHA256 for webhook signatures
+    if (!signature || signature.length === 0) {
+      console.error('Missing webhook signature');
+      return false;
+    }
+
     const encoder = new TextEncoder();
-    const keyData = encoder.encode(secret);
-    const messageData = encoder.encode(payload);
     
-    // For now, we'll implement basic verification
-    // In production, you'd want to implement proper HMAC-SHA256 verification
-    return !!(signature && signature.length > 0);
+    // Import the secret key for HMAC-SHA256
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign', 'verify']
+    );
+
+    // Compute the expected signature
+    const signatureBuffer = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      encoder.encode(payload)
+    );
+    const expectedSignature = bytesToHex(new Uint8Array(signatureBuffer));
+
+    // Compare signatures in constant time to prevent timing attacks
+    const providedSig = signature.toLowerCase().replace(/^sha256=/, '');
+    const expectedSig = expectedSignature.toLowerCase();
+    
+    if (providedSig.length !== expectedSig.length) {
+      console.error('Signature length mismatch');
+      return false;
+    }
+
+    // Constant-time comparison
+    let isValid = true;
+    for (let i = 0; i < providedSig.length; i++) {
+      if (providedSig[i] !== expectedSig[i]) {
+        isValid = false;
+      }
+    }
+
+    if (!isValid) {
+      console.error('Webhook signature verification failed: signature mismatch');
+    }
+
+    return isValid;
   } catch (error) {
-    console.error('Webhook signature verification failed:', error);
+    console.error('Webhook signature verification error:', error);
     return false;
   }
 }
@@ -84,8 +138,9 @@ serve(async (req) => {
     const rawPayload = await req.text();
     const signature = req.headers.get('x-elevenlabs-signature') || '';
 
-    // Verify webhook signature
-    if (!verifyWebhookSignature(rawPayload, signature, webhookSecret)) {
+    // Verify webhook signature (now async)
+    const isValidSignature = await verifyWebhookSignature(rawPayload, signature, webhookSecret);
+    if (!isValidSignature) {
       console.error('Invalid webhook signature');
       return new Response('Unauthorized', { 
         status: 401, 
