@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -17,6 +18,38 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      console.error('❌ No authorization header provided');
+      return new Response(
+        JSON.stringify({ error: 'Authorization required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    );
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('❌ Authentication failed:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('✅ Authenticated user:', user.id);
+
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
     }
@@ -63,7 +96,7 @@ serve(async (req) => {
     const data = await response.json();
     const generatedContent = data.choices[0].message.content;
 
-    console.log('Generated content length:', generatedContent.length);
+    console.log('Generated content for user:', user.id);
 
     return new Response(JSON.stringify({ content: generatedContent }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
