@@ -12,7 +12,6 @@ import InterviewTypeCard from '../components/interview/InterviewTypeCard';
 import InterviewSessionsPanel from '../components/interview/InterviewSessionsPanel';
 import InterviewActiveInterface from '../components/interview/InterviewActiveInterface';
 import { Laptop, Code, Star, Users } from 'lucide-react';
-import { useInterviewRecording } from '@/hooks/useInterviewRecording';
 
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
@@ -38,7 +37,6 @@ const InterviewCopilot = () => {
   const [sessionId, setSessionId] = useState<string>('');
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
-  const recording = useInterviewRecording();
 
 
   const conversation = useConversation({
@@ -60,10 +58,33 @@ const InterviewCopilot = () => {
       setConnectionStatus('disconnected');
       setUserIsSpeaking(false);
       
-      toast({
-        title: "Interview Ended",
-        description: "Disconnected from AI interviewer"
-      });
+      // Process interview end when disconnecting
+      if (transcript.length > 0 && sessionId) {
+        try {
+          const duration = interviewStartTime 
+            ? Math.round((new Date().getTime() - interviewStartTime.getTime()) / 60000)
+            : undefined;
+          
+          await processInterviewEnd(sessionId, transcript, selectedType, duration);
+          
+          toast({
+            title: "Interview Completed",
+            description: "Your interview has been saved and analyzed successfully."
+          });
+        } catch (error) {
+          console.error('❌ Error processing interview end:', error);
+          toast({
+            title: "Save Error",
+            description: "Interview ended but failed to save data.",
+            variant: "destructive"
+          });
+        }
+      } else {
+        toast({
+          title: "Interview Ended",
+          description: "Disconnected from AI interviewer"
+        });
+      }
     },
     onMessage: message => {
       console.log('📨 Message received:', message);
@@ -162,15 +183,12 @@ const InterviewCopilot = () => {
 
   const handleStartInterview = async () => {
     try {
-      console.log('🎤 Requesting microphone and camera access...');
+      console.log('🎤 Requesting microphone access...');
       setConnectionStatus('requesting-mic');
-      
-      // Start recording (this also requests camera/mic permissions)
-      const stream = await recording.startRecording();
-      if (!stream) {
-        throw new Error('Failed to start recording');
-      }
-      console.log('✅ Microphone and camera access granted, recording started');
+      await navigator.mediaDevices.getUserMedia({
+        audio: true
+      });
+      console.log('✅ Microphone access granted');
       setConnectionStatus('fetching-config');
       console.log('🔧 Fetching ElevenLabs configuration...');
       const {
@@ -227,9 +245,6 @@ const InterviewCopilot = () => {
     try {
       console.log('🛑 Ending interview session...');
       
-      // Stop recording and get the blob
-      const recordingBlob = await recording.stopRecording();
-      
       // Process interview end before closing the session
       if (transcript.length > 0 && sessionId) {
         try {
@@ -237,7 +252,7 @@ const InterviewCopilot = () => {
             ? Math.round((new Date().getTime() - interviewStartTime.getTime()) / 60000)
             : undefined;
           
-          await processInterviewEnd(sessionId, transcript, selectedType, duration, undefined, recordingBlob || undefined);
+          await processInterviewEnd(sessionId, transcript, selectedType, duration);
           
           toast({
             title: "Interview Completed",
@@ -301,11 +316,6 @@ const InterviewCopilot = () => {
           onStartInterview={handleStartInterview}
           onExitInterview={handleExitInterview}
           onClearTranscript={handleClearTranscript}
-          isRecording={recording.isRecording}
-          recordingDuration={recording.recordingDuration}
-          hasRecording={!!recording.recordedBlob}
-          videoStream={recording.videoStream}
-          onDownloadRecording={recording.downloadRecording}
         />
       </ProtectedRoute>
     );

@@ -7,8 +7,6 @@ import InterviewInterface from './InterviewInterface';
 import InterviewControls from './InterviewControls';
 import InterviewTranscript from './InterviewTranscript';
 import InterviewStatus from './InterviewStatus';
-import InterviewRecordingIndicator from './InterviewRecordingIndicator';
-import CameraPreview from './CameraPreview';
 
 interface InterviewActiveInterfaceProps {
   selectedType: string;
@@ -21,12 +19,6 @@ interface InterviewActiveInterfaceProps {
   onStartInterview: () => void;
   onExitInterview: () => void;
   onClearTranscript: () => void;
-  // Recording props
-  isRecording?: boolean;
-  recordingDuration?: number;
-  hasRecording?: boolean;
-  videoStream?: MediaStream | null;
-  onDownloadRecording?: () => void;
 }
 
 const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
@@ -39,13 +31,7 @@ const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
   onBack,
   onStartInterview,
   onExitInterview,
-  onClearTranscript,
-  // Recording props
-  isRecording = false,
-  recordingDuration = 0,
-  hasRecording = false,
-  videoStream = null,
-  onDownloadRecording
+  onClearTranscript
 }) => {
   const getInterviewDetails = () => {
     if (selectedType === 'general') {
@@ -93,12 +79,6 @@ const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
             </div>
 
             <div className="flex items-center space-x-3">
-              <InterviewRecordingIndicator
-                isRecording={isRecording}
-                recordingDuration={recordingDuration}
-                hasRecording={hasRecording}
-                onDownload={onDownloadRecording}
-              />
               <div className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
                 connectionStatus === 'connected' 
                   ? 'bg-green-900/50 text-green-300 border-green-700/50' 
@@ -121,17 +101,6 @@ const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Camera Preview */}
-      {isInterviewActive && (
-        <div className="max-w-7xl mx-auto w-full px-6 pt-6">
-          <CameraPreview
-            videoStream={videoStream}
-            isRecording={isRecording}
-            className="w-48 h-36 mx-auto"
-          />
-        </div>
-      )}
 
       {/* Main Interview Content */}
       <div className="flex-1 max-w-7xl mx-auto w-full px-6 py-8 space-y-6">

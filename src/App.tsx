@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +10,6 @@ import Dashboard from "./pages/Dashboard";
 import MockInterview from "./pages/MockInterview";
 import InterviewCopilot from "./pages/InterviewCopilot";
 import InterviewHistory from "./pages/InterviewHistory";
-import InterviewRecordings from "./pages/InterviewRecordings";
 import ResumeBuilder from "./pages/ResumeBuilder";
 import ResumeScanner from "./pages/ResumeScanner";
 import MaterialGenerator from "./pages/MaterialGenerator";
@@ -44,7 +44,6 @@ function App() {
               <Route path="/interview-copilot" element={<InterviewCopilot />} />
               <Route path="/interview-copilot/coding" element={<CodingInterview />} />
               <Route path="/interview-history" element={<InterviewHistory />} />
-              <Route path="/interview-recordings" element={<InterviewRecordings />} />
               <Route path="/resume-builder" element={<ResumeBuilder />} />
               <Route path="/resume-scanner" element={<ResumeScanner />} />
               <Route path="/material-generator" element={<MaterialGenerator />} />

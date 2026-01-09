@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { useConversation } from '@11labs/react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { processInterviewEnd } from '@/services/interviewSessionService';
 import Layout from '../components/Layout';
 import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewControls from '../components/interview/InterviewControls';
@@ -14,9 +13,6 @@ import InterviewStatus from '../components/interview/InterviewStatus';
 import BodyLanguageMonitor from '../components/interview/BodyLanguageMonitor';
 import AnalysisFeedbackButton from '../components/AnalysisFeedbackButton';
 import { useUPSCBodyLanguageDetection } from '@/hooks/useUPSCBodyLanguageDetection';
-import { useInterviewRecording } from '@/hooks/useInterviewRecording';
-import InterviewRecordingIndicator from '@/components/interview/InterviewRecordingIndicator';
-import CameraPreview from '@/components/interview/CameraPreview';
 
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
@@ -34,7 +30,6 @@ const UPSCInterviewer = () => {
   const navigate = useNavigate();
 
   const bodyLanguage = useUPSCBodyLanguageDetection();
-  const recording = useInterviewRecording();
 
   const conversation = useConversation({
     micMuted: isMicMuted,
@@ -111,12 +106,9 @@ const UPSCInterviewer = () => {
       console.log('🎤 Requesting microphone and camera access...');
       setConnectionStatus('requesting-mic');
       
-      // Start recording (this also requests camera/mic permissions)
-      const stream = await recording.startRecording();
-      if (!stream) {
-        throw new Error('Failed to start recording');
-      }
-      console.log('✅ Microphone and camera access granted, recording started');
+      // Request both audio and video permissions
+      await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+      console.log('✅ Microphone and camera access granted');
       
       setConnectionStatus('fetching-config');
       console.log('🔧 Fetching ElevenLabs configuration...');
@@ -190,25 +182,9 @@ const UPSCInterviewer = () => {
     try {
       console.log('🛑 Ending interview session...');
       
-      // Stop recording and get the blob
-      const recordingBlob = await recording.stopRecording();
-      
       // Stop body language detection
       if (bodyLanguage.isActive) {
         bodyLanguage.stopDetection();
-      }
-
-      // Save interview data with recording
-      if (transcript.length > 0 && sessionId) {
-        try {
-          await processInterviewEnd(sessionId, transcript, 'upsc', undefined, undefined, recordingBlob || undefined);
-          toast({
-            title: "Interview Complete",
-            description: "Your interview has been saved and analyzed. Recording uploaded successfully.",
-          });
-        } catch (error) {
-          console.error('❌ Error processing interview end:', error);
-        }
       }
 
       await conversation.endSession();
@@ -221,6 +197,11 @@ const UPSCInterviewer = () => {
       }]);
       
       console.log('✅ UPSC Interview ended successfully');
+      
+      toast({
+        title: "Interview Complete",
+        description: "Body language analysis ready. Click 'Analyze Interview' to view detailed feedback.",
+      });
     } catch (error) {
       console.error('❌ Error ending interview:', error);
       setIsInterviewActive(false);
@@ -262,12 +243,6 @@ const UPSCInterviewer = () => {
             </div>
             
             <div className="flex items-center space-x-3">
-              <InterviewRecordingIndicator
-                isRecording={recording.isRecording}
-                recordingDuration={recording.recordingDuration}
-                hasRecording={!!recording.recordedBlob}
-                onDownload={recording.downloadRecording}
-              />
               <button 
                 onClick={() => navigate('/profile')}
                 className="px-4 py-2 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-lg hover:bg-slate-700/80 transition-colors"
@@ -279,17 +254,6 @@ const UPSCInterviewer = () => {
               </div>
             </div>
           </div>
-
-          {/* Camera Preview */}
-          {isInterviewActive && (
-            <div className="mb-6">
-              <CameraPreview
-                videoStream={recording.videoStream}
-                isRecording={recording.isRecording}
-                className="w-48 h-36 mx-auto"
-              />
-            </div>
-          )}
 
           {/* Debug Status Display */}
           <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl p-4 mb-6">

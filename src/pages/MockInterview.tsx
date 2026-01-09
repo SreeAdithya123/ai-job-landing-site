@@ -9,9 +9,6 @@ import Layout from '../components/Layout';
 import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewTranscript from '../components/interview/InterviewTranscript';
 import { Users, Target, BookOpen, Filter, ExternalLink } from 'lucide-react';
-import { useInterviewRecording } from '@/hooks/useInterviewRecording';
-import InterviewRecordingIndicator from '@/components/interview/InterviewRecordingIndicator';
-import CameraPreview from '@/components/interview/CameraPreview';
 
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
@@ -33,7 +30,6 @@ const MockInterview = () => {
   const [showMockInterface, setShowMockInterface] = useState(false);
   const [sessionId, setSessionId] = useState<string>('');
   const [interviewStartTime, setInterviewStartTime] = useState<Date | null>(null);
-  const recording = useInterviewRecording();
 
   const conversation = useConversation({
     onConnect: () => {
@@ -103,16 +99,12 @@ const MockInterview = () => {
 
   const handleStartMockInterview = async () => {
     try {
-      console.log('🎤 Requesting microphone and camera access...');
+      console.log('🎤 Requesting microphone access...');
       setConnectionStatus('requesting-mic');
       setShowMockInterface(true);
       
-      // Start recording (this also requests camera/mic permissions)
-      const stream = await recording.startRecording();
-      if (!stream) {
-        throw new Error('Failed to start recording');
-      }
-      console.log('✅ Microphone and camera access granted, recording started');
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('✅ Microphone access granted');
       
       setConnectionStatus('fetching-config');
       console.log('🔧 Fetching ElevenLabs configuration...');
@@ -175,24 +167,6 @@ const MockInterview = () => {
   const handleExitInterview = async () => {
     try {
       console.log('🛑 Ending mock interview session...');
-      
-      // Stop recording and get the blob
-      const recordingBlob = await recording.stopRecording();
-      
-      // Save interview data with recording
-      if (transcript.length > 0) {
-        const sessionId = `mock_${Date.now()}`;
-        try {
-          await processInterviewEnd(sessionId, transcript, 'mock', undefined, undefined, recordingBlob || undefined);
-          toast({
-            title: "Mock Interview Complete",
-            description: "Your interview has been saved and recording uploaded.",
-          });
-        } catch (error) {
-          console.error('❌ Error processing interview end:', error);
-        }
-      }
-      
       await conversation.endSession();
       
       const currentTime = new Date().toLocaleTimeString();
@@ -269,29 +243,10 @@ const MockInterview = () => {
                 </h1>
               </div>
               
-              <div className="flex items-center space-x-3">
-                <InterviewRecordingIndicator
-                  isRecording={recording.isRecording}
-                  recordingDuration={recording.recordingDuration}
-                  hasRecording={!!recording.recordedBlob}
-                  onDownload={recording.downloadRecording}
-                />
-                <div className="px-4 py-2 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-lg">
-                  <span className="text-slate-300 text-sm font-medium">AI Powered Interview</span>
-                </div>
+              <div className="px-4 py-2 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-lg">
+                <span className="text-slate-300 text-sm font-medium">AI Powered Interview</span>
               </div>
             </div>
-
-            {/* Camera Preview */}
-            {isInterviewActive && (
-              <div className="mb-6">
-                <CameraPreview
-                  videoStream={recording.videoStream}
-                  isRecording={recording.isRecording}
-                  className="w-48 h-36 mx-auto"
-                />
-              </div>
-            )}
 
             {/* Debug Status Display */}
             <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl p-4 mb-6">

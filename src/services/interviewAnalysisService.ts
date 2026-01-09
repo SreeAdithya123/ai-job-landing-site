@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export interface InterviewAnalysis {
-  id: string;
+  id?: string;
   user_id?: string;
   interview_type: string;
   duration_minutes?: number;
@@ -16,7 +16,6 @@ export interface InterviewAnalysis {
   feedback?: string;
   body_language_feedback?: string;
   transcript_summary?: string;
-  recording_url?: string;
   created_at?: string;
   updated_at?: string;
 }
