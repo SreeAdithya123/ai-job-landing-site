@@ -26,8 +26,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { Shield, Users, Crown, Star, Zap, Search, RefreshCw } from 'lucide-react';
+import { Shield, Users, Crown, Star, Zap, Search, RefreshCw, ShieldCheck, UserCog } from 'lucide-react';
 import { SubscriptionPlan } from '@/hooks/useSubscription';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Database } from '@/integrations/supabase/types';
+
+type AppRole = Database['public']['Enums']['app_role'];
 
 interface UserData {
   user_id: string;
@@ -36,6 +40,13 @@ interface UserData {
   plan: string;
   credits_remaining: number;
   credits_per_month: number;
+  created_at: string;
+}
+
+interface UserRole {
+  id: string;
+  user_id: string;
+  role: AppRole;
   created_at: string;
 }
 
@@ -53,6 +64,53 @@ const AdminDashboard = () => {
       return data as UserData[];
     },
     enabled: isAdmin,
+  });
+
+  const { data: userRoles, isLoading: rolesLoading, refetch: refetchRoles } = useQuery({
+    queryKey: ['admin-user-roles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as UserRole[];
+    },
+    enabled: isAdmin,
+  });
+
+  const addRoleMutation = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
+      const { error } = await supabase
+        .from('user_roles')
+        .insert({ user_id: userId, role });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-user-roles'] });
+      toast.success('Role added successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to add role');
+    },
+  });
+
+  const removeRoleMutation = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
+      const { error } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .eq('role', role);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-user-roles'] });
+      toast.success('Role removed successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to remove role');
+    },
   });
 
   const updatePlanMutation = useMutation({
@@ -75,6 +133,18 @@ const AdminDashboard = () => {
 
   const handlePlanChange = (userId: string, newPlan: SubscriptionPlan) => {
     updatePlanMutation.mutate({ userId, newPlan });
+  };
+
+  const handleAddRole = (userId: string, role: AppRole) => {
+    addRoleMutation.mutate({ userId, role });
+  };
+
+  const handleRemoveRole = (userId: string, role: AppRole) => {
+    removeRoleMutation.mutate({ userId, role });
+  };
+
+  const getUserRoles = (userId: string): AppRole[] => {
+    return userRoles?.filter(r => r.user_id === userId).map(r => r.role) || [];
   };
 
   const getPlanIcon = (plan: string) => {
@@ -161,7 +231,7 @@ const AdminDashboard = () => {
                 <p className="text-muted-foreground">Manage users and subscriptions</p>
               </div>
             </div>
-            <Button variant="outline" onClick={() => refetch()}>
+            <Button variant="outline" onClick={() => { refetch(); refetchRoles(); }}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
@@ -244,96 +314,260 @@ const AdminDashboard = () => {
             </Card>
           </div>
 
-          {/* Users Table */}
-          <Card className="glass-card">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>User Management</CardTitle>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search users..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 w-64"
-                  />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {usersLoading ? (
-                <div className="space-y-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full" />
-                  ))}
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>User</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Credits</TableHead>
-                      <TableHead>Joined</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers?.map((user) => (
-                      <TableRow key={user.user_id}>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{user.full_name || 'No name'}</p>
-                            <p className="text-sm text-muted-foreground">{user.email}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {getPlanIcon(user.plan || 'free')}
-                            <Badge variant={getPlanBadgeVariant(user.plan || 'free')} className="capitalize">
-                              {user.plan || 'free'}
-                            </Badge>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-medium">
-                            {user.credits_remaining ?? 0} / {user.credits_per_month ?? 2}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          {user.created_at 
-                            ? new Date(user.created_at).toLocaleDateString() 
-                            : 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={user.plan || 'free'}
-                            onValueChange={(value) => handlePlanChange(user.user_id, value as SubscriptionPlan)}
-                            disabled={updatePlanMutation.isPending}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="beginner">Beginner</SelectItem>
-                              <SelectItem value="free">Free</SelectItem>
-                              <SelectItem value="plus">Plus</SelectItem>
-                              <SelectItem value="pro">Pro</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-              {filteredUsers?.length === 0 && !usersLoading && (
-                <div className="text-center py-8 text-muted-foreground">
-                  No users found matching your search.
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Tabs for Subscriptions and Roles */}
+          <Tabs defaultValue="subscriptions" className="space-y-4">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="subscriptions" className="flex items-center gap-2">
+                <Crown className="h-4 w-4" />
+                Subscriptions
+              </TabsTrigger>
+              <TabsTrigger value="roles" className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4" />
+                User Roles
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Subscriptions Tab */}
+            <TabsContent value="subscriptions">
+              <Card className="glass-card">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Subscription Management</CardTitle>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-9 w-64"
+                      />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {usersLoading ? (
+                    <div className="space-y-4">
+                      {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} className="h-16 w-full" />
+                      ))}
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User</TableHead>
+                          <TableHead>Roles</TableHead>
+                          <TableHead>Plan</TableHead>
+                          <TableHead>Credits</TableHead>
+                          <TableHead>Joined</TableHead>
+                          <TableHead>Change Plan</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredUsers?.map((user) => {
+                          const roles = getUserRoles(user.user_id);
+                          return (
+                            <TableRow key={user.user_id}>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium">{user.full_name || 'No name'}</p>
+                                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-1 flex-wrap">
+                                  {roles.length > 0 ? roles.map(role => (
+                                    <Badge 
+                                      key={role} 
+                                      variant={role === 'admin' ? 'default' : role === 'moderator' ? 'secondary' : 'outline'}
+                                      className="capitalize"
+                                    >
+                                      {role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
+                                      {role === 'moderator' && <ShieldCheck className="h-3 w-3 mr-1" />}
+                                      {role}
+                                    </Badge>
+                                  )) : (
+                                    <span className="text-muted-foreground text-sm">User</span>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  {getPlanIcon(user.plan || 'beginner')}
+                                  <Badge variant={getPlanBadgeVariant(user.plan || 'beginner')} className="capitalize">
+                                    {user.plan || 'beginner'}
+                                  </Badge>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <span className="font-medium">
+                                  {user.credits_remaining ?? 0} / {user.credits_per_month ?? 0}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                {user.created_at 
+                                  ? new Date(user.created_at).toLocaleDateString() 
+                                  : 'N/A'}
+                              </TableCell>
+                              <TableCell>
+                                <Select
+                                  value={user.plan || 'beginner'}
+                                  onValueChange={(value) => handlePlanChange(user.user_id, value as SubscriptionPlan)}
+                                  disabled={updatePlanMutation.isPending}
+                                >
+                                  <SelectTrigger className="w-32">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="beginner">Beginner</SelectItem>
+                                    <SelectItem value="free">Free</SelectItem>
+                                    <SelectItem value="plus">Plus</SelectItem>
+                                    <SelectItem value="pro">Pro</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  )}
+                  {filteredUsers?.length === 0 && !usersLoading && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No users found matching your search.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Roles Tab */}
+            <TabsContent value="roles">
+              <Card className="glass-card">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <UserCog className="h-5 w-5" />
+                      Role Management
+                    </CardTitle>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-9 w-64"
+                      />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {usersLoading || rolesLoading ? (
+                    <div className="space-y-4">
+                      {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} className="h-16 w-full" />
+                      ))}
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User</TableHead>
+                          <TableHead>Current Roles</TableHead>
+                          <TableHead>Admin</TableHead>
+                          <TableHead>Moderator</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredUsers?.map((user) => {
+                          const roles = getUserRoles(user.user_id);
+                          const isUserAdmin = roles.includes('admin');
+                          const isUserModerator = roles.includes('moderator');
+                          
+                          return (
+                            <TableRow key={user.user_id}>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium">{user.full_name || 'No name'}</p>
+                                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-1 flex-wrap">
+                                  {roles.length > 0 ? roles.map(role => (
+                                    <Badge 
+                                      key={role} 
+                                      variant={role === 'admin' ? 'default' : role === 'moderator' ? 'secondary' : 'outline'}
+                                      className="capitalize"
+                                    >
+                                      {role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
+                                      {role === 'moderator' && <ShieldCheck className="h-3 w-3 mr-1" />}
+                                      {role}
+                                    </Badge>
+                                  )) : (
+                                    <Badge variant="outline">User</Badge>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {isUserAdmin ? (
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => handleRemoveRole(user.user_id, 'admin')}
+                                    disabled={removeRoleMutation.isPending}
+                                  >
+                                    Remove Admin
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleAddRole(user.user_id, 'admin')}
+                                    disabled={addRoleMutation.isPending}
+                                  >
+                                    <Shield className="h-3 w-3 mr-1" />
+                                    Make Admin
+                                  </Button>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {isUserModerator ? (
+                                  <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    onClick={() => handleRemoveRole(user.user_id, 'moderator')}
+                                    disabled={removeRoleMutation.isPending}
+                                  >
+                                    Remove Mod
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleAddRole(user.user_id, 'moderator')}
+                                    disabled={addRoleMutation.isPending}
+                                  >
+                                    <ShieldCheck className="h-3 w-3 mr-1" />
+                                    Make Mod
+                                  </Button>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  )}
+                  {filteredUsers?.length === 0 && !usersLoading && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No users found matching your search.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </Layout>
     </ProtectedRoute>
