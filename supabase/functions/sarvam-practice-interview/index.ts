@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -147,13 +148,45 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      console.error('❌ No authorization header provided');
+      return new Response(
+        JSON.stringify({ error: 'Authorization required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    );
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('❌ Authentication failed:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('✅ Authenticated user:', user.id);
+
     const { audioData, getQuestion } = await req.json();
 
-    console.log('Request received:', { hasAudioData: !!audioData, getQuestion });
+    console.log('Request received:', { hasAudioData: !!audioData, getQuestion, userId: user.id });
 
     // If just getting a question without audio
     if (getQuestion) {
-      console.log('Getting new practice question...');
+      console.log('Getting new practice question for user:', user.id);
       const aiQuestion = await callSarvamLLM('');
       const aiAudio = await callSarvamTTS(aiQuestion);
 
@@ -177,7 +210,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Processing audio recording...');
+    console.log('Processing audio recording for user:', user.id);
 
     // Step 1: Speech-to-Text
     console.log('Converting speech to text...');
@@ -192,7 +225,7 @@ serve(async (req) => {
     // Step 3: Text-to-Speech
     console.log('Converting text to speech...');
     const aiAudio = await callSarvamTTS(aiQuestion);
-    console.log('TTS conversion completed');
+    console.log('TTS conversion completed for user:', user.id);
 
     return new Response(JSON.stringify({
       transcript,
