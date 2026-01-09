@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mic, MicOff, Play, Square, MessageSquare, Volume2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useSubscription } from '@/hooks/useSubscription';
+import RestrictedAccessCard from '@/components/RestrictedAccessCard';
 
 interface PracticeResponse {
   transcript: string;
@@ -23,6 +25,7 @@ const PracticeInterview: React.FC = () => {
   const audioChunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
+  const { subscription, isLoading: subscriptionLoading, isBeginner } = useSubscription();
 
   const startRecording = async () => {
     try {
@@ -172,6 +175,33 @@ const PracticeInterview: React.FC = () => {
       description: "Great job! You can start a new practice session anytime.",
     });
   };
+
+  // Show loading state while checking subscription
+  if (subscriptionLoading) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <Mic className="h-8 w-8 text-white" />
+            </div>
+            <p className="text-slate-300">Loading...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Show restricted access for beginner plan users
+  if (isBeginner) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+          <RestrictedAccessCard feature="Practice Interview" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
