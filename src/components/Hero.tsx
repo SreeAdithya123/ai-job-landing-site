@@ -97,6 +97,9 @@ const Hero = () => {
             <Button variant="secondary" size="lg" onClick={handleViewAIInterviewer} className="glass-card hover:bg-white/90">
               View AI Interviewer Product
             </Button>
+            <Button variant="outline" size="lg" onClick={() => navigate('/payments')} className="border-primary/30 hover:bg-primary/10">
+              View Plans
+            </Button>
           </motion.div>
 
           <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16" initial={{

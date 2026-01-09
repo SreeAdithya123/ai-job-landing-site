@@ -22,14 +22,7 @@ const CreditCheckModal: React.FC<CreditCheckModalProps> = ({ open, onOpenChange 
 
   const handleViewPlans = () => {
     onOpenChange(false);
-    navigate('/');
-    // Scroll to pricing section after navigation
-    setTimeout(() => {
-      const pricingSection = document.getElementById('pricing');
-      if (pricingSection) {
-        pricingSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
+    navigate('/payments');
   };
 
   const handleGoToDashboard = () => {

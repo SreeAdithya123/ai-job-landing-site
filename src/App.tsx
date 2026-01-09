@@ -24,6 +24,7 @@ import CodingInterview from "./pages/CodingInterview";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
+import Payments from "./pages/Payments";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ function App() {
               <Route path="/upsc-interviewer" element={<UPSCInterviewer />} />
               <Route path="/recruiters" element={<Recruiters />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/payments" element={<Payments />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
