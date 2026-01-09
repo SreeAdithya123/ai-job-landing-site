@@ -5,9 +5,12 @@ import { ArrowLeft, Users, Camera, Mic, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import Layout from '../components/Layout';
+import { useSubscription } from '@/hooks/useSubscription';
+import RestrictedAccessCard from '@/components/RestrictedAccessCard';
 
 const VirtualPractice = () => {
   const navigate = useNavigate();
+  const { subscription, isLoading: subscriptionLoading, isBeginner } = useSubscription();
 
   useEffect(() => {
     // Embed HeyGen streaming script
@@ -84,6 +87,33 @@ const VirtualPractice = () => {
       script.remove();
     };
   }, []);
+
+  // Show loading state while checking subscription
+  if (subscriptionLoading) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <Users className="h-8 w-8 text-white" />
+            </div>
+            <p className="text-slate-300">Loading...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Show restricted access for beginner plan users
+  if (isBeginner) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+          <RestrictedAccessCard feature="Virtual Practice" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

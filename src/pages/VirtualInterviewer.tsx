@@ -8,11 +8,14 @@ import Layout from '../components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useHeyGen } from '@/hooks/useHeyGen';
+import { useSubscription } from '@/hooks/useSubscription';
+import RestrictedAccessCard from '@/components/RestrictedAccessCard';
 
 const VirtualInterviewer = () => {
   const [userInput, setUserInput] = useState('');
   const navigate = useNavigate();
   const { isActive, isLoading, startSession, stopSession, speak } = useHeyGen();
+  const { subscription, isLoading: subscriptionLoading, isBeginner } = useSubscription();
 
   const handleStartInterview = async () => {
     try {
@@ -67,6 +70,33 @@ const VirtualInterviewer = () => {
       handleSendMessage();
     }
   };
+
+  // Show loading state while checking subscription
+  if (subscriptionLoading) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <Video className="h-8 w-8 text-white" />
+            </div>
+            <p className="text-slate-300">Loading...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Show restricted access for beginner plan users
+  if (isBeginner) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+          <RestrictedAccessCard feature="Virtual Interviewer" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
