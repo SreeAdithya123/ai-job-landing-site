@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useConversation } from '@11labs/react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useSubscription } from '@/hooks/useSubscription';
 import Layout from '../components/Layout';
 import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewControls from '../components/interview/InterviewControls';
@@ -12,6 +13,7 @@ import InterviewTranscript from '../components/interview/InterviewTranscript';
 import InterviewStatus from '../components/interview/InterviewStatus';
 import BodyLanguageMonitor from '../components/interview/BodyLanguageMonitor';
 import AnalysisFeedbackButton from '../components/AnalysisFeedbackButton';
+import CreditCheckModal from '../components/CreditCheckModal';
 import { useUPSCBodyLanguageDetection } from '@/hooks/useUPSCBodyLanguageDetection';
 
 export interface TranscriptEntry {
@@ -27,7 +29,9 @@ const UPSCInterviewer = () => {
   const [sessionId, setSessionId] = useState<string>('');
   const [showSkeletonOverlay, setShowSkeletonOverlay] = useState(true);
   const [isMicMuted, setIsMicMuted] = useState(false);
+  const [showCreditModal, setShowCreditModal] = useState(false);
   const navigate = useNavigate();
+  const { hasCredits, deductCredit } = useSubscription();
 
   const bodyLanguage = useUPSCBodyLanguageDetection();
 
@@ -102,6 +106,11 @@ const UPSCInterviewer = () => {
   });
 
   const handleStartInterview = async () => {
+    if (!hasCredits) {
+      setShowCreditModal(true);
+      return;
+    }
+
     try {
       console.log('🎤 Requesting microphone and camera access...');
       setConnectionStatus('requesting-mic');
@@ -181,6 +190,9 @@ const UPSCInterviewer = () => {
   const handleExitInterview = async () => {
     try {
       console.log('🛑 Ending interview session...');
+      
+      // Deduct credit when interview ends
+      deductCredit({ interviewType: 'upsc' });
       
       // Stop body language detection
       if (bodyLanguage.isActive) {
@@ -322,6 +334,9 @@ const UPSCInterviewer = () => {
             onClearTranscript={handleClearTranscript}
           />
         </div>
+
+        {/* Credit Check Modal */}
+        <CreditCheckModal open={showCreditModal} onOpenChange={setShowCreditModal} />
       </div>
     </Layout>
   );

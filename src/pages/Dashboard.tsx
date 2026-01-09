@@ -8,11 +8,12 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import AnalysisFeedbackButton from '../components/AnalysisFeedbackButton';
 import ElevenLabsAnalyticsDashboard from '../components/dashboard/ElevenLabsAnalyticsDashboard';
 import SubscriptionCard from '../components/SubscriptionCard';
-import { Download, Play, Menu, BarChart3, History, Video, MessageSquare, Settings } from 'lucide-react';
+import { Download, Play, Menu, BarChart3, History, Video, MessageSquare, Settings, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStats } from '@/hooks/useUserStats';
 import { useElevenLabsAnalytics } from '@/hooks/useElevenLabsAnalytics';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminRole } from '@/hooks/useAdminRole';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ import { toast } from 'sonner';
 const Dashboard = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { isAdmin } = useAdminRole();
   const { totalSessions, totalHours, completedInterviews, averageScore, analyses, interviewSessions } = useUserStats();
   const { data: analyticsData, isLoading: analyticsLoading } = useElevenLabsAnalytics();
   const isNewUser = totalSessions === 0;
@@ -388,6 +390,15 @@ const Dashboard = () => {
                     >
                       Materials
                     </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => navigate('/admin')}
+                        className="text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center space-x-1"
+                      >
+                        <Shield className="h-4 w-4" />
+                        <span>Admin</span>
+                      </button>
+                    )}
                   </nav>
                   <button className="flex items-center space-x-2 px-6 py-3 bg-white/60 backdrop-blur-sm border border-slate-300/50 rounded-xl hover:bg-white/80 transition-all duration-200 shadow-sm">
                     <Settings className="h-5 w-5 text-slate-600" />

@@ -4,6 +4,7 @@ import { useConversation } from '@11labs/react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import { processInterviewEnd } from '@/services/interviewSessionService';
 import ProtectedRoute from '../components/ProtectedRoute';
 import InterviewHeader from '../components/interview/InterviewHeader';
@@ -11,6 +12,7 @@ import InterviewHero from '../components/interview/InterviewHero';
 import InterviewTypeCard from '../components/interview/InterviewTypeCard';
 import InterviewSessionsPanel from '../components/interview/InterviewSessionsPanel';
 import InterviewActiveInterface from '../components/interview/InterviewActiveInterface';
+import CreditCheckModal from '../components/CreditCheckModal';
 import { Laptop, Code, Star, Users } from 'lucide-react';
 
 export interface TranscriptEntry {
@@ -35,8 +37,10 @@ const InterviewCopilot = () => {
   const [userIsSpeaking, setUserIsSpeaking] = useState(false);
   const [interviewStartTime, setInterviewStartTime] = useState<Date | null>(null);
   const [sessionId, setSessionId] = useState<string>('');
+  const [showCreditModal, setShowCreditModal] = useState(false);
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  const { hasCredits, deductCredit, isDeducting, subscription } = useSubscription();
 
 
   const conversation = useConversation({
@@ -64,6 +68,9 @@ const InterviewCopilot = () => {
           const duration = interviewStartTime 
             ? Math.round((new Date().getTime() - interviewStartTime.getTime()) / 60000)
             : undefined;
+          
+          // Deduct credit when interview ends
+          deductCredit({ interviewType: selectedType, durationMinutes: duration });
           
           await processInterviewEnd(sessionId, transcript, selectedType, duration);
           
@@ -169,6 +176,12 @@ const InterviewCopilot = () => {
   }];
 
   const handleSelectInterview = (type: string) => {
+    // Check credits before allowing interview selection
+    if (!hasCredits) {
+      setShowCreditModal(true);
+      return;
+    }
+
     if (type === 'coding') {
       navigate('/interview-copilot/coding');
     } else if (type === 'general') {
@@ -182,6 +195,12 @@ const InterviewCopilot = () => {
   };
 
   const handleStartInterview = async () => {
+    // Double-check credits before starting
+    if (!hasCredits) {
+      setShowCreditModal(true);
+      return;
+    }
+
     try {
       console.log('🎤 Requesting microphone access...');
       setConnectionStatus('requesting-mic');
@@ -350,6 +369,9 @@ const InterviewCopilot = () => {
             onStartFirstInterview={() => handleSelectInterview('general')}
           />
         </div>
+
+        {/* Credit Check Modal */}
+        <CreditCheckModal open={showCreditModal} onOpenChange={setShowCreditModal} />
       </div>
     </ProtectedRoute>
   );
