@@ -9,9 +9,11 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useSubscription } from '@/hooks/useSubscription';
 import { ArrowLeft, Play, Send, RotateCcw, Code2, Timer, CheckCircle, XCircle, Sparkles, History, ArrowRight } from 'lucide-react';
 import CodeEditor from '../components/CodeEditor';
 import ProtectedRoute from '../components/ProtectedRoute';
+import CreditCheckModal from '../components/CreditCheckModal';
 
 interface Problem {
   id: string;
@@ -54,6 +56,8 @@ const CodingInterview = () => {
   const [executionTime, setExecutionTime] = useState<number | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [showCreditModal, setShowCreditModal] = useState(false);
+  const { hasCredits, deductCredit } = useSubscription();
 
   const { data: history, refetch: refetchHistory } = useQuery({
     queryKey: ['coding-history'],
@@ -132,6 +136,11 @@ const CodingInterview = () => {
   const handleSubmit = async () => {
     if (!problem) return;
     
+    if (!hasCredits) {
+      setShowCreditModal(true);
+      return;
+    }
+
     if (!code.trim()) {
       toast({
         title: "No Code",
@@ -165,6 +174,8 @@ const CodingInterview = () => {
       if (data.success) {
         setEvaluation(data.evaluation);
         refetchHistory();
+        // Deduct credit on successful submission
+        deductCredit({ interviewType: 'coding' });
         toast({
           title: "Evaluation Complete",
           description: `Your solution scored ${data.evaluation.score}/10`
@@ -550,6 +561,9 @@ const CodingInterview = () => {
             </div>
           )}
         </div>
+
+        {/* Credit Check Modal */}
+        <CreditCheckModal open={showCreditModal} onOpenChange={setShowCreditModal} />
       </div>
     </ProtectedRoute>
   );

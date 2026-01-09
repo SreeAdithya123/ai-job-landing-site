@@ -6,9 +6,11 @@ import { useNavigate } from 'react-router-dom';
 import { useConversation } from '@11labs/react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useSubscription } from '@/hooks/useSubscription';
 import Layout from '../components/Layout';
 import InterviewInterface from '../components/interview/InterviewInterface';
 import InterviewTranscript from '../components/interview/InterviewTranscript';
+import CreditCheckModal from '../components/CreditCheckModal';
 
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
@@ -20,7 +22,9 @@ const FriendlyInterviewer = () => {
   const [isInterviewActive, setIsInterviewActive] = useState(false);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
+  const [showCreditModal, setShowCreditModal] = useState(false);
   const navigate = useNavigate();
+  const { hasCredits, deductCredit } = useSubscription();
 
   const conversation = useConversation({
     onConnect: () => {
@@ -89,6 +93,11 @@ const FriendlyInterviewer = () => {
   });
 
   const handleStartInterview = async () => {
+    if (!hasCredits) {
+      setShowCreditModal(true);
+      return;
+    }
+
     try {
       console.log('🎤 Requesting microphone access...');
       setConnectionStatus('requesting-mic');
@@ -156,6 +165,10 @@ const FriendlyInterviewer = () => {
   const handleExitInterview = async () => {
     try {
       console.log('🛑 Ending friendly chat session...');
+      
+      // Deduct credit when chat ends
+      deductCredit({ interviewType: 'friendly' });
+      
       await conversation.endSession();
       
       const currentTime = new Date().toLocaleTimeString();
@@ -301,6 +314,9 @@ const FriendlyInterviewer = () => {
             </motion.div>
           )}
         </div>
+
+        {/* Credit Check Modal */}
+        <CreditCheckModal open={showCreditModal} onOpenChange={setShowCreditModal} />
       </div>
     </Layout>
   );

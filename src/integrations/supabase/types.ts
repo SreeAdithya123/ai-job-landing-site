@@ -346,6 +346,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           billing_cycle_start: string
@@ -384,6 +405,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_all_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          credits_per_month: number
+          credits_remaining: number
+          email: string
+          full_name: string
+          plan: string
+          user_id: string
+        }[]
+      }
       admin_update_subscription: {
         Args: {
           p_new_plan: Database["public"]["Enums"]["subscription_plan"]
@@ -409,6 +442,13 @@ export type Database = {
         }[]
       }
       has_credits: { Args: { p_user_id: string }; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       store_elevenlabs_transcript: {
         Args: {
           p_content: string
@@ -421,6 +461,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       subscription_plan: "free" | "plus" | "pro"
     }
     CompositeTypes: {
@@ -549,6 +590,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       subscription_plan: ["free", "plus", "pro"],
     },
   },
