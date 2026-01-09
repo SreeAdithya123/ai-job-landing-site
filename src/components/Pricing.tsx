@@ -20,7 +20,7 @@ const Pricing = () => {
       name: "Free",
       price: "0",
       period: "month",
-      description: "Perfect for getting started with AI interview practice",
+      description: "Get started with 2 free interviews per month",
       originalPrice: null,
       features: [
         "2 interviews per month (1 credit = 10 min)",
@@ -29,11 +29,11 @@ const Pricing = () => {
         "Email support",
         "Progress tracking",
       ],
-      buttonText: "Get Started Free",
+      buttonText: "Start Free",
       buttonVariant: "outline" as const,
       popular: false,
       icon: Clock,
-      highlight: "Great for beginners"
+      highlight: "2 free interviews"
     },
     {
       id: 'plus' as SubscriptionPlan,

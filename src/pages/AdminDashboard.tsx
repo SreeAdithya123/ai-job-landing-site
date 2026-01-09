@@ -83,6 +83,8 @@ const AdminDashboard = () => {
         return <Crown className="h-4 w-4 text-amber-500" />;
       case 'plus':
         return <Star className="h-4 w-4 text-primary" />;
+      case 'free':
+        return <Zap className="h-4 w-4 text-green-500" />;
       default:
         return <Zap className="h-4 w-4 text-muted-foreground" />;
     }
@@ -94,8 +96,10 @@ const AdminDashboard = () => {
         return 'default';
       case 'plus':
         return 'secondary';
-      default:
+      case 'free':
         return 'outline';
+      default:
+        return 'destructive';
     }
   };
 
@@ -164,7 +168,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <Card className="glass-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -181,14 +185,29 @@ const AdminDashboard = () => {
             <Card className="glass-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Free Users
+                  Beginner Users
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
                   <Zap className="h-5 w-5 text-muted-foreground" />
                   <span className="text-2xl font-bold">
-                    {users?.filter(u => u.plan === 'free' || !u.plan).length ?? 0}
+                    {users?.filter(u => u.plan === 'beginner' || !u.plan).length ?? 0}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="glass-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Free Users
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-green-500" />
+                  <span className="text-2xl font-bold">
+                    {users?.filter(u => u.plan === 'free').length ?? 0}
                   </span>
                 </div>
               </CardContent>
@@ -296,6 +315,7 @@ const AdminDashboard = () => {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
+                              <SelectItem value="beginner">Beginner</SelectItem>
                               <SelectItem value="free">Free</SelectItem>
                               <SelectItem value="plus">Plus</SelectItem>
                               <SelectItem value="pro">Pro</SelectItem>
