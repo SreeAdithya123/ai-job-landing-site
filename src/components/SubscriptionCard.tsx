@@ -2,12 +2,15 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
-import { Zap, Crown, Star } from 'lucide-react';
+import { Button } from './ui/button';
+import { Zap, Crown, Star, ArrowUpRight } from 'lucide-react';
 import { useSubscription, PLAN_DETAILS } from '@/hooks/useSubscription';
 import { Skeleton } from './ui/skeleton';
+import { useNavigate } from 'react-router-dom';
 
 const SubscriptionCard = () => {
   const { subscription, isLoading, planDetails } = useSubscription();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -73,13 +76,22 @@ const SubscriptionCard = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         {isBeginner ? (
-          <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
-            <p className="text-sm text-amber-600 font-medium mb-2">
-              You're on the Beginner plan with no interview credits.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Upgrade to Free or higher to start practicing interviews.
-            </p>
+          <div className="space-y-3">
+            <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+              <p className="text-sm text-amber-600 font-medium mb-2">
+                You're on the Beginner plan with no interview credits.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Upgrade to Free or higher to start practicing interviews.
+              </p>
+            </div>
+            <Button 
+              onClick={() => navigate('/payments')}
+              className="w-full bg-gradient-to-r from-primary to-accent text-white"
+            >
+              <ArrowUpRight className="h-4 w-4 mr-2" />
+              Upgrade Plan
+            </Button>
           </div>
         ) : (
           <div>
@@ -97,11 +109,33 @@ const SubscriptionCard = () => {
         )}
 
         {!isBeginner && subscription.credits_remaining === 0 && (
-          <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20">
-            <p className="text-sm text-destructive font-medium">
-              No credits remaining. Upgrade your plan to continue practicing.
-            </p>
+          <div className="space-y-3">
+            <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+              <p className="text-sm text-destructive font-medium">
+                No credits remaining. Upgrade your plan to continue practicing.
+              </p>
+            </div>
+            <Button 
+              onClick={() => navigate('/payments')}
+              variant="outline"
+              className="w-full border-primary text-primary hover:bg-primary/10"
+            >
+              <ArrowUpRight className="h-4 w-4 mr-2" />
+              Upgrade Plan
+            </Button>
           </div>
+        )}
+
+        {!isBeginner && subscription.credits_remaining > 0 && subscription.plan !== 'pro' && (
+          <Button 
+            onClick={() => navigate('/payments')}
+            variant="outline"
+            size="sm"
+            className="w-full border-primary/50 text-primary hover:bg-primary/10"
+          >
+            <ArrowUpRight className="h-4 w-4 mr-2" />
+            View Upgrade Options
+          </Button>
         )}
 
         <div className="text-xs text-muted-foreground">

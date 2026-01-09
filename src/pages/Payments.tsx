@@ -1,15 +1,15 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Check, Star, Zap, Shield, Crown, Clock, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Check, Star, Zap, Shield, Crown, Clock, Users, ArrowLeft, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription, PLAN_DETAILS, SubscriptionPlan } from '@/hooks/useSubscription';
-import { Badge } from './ui/badge';
+import { Badge } from '@/components/ui/badge';
+import Layout from '@/components/Layout';
 
-const Pricing = () => {
+const Payments = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { subscription } = useSubscription();
@@ -21,7 +21,6 @@ const Pricing = () => {
       price: "0",
       period: "month",
       description: "Get started with 2 free interviews per month",
-      originalPrice: null,
       features: [
         "2 interviews per month (1 credit = 10 min)",
         "Basic feedback and scoring",
@@ -29,8 +28,7 @@ const Pricing = () => {
         "Email support",
         "Progress tracking",
       ],
-      buttonText: "Start Free",
-      buttonVariant: "outline" as const,
+      buttonText: "Get Started",
       popular: false,
       icon: Clock,
       highlight: "2 free interviews"
@@ -39,7 +37,6 @@ const Pricing = () => {
       id: 'plus' as SubscriptionPlan,
       name: "Plus",
       price: "19",
-      originalPrice: null,
       period: "month",
       description: "More practice time for serious job seekers",
       features: [
@@ -51,7 +48,6 @@ const Pricing = () => {
         "Priority email support",
       ],
       buttonText: "Upgrade to Plus",
-      buttonVariant: "outline" as const,
       popular: false,
       icon: Star,
       highlight: "More practice time"
@@ -60,7 +56,6 @@ const Pricing = () => {
       id: 'pro' as SubscriptionPlan,
       name: "Pro",
       price: "49",
-      originalPrice: null,
       period: "month",
       description: "Maximum interviews + all premium features",
       features: [
@@ -74,66 +69,93 @@ const Pricing = () => {
         "Custom question banks",
       ],
       buttonText: "Upgrade to Pro",
-      buttonVariant: "default" as const,
       popular: true,
       icon: Crown,
       highlight: "Best value"
     }
   ];
 
-  const handleGetStarted = (planId: SubscriptionPlan) => {
+  const handleSelectPlan = (planId: SubscriptionPlan) => {
     if (!user) {
       navigate('/auth');
-    } else {
-      navigate('/payments');
+      return;
     }
+    // For now, show contact info - can integrate Stripe later
+    window.location.href = 'mailto:support@vyoman.com?subject=Plan Upgrade Request - ' + planId.toUpperCase();
   };
 
   const isCurrentPlan = (planId: SubscriptionPlan) => {
     return subscription?.plan === planId;
   };
 
-  return (
-    <section className="py-24 bg-gradient-to-b from-background via-slate-50/50 to-background relative overflow-hidden">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(139,92,246,0.05),transparent_50%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(20,184,166,0.05),transparent_50%)] pointer-events-none" />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+  const isPlanDowngrade = (planId: SubscriptionPlan) => {
+    const planOrder = { beginner: 0, free: 1, plus: 2, pro: 3 };
+    const currentPlanOrder = planOrder[subscription?.plan || 'beginner'];
+    const targetPlanOrder = planOrder[planId];
+    return targetPlanOrder < currentPlanOrder;
+  };
+
+  const content = (
+    <div className="min-h-screen bg-gradient-to-b from-background via-slate-50/50 to-background">
+      {/* Navigation */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+      </div>
+
+      {/* Header */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         <motion.div
-          className="text-center mb-20"
+          className="text-center mb-12"
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
         >
           <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full mb-6 border border-primary/20">
             <Shield className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-primary">Trusted by 50,000+ job seekers</span>
           </div>
           
-          <h2 className="text-5xl lg:text-6xl font-bold text-foreground mb-6 bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent leading-tight">
-            Simple, Transparent Pricing
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Start free and upgrade as you grow. All plans include our core AI interview technology with no hidden fees.
+          <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4 bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+            Choose Your Plan
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Unlock your interview potential with our AI-powered practice platform
           </p>
-          
+
+          {subscription && (
+            <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+              <span className="text-sm text-muted-foreground">Current Plan:</span>
+              <Badge variant="default" className="capitalize">
+                {subscription.plan}
+              </Badge>
+              <span className="text-sm text-muted-foreground">
+                ({subscription.credits_remaining} credits remaining)
+              </span>
+            </div>
+          )}
+
           {/* Credit info */}
-          <div className="mt-8 inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full border border-primary/20">
+          <div className="mt-6 inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full border border-primary/20">
             <Zap className="h-4 w-4 text-primary" />
             <span className="text-primary font-medium">1 credit = 10 minutes of interview time</span>
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {/* Pricing Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
               className="relative"
             >
               {plan.popular && (
@@ -150,16 +172,16 @@ const Pricing = () => {
                 </div>
               )}
               
-              <Card className={`glass-card h-full transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${
+              <Card className={`h-full transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${
                 plan.popular 
                   ? 'border-primary/30 shadow-xl ring-2 ring-primary/20 scale-105' 
-                  : 'border-white/20 hover:border-primary/20'
+                  : 'border-border hover:border-primary/20'
               }`}>
                 <CardHeader className="text-center pb-8 pt-8">
                   <div className="flex items-center justify-center mb-4">
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                       plan.popular 
-                        ? 'bg-gradient-to-r from-primary to-accent text-white shadow-glow' 
+                        ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg' 
                         : 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-600'
                     }`}>
                       <plan.icon className="h-6 w-6" />
@@ -175,25 +197,15 @@ const Pricing = () => {
                   </div>
                   
                   <div className="mb-4">
-                    <div className="flex items-center justify-center space-x-2">
-                      {plan.originalPrice && (
-                        <span className="text-lg text-muted-foreground line-through">
-                          ${plan.originalPrice}
-                        </span>
-                      )}
+                    <div className="flex items-center justify-center">
                       <span className="text-5xl font-bold text-foreground">
                         ${plan.price}
                       </span>
                     </div>
                     <span className="text-muted-foreground">/{plan.period}</span>
-                    {plan.originalPrice && (
-                      <div className="text-sm text-green-600 font-medium mt-1">
-                        Save ${parseInt(plan.originalPrice) - parseInt(plan.price)}/month
-                      </div>
-                    )}
                   </div>
                   
-                  <p className="text-muted-foreground text-sm leading-relaxed">
+                  <p className="text-muted-foreground text-sm">
                     {plan.description}
                   </p>
                 </CardHeader>
@@ -205,7 +217,7 @@ const Pricing = () => {
                         <div className="flex-shrink-0 w-5 h-5 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mt-0.5">
                           <Check className="h-3 w-3 text-white" />
                         </div>
-                        <span className="text-muted-foreground text-sm leading-relaxed">
+                        <span className="text-muted-foreground text-sm">
                           {feature}
                         </span>
                       </li>
@@ -213,45 +225,68 @@ const Pricing = () => {
                   </ul>
 
                   <Button
-                    onClick={() => handleGetStarted(plan.id)}
-                    variant={plan.buttonVariant}
+                    onClick={() => handleSelectPlan(plan.id)}
+                    variant={plan.popular ? "default" : "outline"}
                     disabled={isCurrentPlan(plan.id)}
                     className={`w-full h-12 font-semibold ${
                       plan.popular 
-                        ? 'shadow-xl hover:shadow-2xl scale-105 bg-gradient-to-r from-primary to-accent text-white' 
+                        ? 'shadow-xl hover:shadow-2xl bg-gradient-to-r from-primary to-accent text-white' 
                         : 'hover:bg-primary/10 hover:border-primary/30'
                     } ${isCurrentPlan(plan.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {isCurrentPlan(plan.id) ? 'Current Plan' : plan.buttonText}
+                    {isCurrentPlan(plan.id) 
+                      ? 'Current Plan' 
+                      : isPlanDowngrade(plan.id) 
+                        ? 'Contact to Downgrade'
+                        : plan.buttonText}
                   </Button>
-                  
-                  {plan.id !== 'free' && (
-                    <div className="text-center">
-                      <Button
-                        variant="link"
-                        onClick={() => navigate('/payments')}
-                        className="text-xs text-primary p-0 h-auto"
-                      >
-                        View all plan details →
-                      </Button>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </div>
 
-        {/* Trust indicators and guarantee */}
+        {/* Contact Section */}
         <motion.div
-          className="mt-20 space-y-8"
+          className="max-w-3xl mx-auto text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true }}
+        >
+          <Card className="border border-primary/20">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
+                  <Mail className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">
+                Need Help Choosing?
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Contact our team to discuss which plan is right for you or to request a custom enterprise solution.
+              </p>
+              <Button 
+                variant="outline"
+                onClick={() => window.location.href = 'mailto:support@vyoman.com?subject=Plan Inquiry'}
+                className="flex items-center gap-2"
+              >
+                <Mail className="h-4 w-4" />
+                Contact Sales
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Trust indicators */}
+        <motion.div
+          className="space-y-8 max-w-4xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
         >
           {/* Money-back guarantee */}
-          <div className="glass-card p-8 rounded-2xl border border-white/20 max-w-3xl mx-auto text-center">
+          <div className="p-8 rounded-2xl border border-border text-center bg-card">
             <div className="flex items-center justify-center mb-4">
               <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
                 <Shield className="h-6 w-6 text-white" />
@@ -260,13 +295,13 @@ const Pricing = () => {
             <h3 className="text-2xl font-bold text-foreground mb-3">
               30-Day Money-Back Guarantee
             </h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Not satisfied with your results? Get a full refund within 30 days, no questions asked. We're confident you'll love our AI interview platform.
+            <p className="text-muted-foreground">
+              Not satisfied with your results? Get a full refund within 30 days, no questions asked.
             </p>
           </div>
 
-          {/* FAQ or additional info */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          {/* Features grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center mx-auto mb-3">
                 <Clock className="h-5 w-5 text-white" />
@@ -291,8 +326,15 @@ const Pricing = () => {
           </div>
         </motion.div>
       </div>
-    </section>
+    </div>
   );
+
+  // If user is logged in, wrap with Layout (sidebar), otherwise show standalone
+  if (user) {
+    return <Layout>{content}</Layout>;
+  }
+
+  return content;
 };
 
-export default Pricing;
+export default Payments;
