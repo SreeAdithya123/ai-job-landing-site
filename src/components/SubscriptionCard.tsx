@@ -36,6 +36,8 @@ const SubscriptionCard = () => {
         return <Crown className="h-5 w-5 text-amber-500" />;
       case 'plus':
         return <Star className="h-5 w-5 text-primary" />;
+      case 'free':
+        return <Zap className="h-5 w-5 text-green-500" />;
       default:
         return <Zap className="h-5 w-5 text-muted-foreground" />;
     }
@@ -47,10 +49,14 @@ const SubscriptionCard = () => {
         return 'default';
       case 'plus':
         return 'secondary';
-      default:
+      case 'free':
         return 'outline';
+      default:
+        return 'destructive';
     }
   };
+
+  const isBeginner = subscription.plan === 'beginner';
 
   return (
     <Card className="glass-card border-primary/20">
@@ -66,20 +72,31 @@ const SubscriptionCard = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-muted-foreground">Interview Credits</span>
-            <span className="font-medium">
-              {subscription.credits_remaining} / {subscription.credits_per_month}
-            </span>
+        {isBeginner ? (
+          <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+            <p className="text-sm text-amber-600 font-medium mb-2">
+              You're on the Beginner plan with no interview credits.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Upgrade to Free or higher to start practicing interviews.
+            </p>
           </div>
-          <Progress value={100 - usagePercent} className="h-2" />
-          <p className="text-xs text-muted-foreground mt-1">
-            {subscription.credits_remaining} credit{subscription.credits_remaining !== 1 ? 's' : ''} remaining this month
-          </p>
-        </div>
+        ) : (
+          <div>
+            <div className="flex justify-between text-sm mb-2">
+              <span className="text-muted-foreground">Interview Credits</span>
+              <span className="font-medium">
+                {subscription.credits_remaining} / {subscription.credits_per_month}
+              </span>
+            </div>
+            <Progress value={100 - usagePercent} className="h-2" />
+            <p className="text-xs text-muted-foreground mt-1">
+              {subscription.credits_remaining} credit{subscription.credits_remaining !== 1 ? 's' : ''} remaining this month
+            </p>
+          </div>
+        )}
 
-        {subscription.credits_remaining === 0 && (
+        {!isBeginner && subscription.credits_remaining === 0 && (
           <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20">
             <p className="text-sm text-destructive font-medium">
               No credits remaining. Upgrade your plan to continue practicing.

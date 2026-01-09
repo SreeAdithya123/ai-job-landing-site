@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-export type SubscriptionPlan = 'free' | 'plus' | 'pro';
+export type SubscriptionPlan = 'beginner' | 'free' | 'plus' | 'pro';
 
 export interface Subscription {
   plan: SubscriptionPlan;
@@ -21,6 +21,19 @@ export interface PlanFeatures {
 }
 
 export const PLAN_DETAILS: Record<SubscriptionPlan, PlanFeatures> = {
+  beginner: {
+    name: 'Beginner',
+    price: 0,
+    creditsPerMonth: 0,
+    features: [
+      'No interview credits',
+      'Basic feedback and scoring',
+      'General interview questions',
+      'Email support',
+      'Progress tracking',
+      'Upgrade required to start interviews',
+    ],
+  },
   free: {
     name: 'Free',
     price: 0,
@@ -91,9 +104,9 @@ export const useSubscription = () => {
             .from('user_subscriptions')
             .insert({
               user_id: user.id,
-              plan: 'free',
-              credits_remaining: 2,
-              credits_per_month: 2,
+              plan: 'beginner',
+              credits_remaining: 0,
+              credits_per_month: 0,
             })
             .select('plan, credits_remaining, credits_per_month, billing_cycle_start')
             .single();
@@ -135,7 +148,8 @@ export const useSubscription = () => {
   const hasCredits = subscription ? subscription.credits_remaining > 0 : false;
   const isPro = subscription?.plan === 'pro';
   const isPlus = subscription?.plan === 'plus' || subscription?.plan === 'pro';
-  const planDetails = subscription ? PLAN_DETAILS[subscription.plan] : PLAN_DETAILS.free;
+  const isBeginner = subscription?.plan === 'beginner';
+  const planDetails = subscription ? PLAN_DETAILS[subscription.plan] : PLAN_DETAILS.beginner;
 
   return {
     subscription,
@@ -144,6 +158,7 @@ export const useSubscription = () => {
     hasCredits,
     isPro,
     isPlus,
+    isBeginner,
     planDetails,
     deductCredit: deductCreditMutation.mutate,
     isDeducting: deductCreditMutation.isPending,
