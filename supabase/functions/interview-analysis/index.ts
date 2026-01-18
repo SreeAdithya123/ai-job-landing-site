@@ -97,7 +97,7 @@ Return ONLY the JSON object, no additional text.
         'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'Interview Copilot'
       },
       body: JSON.stringify({
-        model: 'openai/gpt-oss-20b:free',
+        model: 'google/gemini-2.0-flash-exp:free',
         messages: [
           {
             role: 'system',
