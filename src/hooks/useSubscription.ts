@@ -21,8 +21,8 @@ export interface PlanFeatures {
 }
 
 export const PLAN_DETAILS: Record<SubscriptionPlan, PlanFeatures> = {
-  beginner: {
-    name: 'Beginner',
+  free: {
+    name: 'Free',
     price: 0,
     creditsPerMonth: 0,
     features: [
@@ -34,12 +34,12 @@ export const PLAN_DETAILS: Record<SubscriptionPlan, PlanFeatures> = {
       'Upgrade required to start interviews',
     ],
   },
-  free: {
-    name: 'Free',
-    price: 0,
-    creditsPerMonth: 2,
+  beginner: {
+    name: 'Beginner',
+    price: 299,
+    creditsPerMonth: 3,
     features: [
-      '2 interviews per month',
+      '3 interviews per month',
       'Basic feedback and scoring',
       'General interview questions',
       'Email support',
@@ -48,7 +48,7 @@ export const PLAN_DETAILS: Record<SubscriptionPlan, PlanFeatures> = {
   },
   plus: {
     name: 'Plus',
-    price: 19,
+    price: 399,
     creditsPerMonth: 5,
     features: [
       '5 interviews per month',
@@ -61,7 +61,7 @@ export const PLAN_DETAILS: Record<SubscriptionPlan, PlanFeatures> = {
   },
   pro: {
     name: 'Pro',
-    price: 49,
+    price: 599,
     creditsPerMonth: 10,
     features: [
       '10 interviews per month',
