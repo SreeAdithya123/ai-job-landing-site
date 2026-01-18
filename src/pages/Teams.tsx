@@ -123,7 +123,7 @@ const Teams = () => {
                     <img
                       src={member.image}
                       alt={member.name}
-                      className="w-24 h-24 rounded-full mx-auto object-cover object-top ring-4 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300"
+                      className="w-32 h-32 rounded-full mx-auto object-cover object-top ring-4 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300"
                     />
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-1">{member.name}</h3>
