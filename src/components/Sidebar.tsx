@@ -53,6 +53,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       section: 'Company',
       items: [
         { name: 'Get Started', href: '/', icon: Star },
+        { name: 'Our Team', href: '/teams', icon: Users },
         { name: 'Careers', href: '/careers', icon: Briefcase },
       ]
     }
