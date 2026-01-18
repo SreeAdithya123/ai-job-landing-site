@@ -1,18 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Star, Zap, Shield, Crown, Clock, Users, ArrowLeft, Mail } from 'lucide-react';
+import { Check, Star, Zap, Shield, Crown, Clock, Users, ArrowLeft, Mail, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription, PLAN_DETAILS, SubscriptionPlan } from '@/hooks/useSubscription';
 import { Badge } from '@/components/ui/badge';
 import Layout from '@/components/Layout';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 const Payments = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { subscription } = useSubscription();
+  const { subscription, refetch } = useSubscription();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingPlan, setProcessingPlan] = useState<string | null>(null);
 
   const plans = [
     {
@@ -97,13 +107,110 @@ const Payments = () => {
     }
   ];
 
-  const handleSelectPlan = (planId: SubscriptionPlan) => {
+  const handleSelectPlan = async (planId: SubscriptionPlan) => {
     if (!user) {
       navigate('/auth');
       return;
     }
-    // For now, show contact info - can integrate Stripe later
-    window.location.href = 'mailto:support@vyoman.com?subject=Plan Upgrade Request - ' + planId.toUpperCase();
+
+    // Free plan - no payment needed
+    if (planId === 'free') {
+      toast.info('You are already on the free plan or can explore without payment.');
+      return;
+    }
+
+    setIsProcessing(true);
+    setProcessingPlan(planId);
+
+    try {
+      // Create order via edge function
+      const { data: orderData, error: orderError } = await supabase.functions.invoke('razorpay-create-order', {
+        body: { plan: planId }
+      });
+
+      if (orderError || !orderData) {
+        console.error('Order creation error:', orderError);
+        toast.error('Failed to create payment order. Please try again.');
+        return;
+      }
+
+      console.log('Order created:', orderData);
+
+      // Open Razorpay checkout
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'AI Interviewer',
+        description: `${planId.charAt(0).toUpperCase() + planId.slice(1)} Plan - ${orderData.credits} Credits`,
+        order_id: orderData.orderId,
+        prefill: {
+          email: orderData.userEmail || '',
+          name: orderData.userName || '',
+        },
+        theme: {
+          color: '#6366f1',
+        },
+        handler: async function (response: any) {
+          console.log('Payment successful:', response);
+          
+          // Verify payment
+          try {
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke('razorpay-verify-payment', {
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                plan: planId,
+              }
+            });
+
+            if (verifyError || !verifyData?.success) {
+              console.error('Payment verification error:', verifyError);
+              toast.error('Payment verification failed. Please contact support.');
+              return;
+            }
+
+            toast.success(`Successfully upgraded to ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan!`);
+            
+            // Refetch subscription data
+            if (refetch) {
+              refetch();
+            }
+            
+            // Navigate to dashboard
+            navigate('/dashboard');
+          } catch (error) {
+            console.error('Verification error:', error);
+            toast.error('Payment verification failed. Please contact support.');
+          }
+        },
+        modal: {
+          ondismiss: function() {
+            console.log('Payment modal closed');
+            setIsProcessing(false);
+            setProcessingPlan(null);
+          }
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.on('payment.failed', function (response: any) {
+        console.error('Payment failed:', response.error);
+        toast.error(`Payment failed: ${response.error.description}`);
+        setIsProcessing(false);
+        setProcessingPlan(null);
+      });
+      
+      razorpay.open();
+
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsProcessing(false);
+      setProcessingPlan(null);
+    }
   };
 
   const isCurrentPlan = (planId: SubscriptionPlan) => {
@@ -111,8 +218,8 @@ const Payments = () => {
   };
 
   const isPlanDowngrade = (planId: SubscriptionPlan) => {
-    const planOrder = { beginner: 0, free: 1, plus: 2, pro: 3 };
-    const currentPlanOrder = planOrder[subscription?.plan || 'beginner'];
+    const planOrder = { free: 0, beginner: 1, plus: 2, pro: 3 };
+    const currentPlanOrder = planOrder[subscription?.plan || 'free'];
     const targetPlanOrder = planOrder[planId];
     return targetPlanOrder < currentPlanOrder;
   };
@@ -249,14 +356,19 @@ const Payments = () => {
                   <Button
                     onClick={() => handleSelectPlan(plan.id)}
                     variant={plan.popular ? "default" : "outline"}
-                    disabled={isCurrentPlan(plan.id)}
+                    disabled={isCurrentPlan(plan.id) || (isProcessing && processingPlan === plan.id)}
                     className={`w-full h-12 font-semibold ${
                       plan.popular 
                         ? 'shadow-xl hover:shadow-2xl bg-gradient-to-r from-primary to-accent text-white' 
                         : 'hover:bg-primary/10 hover:border-primary/30'
                     } ${isCurrentPlan(plan.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {isCurrentPlan(plan.id) 
+                    {isProcessing && processingPlan === plan.id ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : isCurrentPlan(plan.id) 
                       ? 'Current Plan' 
                       : isPlanDowngrade(plan.id) 
                         ? 'Contact to Downgrade'

@@ -86,7 +86,7 @@ export const useSubscription = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: subscription, isLoading, error } = useQuery({
+  const { data: subscription, isLoading, error, refetch } = useQuery({
     queryKey: ['subscription', user?.id],
     queryFn: async (): Promise<Subscription | null> => {
       if (!user) return null;
@@ -148,7 +148,8 @@ export const useSubscription = () => {
   const hasCredits = subscription ? subscription.credits_remaining > 0 : false;
   const isPro = subscription?.plan === 'pro';
   const isPlus = subscription?.plan === 'plus' || subscription?.plan === 'pro';
-  const isBeginner = subscription?.plan === 'beginner';
+  const isBeginner = subscription?.plan === 'beginner' || subscription?.plan === 'free';
+  const isFree = subscription?.plan === 'free';
   const planDetails = subscription ? PLAN_DETAILS[subscription.plan] : PLAN_DETAILS.beginner;
 
   return {
@@ -159,8 +160,10 @@ export const useSubscription = () => {
     isPro,
     isPlus,
     isBeginner,
+    isFree,
     planDetails,
     deductCredit: deductCreditMutation.mutate,
     isDeducting: deductCreditMutation.isPending,
+    refetch,
   };
 };
