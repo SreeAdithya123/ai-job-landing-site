@@ -20,10 +20,11 @@ const Pricing = () => {
       name: "Free",
       price: "0",
       period: "month",
-      description: "Get started with 2 free interviews per month",
+      currency: "₹",
+      description: "Get started - upgrade required to practice",
       originalPrice: null,
       features: [
-        "2 interviews per month (1 credit = 10 min)",
+        "No interview credits",
         "Basic feedback and scoring",
         "General interview questions",
         "Email support",
@@ -33,14 +34,36 @@ const Pricing = () => {
       buttonVariant: "outline" as const,
       popular: false,
       icon: Clock,
-      highlight: "2 free interviews"
+      highlight: "Free to explore"
+    },
+    {
+      id: 'beginner' as SubscriptionPlan,
+      name: "Beginner",
+      price: "299",
+      period: "month",
+      currency: "₹",
+      description: "Get started with 3 interviews per month",
+      originalPrice: null,
+      features: [
+        "3 interviews per month (1 credit = 10 min)",
+        "Basic feedback and scoring",
+        "General interview questions",
+        "Email support",
+        "Progress tracking",
+      ],
+      buttonText: "Get Beginner",
+      buttonVariant: "outline" as const,
+      popular: false,
+      icon: Clock,
+      highlight: "3 interviews"
     },
     {
       id: 'plus' as SubscriptionPlan,
       name: "Plus",
-      price: "19",
+      price: "399",
       originalPrice: null,
       period: "month",
+      currency: "₹",
       description: "More practice time for serious job seekers",
       features: [
         "5 interviews per month",
@@ -59,9 +82,10 @@ const Pricing = () => {
     {
       id: 'pro' as SubscriptionPlan,
       name: "Pro",
-      price: "49",
+      price: "599",
       originalPrice: null,
       period: "month",
+      currency: "₹",
       description: "Maximum interviews + all premium features",
       features: [
         "10 interviews per month",
@@ -126,7 +150,7 @@ const Pricing = () => {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
@@ -181,8 +205,8 @@ const Pricing = () => {
                           ${plan.originalPrice}
                         </span>
                       )}
-                      <span className="text-5xl font-bold text-foreground">
-                        ${plan.price}
+                      <span className="text-4xl font-bold text-foreground">
+                        {plan.currency}{plan.price}
                       </span>
                     </div>
                     <span className="text-muted-foreground">/{plan.period}</span>
