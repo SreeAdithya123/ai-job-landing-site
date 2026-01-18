@@ -4,6 +4,7 @@ import { Users, Mail, Linkedin, Twitter, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import ceoImage from '@/assets/team-ceo.png';
 
 interface TeamMember {
   name: string;
@@ -19,12 +20,12 @@ interface TeamMember {
 
 const teamMembers: TeamMember[] = [
   {
-    name: "Alex Johnson",
+    name: "K. Sree Adithya",
     role: "CEO & Founder",
     bio: "Passionate about democratizing interview preparation through AI technology.",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
+    image: ceoImage,
     social: {
-      email: "alex@aiinterviewer.com",
+      email: "adithya@aiinterviewer.com",
       linkedin: "#",
       twitter: "#"
     }
