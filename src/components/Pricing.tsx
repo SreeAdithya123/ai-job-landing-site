@@ -45,7 +45,7 @@ const Pricing = () => {
       description: "Get started with 3 interviews per month",
       originalPrice: null,
       features: [
-        "3 interviews per month (1 credit = 10 min)",
+        "3 interviews per month (1 credit = 15 min)",
         "Basic feedback and scoring",
         "General interview questions",
         "Email support",
@@ -146,7 +146,7 @@ const Pricing = () => {
           {/* Credit info */}
           <div className="mt-8 inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full border border-primary/20">
             <Zap className="h-4 w-4 text-primary" />
-            <span className="text-primary font-medium">1 credit = 10 minutes of interview time</span>
+            <span className="text-primary font-medium">1 credit = 15 minutes of interview time</span>
           </div>
         </motion.div>
 
