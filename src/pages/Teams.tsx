@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import ceoImage from '@/assets/team-ceo.png';
+import cmoImage from '@/assets/team-cmo.png';
 
 interface TeamMember {
   name: string;
@@ -31,12 +32,12 @@ const teamMembers: TeamMember[] = [
     }
   },
   {
-    name: "Sarah Chen",
-    role: "CTO",
-    bio: "AI/ML expert with 10+ years of experience building intelligent systems.",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=face",
+    name: "G. Yohan Raju",
+    role: "CMO",
+    bio: "Strategic marketing leader driving brand growth and user engagement.",
+    image: cmoImage,
     social: {
-      email: "sarah@aiinterviewer.com",
+      email: "yohan@aiinterviewer.com",
       linkedin: "#",
       twitter: "#"
     }
