@@ -129,35 +129,62 @@ Return the response as a valid JSON array with this exact structure:
 
 Return ONLY the JSON array, no additional text or markdown.`;
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://ai-job-landing-site.lovable.app',
-        'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'Vyoman Interviewer',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-exp:free',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert aptitude test question generator. Generate high-quality, original MCQ questions. Always return valid JSON arrays only.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.8,
-        max_tokens: 8000,
-      }),
-    });
+    // Try with primary model first, fallback to alternatives if rate limited
+    const models = [
+      'google/gemini-2.5-flash',
+      'google/gemini-2.0-flash-001',
+      'deepseek/deepseek-chat'
+    ];
 
-    if (!response.ok) {
+    let response: Response | null = null;
+    let lastError: string = '';
+
+    for (const model of models) {
+      console.log(`Trying model: ${model}`);
+      
+      response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://ai-job-landing-site.lovable.app',
+          'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'Vyoman Interviewer',
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert aptitude test question generator. Generate high-quality, original MCQ questions. Always return valid JSON arrays only.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.8,
+          max_tokens: 8000,
+        }),
+      });
+
+      if (response.ok) {
+        console.log(`Success with model: ${model}`);
+        break;
+      }
+
+      if (response.status === 429) {
+        lastError = `Rate limited on ${model}`;
+        console.log(lastError + ', trying next model...');
+        continue;
+      }
+
       const errorText = await response.text();
-      console.error('OpenRouter API error:', errorText);
-      throw new Error(`AI API error: ${response.status}`);
+      console.error(`${model} API error:`, errorText);
+      lastError = `API error: ${response.status}`;
+    }
+
+    if (!response || !response.ok) {
+      throw new Error(lastError || 'All models failed');
     }
 
     const aiResponse = await response.json();
