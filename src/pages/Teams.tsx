@@ -37,7 +37,7 @@ const teamMembers: TeamMember[] = [
     role: "CMO",
     bio: "Strategic marketing leader driving brand growth and user engagement.",
     image: cmoImage,
-    imageClassName: "scale-[2.5] translate-y-[30%]",
+    imageClassName: "scale-[1.8] translate-y-[20%]",
     social: {
       email: "yohan@aiinterviewer.com",
       linkedin: "#",
