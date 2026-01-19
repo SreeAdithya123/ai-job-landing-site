@@ -56,18 +56,20 @@ const AdminDashboard = () => {
   const { isAdmin, isLoading: isAdminLoading } = useAdminRole();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { data: users, isLoading: usersLoading, refetch } = useQuery({
+  const { data: users, isLoading: usersLoading, error: usersError, refetch } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
+      console.log('Fetching admin users, isAdmin:', isAdmin);
       const { data, error } = await supabase.rpc('admin_get_all_users');
       if (error) {
         console.error('Error fetching admin users:', error);
         throw error;
       }
-      console.log('Admin users fetched:', data);
+      console.log('Admin users fetched successfully:', data?.length, 'users');
       return data as UserData[];
     },
     enabled: isAdmin === true,
+    retry: 1,
   });
 
   const { data: userRoles, isLoading: rolesLoading, refetch: refetchRoles } = useQuery({
@@ -439,9 +441,14 @@ const AdminDashboard = () => {
                       </TableBody>
                     </Table>
                   )}
-                  {filteredUsers?.length === 0 && !usersLoading && (
+                  {usersError && (
+                    <div className="text-center py-8 text-destructive">
+                      Error loading users: {(usersError as Error).message}
+                    </div>
+                  )}
+                  {!usersError && filteredUsers?.length === 0 && !usersLoading && (
                     <div className="text-center py-8 text-muted-foreground">
-                      No users found matching your search.
+                      {searchTerm ? 'No users found matching your search.' : 'No users found.'}
                     </div>
                   )}
                 </CardContent>
