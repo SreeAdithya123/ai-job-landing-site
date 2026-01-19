@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      aptitude_test_sessions: {
+        Row: {
+          answers: Json | null
+          category: string
+          completed_at: string | null
+          correct_answers: number | null
+          created_at: string
+          difficulty: string
+          id: string
+          questions: Json
+          score: number | null
+          started_at: string
+          status: string
+          time_taken_seconds: number | null
+          total_questions: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          category: string
+          completed_at?: string | null
+          correct_answers?: number | null
+          created_at?: string
+          difficulty: string
+          id?: string
+          questions?: Json
+          score?: number | null
+          started_at?: string
+          status?: string
+          time_taken_seconds?: number | null
+          total_questions?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          category?: string
+          completed_at?: string | null
+          correct_answers?: number | null
+          created_at?: string
+          difficulty?: string
+          id?: string
+          questions?: Json
+          score?: number | null
+          started_at?: string
+          status?: string
+          time_taken_seconds?: number | null
+          total_questions?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       coding_interview_results: {
         Row: {
           ai_feedback: string | null
@@ -447,6 +501,23 @@ export type Database = {
           p_user_id: string
         }
         Returns: boolean
+      }
+      get_aptitude_stats: {
+        Args: { p_user_id: string }
+        Returns: {
+          average_score: number
+          best_score: number
+          correct_answers_total: number
+          logical_avg: number
+          quantitative_avg: number
+          total_questions_attempted: number
+          total_tests: number
+          verbal_avg: number
+        }[]
+      }
+      get_monthly_aptitude_test_count: {
+        Args: { p_user_id: string }
+        Returns: number
       }
       get_subscription: {
         Args: { p_user_id: string }
