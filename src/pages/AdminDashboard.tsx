@@ -60,10 +60,14 @@ const AdminDashboard = () => {
     queryKey: ['admin-users'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('admin_get_all_users');
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching admin users:', error);
+        throw error;
+      }
+      console.log('Admin users fetched:', data);
       return data as UserData[];
     },
-    enabled: isAdmin,
+    enabled: isAdmin === true,
   });
 
   const { data: userRoles, isLoading: rolesLoading, refetch: refetchRoles } = useQuery({
@@ -73,10 +77,13 @@ const AdminDashboard = () => {
         .from('user_roles')
         .select('*')
         .order('created_at', { ascending: false });
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching user roles:', error);
+        throw error;
+      }
       return data as UserRole[];
     },
-    enabled: isAdmin,
+    enabled: isAdmin === true,
   });
 
   const addRoleMutation = useMutation({
