@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useInterviewCredits } from '@/hooks/useInterviewCredits';
 import { processInterviewEnd } from '@/services/interviewSessionService';
 import ProtectedRoute from '../components/ProtectedRoute';
 import InterviewHeader from '../components/interview/InterviewHeader';
@@ -13,6 +14,8 @@ import InterviewTypeCard from '../components/interview/InterviewTypeCard';
 import InterviewSessionsPanel from '../components/interview/InterviewSessionsPanel';
 import InterviewActiveInterface from '../components/interview/InterviewActiveInterface';
 import CreditCheckModal from '../components/CreditCheckModal';
+import InterviewWarningModal from '../components/interview/InterviewWarningModal';
+import AccountSuspendedModal from '../components/interview/AccountSuspendedModal';
 import { Laptop, Code, Star, Users } from 'lucide-react';
 
 export interface TranscriptEntry {
@@ -35,12 +38,23 @@ const InterviewCopilot = () => {
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
   const [userIsSpeaking, setUserIsSpeaking] = useState(false);
-  const [interviewStartTime, setInterviewStartTime] = useState<Date | null>(null);
   const [sessionId, setSessionId] = useState<string>('');
   const [showCreditModal, setShowCreditModal] = useState(false);
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
-  const { hasCredits, deductCredit, isDeducting, subscription } = useSubscription();
+  const { hasCredits, isSuspended, refetch: refetchSubscription } = useSubscription();
+  
+  const {
+    formattedTimeRemaining,
+    showWarningModal,
+    setShowWarningModal,
+    showSuspendedModal,
+    setShowSuspendedModal,
+    deductCreditForStart,
+    startInterviewTimer,
+    endInterview,
+    checkSuspensionStatus,
+  } = useInterviewCredits();
 
 
   const conversation = useConversation({
@@ -48,7 +62,6 @@ const InterviewCopilot = () => {
       console.log('✅ Successfully connected to ElevenLabs Conversational AI');
       const newSessionId = `interview_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       setSessionId(newSessionId);
-      setInterviewStartTime(new Date());
       setIsInterviewActive(true);
       setConnectionStatus('connected');
       toast({
@@ -62,22 +75,27 @@ const InterviewCopilot = () => {
       setConnectionStatus('disconnected');
       setUserIsSpeaking(false);
       
+      // Handle credit refund/deduction based on duration
+      const { wasEarlyDisconnect } = await endInterview();
+      
       // Process interview end when disconnecting
       if (transcript.length > 0 && sessionId) {
         try {
-          const duration = interviewStartTime 
-            ? Math.round((new Date().getTime() - interviewStartTime.getTime()) / 60000)
-            : undefined;
+          await processInterviewEnd(sessionId, transcript, selectedType);
           
-          // Deduct credit when interview ends
-          deductCredit({ interviewType: selectedType, durationMinutes: duration });
+          if (wasEarlyDisconnect) {
+            toast({
+              title: "Interview Ended Early",
+              description: "0.7 credit has been saved for your next interview."
+            });
+          } else {
+            toast({
+              title: "Interview Completed",
+              description: "Your interview has been saved and analyzed successfully."
+            });
+          }
           
-          await processInterviewEnd(sessionId, transcript, selectedType, duration);
-          
-          toast({
-            title: "Interview Completed",
-            description: "Your interview has been saved and analyzed successfully."
-          });
+          refetchSubscription();
         } catch (error) {
           console.error('❌ Error processing interview end:', error);
           toast({
@@ -175,7 +193,13 @@ const InterviewCopilot = () => {
     bgGradient: 'from-pink-500/10 to-pink-600/10'
   }];
 
-  const handleSelectInterview = (type: string) => {
+  const handleSelectInterview = async (type: string) => {
+    // Check if suspended first
+    if (isSuspended) {
+      setShowSuspendedModal(true);
+      return;
+    }
+
     // Check credits before allowing interview selection
     if (!hasCredits) {
       setShowCreditModal(true);
@@ -195,8 +219,16 @@ const InterviewCopilot = () => {
   };
 
   const handleStartInterview = async () => {
-    // Double-check credits before starting
-    if (!hasCredits) {
+    // Check if suspended first
+    const suspended = await checkSuspensionStatus();
+    if (suspended) {
+      setShowSuspendedModal(true);
+      return;
+    }
+
+    // Deduct credit at the start of interview
+    const creditDeducted = await deductCreditForStart(selectedType);
+    if (!creditDeducted) {
       setShowCreditModal(true);
       return;
     }
@@ -239,6 +271,9 @@ const InterviewCopilot = () => {
       });
       console.log(`✅ ${selectedType} Interview started with conversation ID:`, conversationId);
       setConnectionStatus('connected');
+      
+      // Start the interview timer with auto-end callback
+      startInterviewTimer(handleExitInterview);
     } catch (error) {
       console.error('❌ Error starting interview:', error);
       setIsInterviewActive(false);
@@ -264,19 +299,27 @@ const InterviewCopilot = () => {
     try {
       console.log('🛑 Ending interview session...');
       
+      // Handle credit refund/deduction based on duration
+      const { wasEarlyDisconnect } = await endInterview();
+      
       // Process interview end before closing the session
       if (transcript.length > 0 && sessionId) {
         try {
-          const duration = interviewStartTime 
-            ? Math.round((new Date().getTime() - interviewStartTime.getTime()) / 60000)
-            : undefined;
+          await processInterviewEnd(sessionId, transcript, selectedType);
           
-          await processInterviewEnd(sessionId, transcript, selectedType, duration);
+          if (wasEarlyDisconnect) {
+            toast({
+              title: "Interview Ended Early",
+              description: "0.7 credit has been saved for your next interview."
+            });
+          } else {
+            toast({
+              title: "Interview Completed",
+              description: "Your interview has been saved and analyzed successfully."
+            });
+          }
           
-          toast({
-            title: "Interview Completed",
-            description: "Your interview has been saved and analyzed successfully."
-          });
+          refetchSubscription();
         } catch (error) {
           console.error('❌ Error processing interview end:', error);
           toast({
@@ -335,6 +378,7 @@ const InterviewCopilot = () => {
           onStartInterview={handleStartInterview}
           onExitInterview={handleExitInterview}
           onClearTranscript={handleClearTranscript}
+          timeRemaining={isInterviewActive ? formattedTimeRemaining : undefined}
         />
       </ProtectedRoute>
     );
@@ -372,6 +416,12 @@ const InterviewCopilot = () => {
 
         {/* Credit Check Modal */}
         <CreditCheckModal open={showCreditModal} onOpenChange={setShowCreditModal} />
+        
+        {/* Warning Modal for unusual activity */}
+        <InterviewWarningModal open={showWarningModal} onOpenChange={setShowWarningModal} />
+        
+        {/* Suspended Account Modal */}
+        <AccountSuspendedModal open={showSuspendedModal} onOpenChange={setShowSuspendedModal} />
       </div>
     </ProtectedRoute>
   );
