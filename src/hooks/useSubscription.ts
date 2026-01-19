@@ -28,14 +28,13 @@ export const PLAN_DETAILS: Record<SubscriptionPlan, PlanFeatures> = {
   free: {
     name: 'Free',
     price: 0,
-    creditsPerMonth: 0,
+    creditsPerMonth: 1,
     features: [
-      'No interview credits',
+      '1 interview credit',
       'Basic feedback and scoring',
       'General interview questions',
       'Email support',
       'Progress tracking',
-      'Upgrade required to start interviews',
     ],
   },
   beginner: {
