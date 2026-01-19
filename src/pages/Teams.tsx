@@ -12,6 +12,7 @@ interface TeamMember {
   role: string;
   bio: string;
   image: string;
+  imageClassName?: string;
   social?: {
     email?: string;
     linkedin?: string;
@@ -36,6 +37,7 @@ const teamMembers: TeamMember[] = [
     role: "CMO",
     bio: "Strategic marketing leader driving brand growth and user engagement.",
     image: cmoImage,
+    imageClassName: "scale-[2.5] translate-y-[30%]",
     social: {
       email: "yohan@aiinterviewer.com",
       linkedin: "#",
@@ -120,11 +122,11 @@ const Teams = () => {
             >
               <Card className="h-full bg-card hover:shadow-lg transition-shadow duration-300 overflow-hidden group">
                 <CardContent className="p-6 text-center">
-                  <div className="relative mb-4">
+                  <div className="relative mb-4 w-32 h-32 mx-auto rounded-full overflow-hidden ring-4 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300">
                     <img
                       src={member.image}
                       alt={member.name}
-                      className="w-32 h-32 rounded-full mx-auto object-cover object-top ring-4 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300"
+                      className={`w-full h-full object-cover object-top ${member.imageClassName || ''}`}
                     />
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-1">{member.name}</h3>
