@@ -108,7 +108,7 @@ export const useSubscription = () => {
             .from('user_subscriptions')
             .insert({
               user_id: user.id,
-              plan: 'beginner',
+              plan: 'free',
               credits_remaining: 0,
               credits_per_month: 0,
             })
