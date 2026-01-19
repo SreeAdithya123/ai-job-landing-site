@@ -26,7 +26,9 @@ import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import Payments from "./pages/Payments";
 import Teams from "./pages/Teams";
+import AptitudeTest from "./pages/AptitudeTest";
 import NotFound from "./pages/NotFound";
+
 
 const queryClient = new QueryClient();
 
@@ -60,6 +62,7 @@ function App() {
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/payments" element={<Payments />} />
               <Route path="/teams" element={<Teams />} />
+              <Route path="/aptitude-test" element={<AptitudeTest />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

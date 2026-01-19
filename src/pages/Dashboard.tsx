@@ -7,6 +7,7 @@ import InterviewHistoryTable from '../components/InterviewHistoryTable';
 import ProtectedRoute from '../components/ProtectedRoute';
 import AnalysisFeedbackButton from '../components/AnalysisFeedbackButton';
 import ElevenLabsAnalyticsDashboard from '../components/dashboard/ElevenLabsAnalyticsDashboard';
+import AptitudePerformanceCard from '../components/dashboard/AptitudePerformanceCard';
 import SubscriptionCard from '../components/SubscriptionCard';
 import { Download, Play, Menu, BarChart3, History, Video, MessageSquare, Settings, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -533,6 +534,11 @@ const Dashboard = () => {
             {/* Interview History Table */}
             <div className="mb-12">
               <InterviewHistoryTable />
+            </div>
+
+            {/* Aptitude Test Performance */}
+            <div className="mb-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <AptitudePerformanceCard />
             </div>
 
             {/* Analytics Visualizations */}

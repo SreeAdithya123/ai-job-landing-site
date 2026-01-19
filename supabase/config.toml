@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.razorpay-verify-payment]
 verify_jwt = false
+
+[functions.generate-aptitude-questions]
+verify_jwt = false
