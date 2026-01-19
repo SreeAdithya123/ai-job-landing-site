@@ -108,8 +108,8 @@ export const useSubscription = () => {
             .insert({
               user_id: user.id,
               plan: 'free',
-              credits_remaining: 0,
-              credits_per_month: 0,
+              credits_remaining: 1,
+              credits_per_month: 1,
             })
             .select('plan, credits_remaining, credits_per_month, billing_cycle_start, early_disconnect_count, is_warned, is_suspended, pending_partial_credit')
             .single();
