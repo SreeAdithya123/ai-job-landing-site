@@ -19,7 +19,8 @@ import {
   LogOut,
   Scan,
   Video,
-  CreditCard
+  CreditCard,
+  Brain
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -43,6 +44,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
     {
       section: 'Tools',
       items: [
+        { name: 'Aptitude Test', href: '/aptitude-test', icon: Brain },
         { name: 'AI Material Generator', href: '/material-generator', icon: Zap },
         { name: 'AI Career Coach', href: '/career-coach', icon: Star },
         { name: 'Speak with Recruiters', href: '/recruiters', icon: Users },
