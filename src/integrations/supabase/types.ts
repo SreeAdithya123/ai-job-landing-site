@@ -373,7 +373,11 @@ export type Database = {
           created_at: string
           credits_per_month: number
           credits_remaining: number
+          early_disconnect_count: number | null
           id: string
+          is_suspended: boolean | null
+          is_warned: boolean | null
+          pending_partial_credit: number | null
           plan: Database["public"]["Enums"]["subscription_plan"]
           updated_at: string
           user_id: string
@@ -383,7 +387,11 @@ export type Database = {
           created_at?: string
           credits_per_month?: number
           credits_remaining?: number
+          early_disconnect_count?: number | null
           id?: string
+          is_suspended?: boolean | null
+          is_warned?: boolean | null
+          pending_partial_credit?: number | null
           plan?: Database["public"]["Enums"]["subscription_plan"]
           updated_at?: string
           user_id: string
@@ -393,7 +401,11 @@ export type Database = {
           created_at?: string
           credits_per_month?: number
           credits_remaining?: number
+          early_disconnect_count?: number | null
           id?: string
+          is_suspended?: boolean | null
+          is_warned?: boolean | null
+          pending_partial_credit?: number | null
           plan?: Database["public"]["Enums"]["subscription_plan"]
           updated_at?: string
           user_id?: string
@@ -416,6 +428,10 @@ export type Database = {
           plan: string
           user_id: string
         }[]
+      }
+      admin_unsuspend_user: {
+        Args: { p_target_user_id: string }
+        Returns: boolean
       }
       admin_update_subscription: {
         Args: {
@@ -441,6 +457,11 @@ export type Database = {
           plan: Database["public"]["Enums"]["subscription_plan"]
         }[]
       }
+      get_user_subscription_status: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      handle_early_disconnect: { Args: { p_user_id: string }; Returns: Json }
       has_credits: { Args: { p_user_id: string }; Returns: boolean }
       has_role: {
         Args: {
@@ -449,6 +470,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_user_suspended: { Args: { p_user_id: string }; Returns: boolean }
       store_elevenlabs_transcript: {
         Args: {
           p_content: string

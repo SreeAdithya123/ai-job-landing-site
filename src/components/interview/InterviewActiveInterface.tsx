@@ -7,6 +7,7 @@ import InterviewInterface from './InterviewInterface';
 import InterviewControls from './InterviewControls';
 import InterviewTranscript from './InterviewTranscript';
 import InterviewStatus from './InterviewStatus';
+import InterviewTimer from './InterviewTimer';
 
 interface InterviewActiveInterfaceProps {
   selectedType: string;
@@ -19,6 +20,7 @@ interface InterviewActiveInterfaceProps {
   onStartInterview: () => void;
   onExitInterview: () => void;
   onClearTranscript: () => void;
+  timeRemaining?: string;
 }
 
 const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
@@ -31,7 +33,8 @@ const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
   onBack,
   onStartInterview,
   onExitInterview,
-  onClearTranscript
+  onClearTranscript,
+  timeRemaining
 }) => {
   const getInterviewDetails = () => {
     if (selectedType === 'general') {
@@ -79,6 +82,9 @@ const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
             </div>
 
             <div className="flex items-center space-x-3">
+              {isInterviewActive && timeRemaining && (
+                <InterviewTimer timeRemaining={timeRemaining} />
+              )}
               <div className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
                 connectionStatus === 'connected' 
                   ? 'bg-green-900/50 text-green-300 border-green-700/50' 
