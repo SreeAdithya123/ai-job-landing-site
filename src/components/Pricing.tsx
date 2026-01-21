@@ -39,11 +39,11 @@ const Pricing = () => {
     {
       id: 'beginner' as SubscriptionPlan,
       name: "Beginner",
-      price: "299",
+      price: "249",
       period: "month",
       currency: "₹",
       description: "Get started with 3 interviews per month",
-      originalPrice: "349",
+      originalPrice: "299",
       features: [
         "3 interviews per month (1 credit = 15 min)",
         "Basic feedback and scoring",
@@ -60,8 +60,8 @@ const Pricing = () => {
     {
       id: 'plus' as SubscriptionPlan,
       name: "Plus",
-      price: "399",
-      originalPrice: "449",
+      price: "349",
+      originalPrice: "399",
       period: "month",
       currency: "₹",
       description: "More practice time for serious job seekers",
@@ -82,8 +82,8 @@ const Pricing = () => {
     {
       id: 'pro' as SubscriptionPlan,
       name: "Pro",
-      price: "599",
-      originalPrice: "649",
+      price: "549",
+      originalPrice: "599",
       period: "month",
       currency: "₹",
       description: "Maximum interviews + all premium features",

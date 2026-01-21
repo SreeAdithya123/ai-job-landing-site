@@ -47,7 +47,8 @@ const Payments = () => {
     {
       id: 'beginner' as SubscriptionPlan,
       name: "Beginner",
-      price: "299",
+      price: "249",
+      originalPrice: "299",
       period: "month",
       currency: "₹",
       description: "Get started with 3 interviews per month",
@@ -66,7 +67,8 @@ const Payments = () => {
     {
       id: 'plus' as SubscriptionPlan,
       name: "Plus",
-      price: "399",
+      price: "349",
+      originalPrice: "399",
       period: "month",
       currency: "₹",
       description: "More practice time for serious job seekers",
@@ -86,7 +88,8 @@ const Payments = () => {
     {
       id: 'pro' as SubscriptionPlan,
       name: "Pro",
-      price: "599",
+      price: "549",
+      originalPrice: "599",
       period: "month",
       currency: "₹",
       description: "Maximum interviews + all premium features",
@@ -326,12 +329,22 @@ const Payments = () => {
                   </div>
                   
                   <div className="mb-4">
-                    <div className="flex items-center justify-center">
+                    <div className="flex items-center justify-center space-x-2">
+                      {plan.originalPrice && (
+                        <span className="text-lg text-muted-foreground line-through">
+                          {plan.currency}{plan.originalPrice}
+                        </span>
+                      )}
                       <span className="text-4xl font-bold text-foreground">
                         {plan.currency}{plan.price}
                       </span>
                     </div>
                     <span className="text-muted-foreground">/{plan.period}</span>
+                    {plan.originalPrice && (
+                      <div className="text-sm text-green-600 font-medium mt-1">
+                        Save {plan.currency}50/month
+                      </div>
+                    )}
                   </div>
                   
                   <p className="text-muted-foreground text-sm">
