@@ -427,44 +427,29 @@ const Payments = () => {
 
         {/* Trust indicators */}
         <motion.div
-          className="space-y-8 max-w-4xl mx-auto"
+          className="max-w-4xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
         >
-          {/* Money-back guarantee */}
-          <div className="p-8 rounded-2xl border border-border text-center bg-card">
-            <div className="flex items-center justify-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                <Shield className="h-6 w-6 text-white" />
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold text-foreground mb-3">
-              30-Day Money-Back Guarantee
-            </h3>
-            <p className="text-muted-foreground">
-              Not satisfied with your results? Get a full refund within 30 days, no questions asked.
-            </p>
-          </div>
-
           {/* Features grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <div className="text-center p-6 rounded-xl border border-border bg-card">
+              <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center mx-auto mb-3">
                 <Clock className="h-5 w-5 text-white" />
               </div>
               <h4 className="font-semibold text-foreground mb-2">Instant Access</h4>
               <p className="text-sm text-muted-foreground">Start practicing immediately after signup</p>
             </div>
-            <div className="text-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <div className="text-center p-6 rounded-xl border border-border bg-card">
+              <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center mx-auto mb-3">
                 <Zap className="h-5 w-5 text-white" />
               </div>
               <h4 className="font-semibold text-foreground mb-2">No Setup Required</h4>
               <p className="text-sm text-muted-foreground">Works in any browser, no downloads needed</p>
             </div>
-            <div className="text-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <div className="text-center p-6 rounded-xl border border-border bg-card">
+              <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center mx-auto mb-3">
                 <Users className="h-5 w-5 text-white" />
               </div>
               <h4 className="font-semibold text-foreground mb-2">Expert Support</h4>
