@@ -86,36 +86,60 @@ Focus on:
 Return ONLY the JSON object, no additional text.
 `
 
-    // Call OpenRouter API with free model
-    console.log('📤 Sending request to OpenRouter API...')
-    const openrouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENROUTER_API_KEY')}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://interview-copilot.app',
-        'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'Interview Copilot'
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-exp:free',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert interview analyst. Provide detailed, constructive feedback on interview performance. Always respond with valid JSON only.'
-          },
-          {
-            role: 'user',
-            content: analysisPrompt
-          }
-        ],
-        temperature: 0.3
-      }),
-    })
+    // Models to try in order (fallback for rate limiting)
+    const models = [
+      'google/gemini-2.0-flash-exp:free',
+      'deepseek/deepseek-chat-v3-0324:free',
+      'meta-llama/llama-3.3-8b-instruct:free'
+    ]
 
-    if (!openrouterResponse.ok) {
-      const errorText = await openrouterResponse.text()
-      console.error('❌ OpenRouter API error:', errorText)
-      throw new Error(`OpenRouter API error: ${openrouterResponse.status} - ${errorText}`)
+    let openrouterResponse: Response | null = null
+    let lastError = ''
+
+    for (const model of models) {
+      console.log(`📤 Trying model: ${model}...`)
+      
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${Deno.env.get('OPENROUTER_API_KEY')}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://interview-copilot.app',
+          'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'Interview Copilot'
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert interview analyst. Provide detailed, constructive feedback on interview performance. Always respond with valid JSON only.'
+            },
+            {
+              role: 'user',
+              content: analysisPrompt
+            }
+          ],
+          temperature: 0.3
+        }),
+      })
+
+      if (response.ok) {
+        openrouterResponse = response
+        console.log(`✅ Success with model: ${model}`)
+        break
+      }
+
+      lastError = await response.text()
+      console.warn(`⚠️ Model ${model} failed (${response.status}):`, lastError)
+      
+      // If it's not a rate limit error, don't try other models
+      if (response.status !== 429) {
+        throw new Error(`OpenRouter API error: ${response.status} - ${lastError}`)
+      }
+    }
+
+    if (!openrouterResponse) {
+      throw new Error(`All models rate limited. Last error: ${lastError}`)
     }
 
     const openrouterData = await openrouterResponse.json()
