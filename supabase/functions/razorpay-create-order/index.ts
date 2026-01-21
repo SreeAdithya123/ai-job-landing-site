@@ -11,9 +11,9 @@ interface CreateOrderRequest {
 }
 
 const PLAN_PRICES: Record<string, number> = {
-  beginner: 29900, // Amount in paise (₹299)
-  plus: 39900,     // Amount in paise (₹399)
-  pro: 59900,      // Amount in paise (₹599)
+  beginner: 24900, // Amount in paise (₹249)
+  plus: 34900,     // Amount in paise (₹349)
+  pro: 54900,      // Amount in paise (₹549)
 };
 
 const PLAN_CREDITS: Record<string, number> = {
