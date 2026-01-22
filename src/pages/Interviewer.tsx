@@ -281,8 +281,8 @@ const Interviewer = () => {
         
         addLog(`STT: "${data.transcript.substring(0, 50)}..." (${sttLatency}ms, ${Math.round(data.confidence * 100)}% conf)`);
         
-        // Get AI response
-        await getAIResponse(false);
+        // Get AI response - pass the transcript directly to avoid stale state
+        await getAIResponse(false, data.transcript);
       } else {
         addLog('No speech detected in audio');
       }
@@ -378,16 +378,28 @@ const Interviewer = () => {
   }, [isPushToTalkActive, stopRecording]);
 
   // Get AI response from LLM
-  const getAIResponse = useCallback(async (isInitial: boolean = false) => {
+  // newUserText is passed to ensure we include the latest user message (avoids stale closure)
+  const getAIResponse = useCallback(async (isInitial: boolean = false, newUserText?: string) => {
     try {
       const llmStart = Date.now();
       addLog(isInitial ? 'Getting initial question...' : 'Getting AI response...');
       
       const userPlan = isPro ? 'pro' : isPlus ? 'plus' : 'free';
       
+      // Build message history including the new user message if provided
+      const messageHistory = messages.map(m => ({ 
+        role: m.role === 'ai' ? 'assistant' : 'user', 
+        content: m.text 
+      }));
+      
+      // Append new user message if provided (to avoid stale state issue)
+      if (newUserText) {
+        messageHistory.push({ role: 'user', content: newUserText });
+      }
+      
       const { data, error } = await supabase.functions.invoke('interviewer-llm', {
         body: {
-          messages: messages.map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text })),
+          messages: messageHistory,
           interview_settings: settings,
           user_plan: userPlan,
           is_initial: isInitial
