@@ -6,6 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 interface Message {
   role: 'ai' | 'user';
   content: string;
@@ -80,7 +82,13 @@ serve(async (req) => {
       throw new Error('Authentication failed');
     }
 
-    const { messages, settings, duration_minutes } = await req.json();
+    const body = await req.json();
+    const {
+      messages,
+      settings,
+      duration_minutes,
+      user_plan = 'free',
+    } = body || {};
     
     if (!messages || messages.length === 0) {
       throw new Error('No messages to analyze');
@@ -91,10 +99,11 @@ serve(async (req) => {
       .map((m: Message) => `${m.role === 'ai' ? 'Interviewer' : 'Candidate'}: ${m.content}`)
       .join('\n\n');
 
-    // Call LLM for evaluation with fallback models
+    // Call LLM for evaluation with fallback providers/models
     const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
-    if (!OPENROUTER_API_KEY) {
-      throw new Error('OPENROUTER_API_KEY not configured');
+    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
+    if (!OPENROUTER_API_KEY && !GROQ_API_KEY) {
+      throw new Error('No LLM providers configured (OPENROUTER_API_KEY / GROQ_API_KEY)');
     }
 
     const userPrompt = `Interview Settings:
@@ -115,58 +124,109 @@ Please evaluate this interview and provide your assessment in the required JSON 
       'meta-llama/llama-3.3-70b-instruct:free'
     ];
 
-    let llmResult: any = null;
-    let lastError: string = '';
+    const isPaid = user_plan === 'pro' || user_plan === 'plus' || user_plan === 'beginner';
 
-    for (const model of models) {
-      console.log(`Trying model: ${model}`);
-      
-      const llmResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const callGroq = async (): Promise<{ content: string; provider: string }> => {
+      if (!GROQ_API_KEY) throw new Error('GROQ_API_KEY not configured');
+
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Authorization': `Bearer ${GROQ_API_KEY}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://ai-job-landing-site.lovable.app',
         },
         body: JSON.stringify({
-          model,
+          model: 'llama-3.3-70b-versatile',
           messages: [
             { role: 'system', content: EVALUATION_PROMPT },
-            { role: 'user', content: userPrompt }
+            { role: 'user', content: userPrompt },
           ],
           max_tokens: 1000,
           temperature: 0.3,
-        })
+        }),
       });
 
-      if (llmResponse.ok) {
-        llmResult = await llmResponse.json();
-        console.log(`Success with model: ${model}`);
-        break;
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(`Groq error ${res.status}: ${t}`);
       }
 
-      // On rate limit (429), try next model
-      if (llmResponse.status === 429) {
-        console.log(`Rate limited on ${model}, trying next...`);
-        lastError = `Rate limited on ${model}`;
-        continue;
+      const j = await res.json();
+      return { content: j.choices?.[0]?.message?.content || '', provider: 'groq' };
+    };
+
+    const callOpenRouter = async (): Promise<{ content: string; provider: string }> => {
+      if (!OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY not configured');
+
+      let lastError = '';
+      for (const model of models) {
+        console.log(`Trying OpenRouter model: ${model}`);
+
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://ai-job-landing-site.lovable.app',
+            'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'AI Interviewer',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: EVALUATION_PROMPT },
+              { role: 'user', content: userPrompt },
+            ],
+            max_tokens: 1000,
+            temperature: 0.3,
+          }),
+        });
+
+        if (res.ok) {
+          const j = await res.json();
+          return { content: j.choices?.[0]?.message?.content || '', provider: `openrouter:${model}` };
+        }
+
+        if (res.status === 429) {
+          lastError = `Rate limited on ${model}`;
+          // small backoff to reduce immediate re-rate-limit
+          await sleep(350);
+          continue;
+        }
+
+        const t = await res.text();
+        lastError = `${model} error ${res.status}: ${t}`;
       }
 
-      // Other errors, log and try next
-      const errorText = await llmResponse.text();
-      console.error(`Error with ${model}:`, errorText);
-      lastError = `${model}: ${llmResponse.status}`;
-    }
+      throw new Error(`OpenRouter failed. ${lastError}`);
+    };
 
-    if (!llmResult) {
-      throw new Error(`All LLM models failed. Last error: ${lastError}`);
-    }
+    let aiContent = '';
+    let evaluationProvider = 'fallback';
 
-    const aiContent = llmResult.choices?.[0]?.message?.content || '';
+    // Provider preference: paid => Groq first, otherwise OpenRouter first
+    try {
+      const primary = isPaid ? callGroq : callOpenRouter;
+      const { content, provider } = await primary();
+      aiContent = content;
+      evaluationProvider = provider;
+    } catch (primaryErr) {
+      console.error('Primary evaluator failed, trying fallback...', primaryErr);
+      try {
+        const secondary = isPaid ? callOpenRouter : callGroq;
+        const { content, provider } = await secondary();
+        aiContent = content;
+        evaluationProvider = provider;
+      } catch (secondaryErr) {
+        console.error('Both evaluators failed; using default evaluation', secondaryErr);
+        aiContent = '';
+        evaluationProvider = 'default';
+      }
+    }
 
     // Parse the JSON response
     let evaluation: ReportSchema;
     try {
+      if (!aiContent) throw new Error('Empty AI content');
       // Extract JSON from potential markdown code blocks
       const jsonMatch = aiContent.match(/```json\s*([\s\S]*?)\s*```/) || 
                         aiContent.match(/```\s*([\s\S]*?)\s*```/) ||
@@ -244,7 +304,8 @@ Please evaluate this interview and provide your assessment in the required JSON 
         success: true,
         analysis_id: analysisData?.id,
         session_id: sessionId,
-        evaluation: evaluation
+        evaluation: evaluation,
+        evaluation_provider: evaluationProvider
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
