@@ -8,6 +8,7 @@ import InterviewerControlPanel from '@/components/interviewer/InterviewerControl
 import InterviewerConversationPanel from '@/components/interviewer/InterviewerConversationPanel';
 import InterviewerRightPanel from '@/components/interviewer/InterviewerRightPanel';
 import InterviewerPageHeader from '@/components/interviewer/InterviewerPageHeader';
+import InterviewSetupForm from '@/components/interviewer/InterviewSetupForm';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -56,6 +57,10 @@ const Interviewer = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { subscription, isPro, isPlus } = useSubscription();
+  
+  // Setup state - shows form before interview starts
+  const [showSetupForm, setShowSetupForm] = useState(true);
+  const [isStartingInterview, setIsStartingInterview] = useState(false);
   
   // Session state
   const [isSessionActive, setIsSessionActive] = useState(false);
@@ -285,6 +290,19 @@ const Interviewer = () => {
     }
   }, [isProcessingAudio, addLog]);
 
+  // Start interview from setup form
+  const handleStartFromSetup = useCallback(async () => {
+    setIsStartingInterview(true);
+    try {
+      await startSession();
+      setShowSetupForm(false);
+    } catch (error) {
+      console.error('Failed to start interview:', error);
+    } finally {
+      setIsStartingInterview(false);
+    }
+  }, []);
+
   // Start interview session
   const startSession = useCallback(async () => {
     try {
@@ -320,8 +338,10 @@ const Interviewer = () => {
       setConnectionStatus(prev => ({ ...prev, deepgram: 'connected' }));
       addLog('Audio pipeline ready');
       
-      // Start Voice Activity Detection
-      startVAD();
+      // Only start VAD if NOT in push-to-talk mode
+      if (!isPushToTalk) {
+        startVAD();
+      }
       
       // Get initial question from AI
       await getAIResponse(true);
@@ -334,8 +354,23 @@ const Interviewer = () => {
         toast.error('Failed to start interview session');
       }
       addLog(`Error: ${error.message}`);
+      throw error;
     }
-  }, [addLog, startVAD]);
+  }, [addLog, startVAD, isPushToTalk]);
+
+  // Push-to-talk start - begins recording
+  const handlePushToTalkStart = useCallback(() => {
+    if (!isSessionActive || !streamRef.current) return;
+    setIsPushToTalkActive(true);
+    startRecording();
+  }, [isSessionActive, startRecording]);
+
+  // Push-to-talk end - stops recording and processes audio
+  const handlePushToTalkEnd = useCallback(() => {
+    if (!isPushToTalkActive) return;
+    setIsPushToTalkActive(false);
+    stopRecording();
+  }, [isPushToTalkActive, stopRecording]);
 
   // Get AI response from LLM
   const getAIResponse = useCallback(async (isInitial: boolean = false) => {
@@ -576,120 +611,123 @@ const Interviewer = () => {
           />
           
           <div className="max-w-[1800px] mx-auto px-6 py-8">
-            {/* Hero Section */}
-            {!isSessionActive && messages.length === 0 && (
-              <motion.div 
+            {/* Setup Form - shown before interview starts */}
+            {showSetupForm && (
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center mb-12"
               >
-                <h2 className="text-4xl font-bold text-foreground mb-4 tracking-tight">
-                  Your AI Interview Coach
-                </h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                  Practice interviews with real-time voice recognition and personalized feedback. 
-                  Start a session to begin your preparation journey.
-                </p>
-              </motion.div>
-            )}
-
-            {/* Recording Indicator */}
-            {isRecording && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
-              >
-                <div className="flex items-center gap-3 px-6 py-3 bg-destructive text-destructive-foreground rounded-full shadow-lg">
-                  <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
-                  <span className="font-medium">Recording...</span>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Processing Indicator */}
-            {isProcessingAudio && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
-              >
-                <div className="flex items-center gap-3 px-6 py-3 bg-primary text-primary-foreground rounded-full shadow-lg">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span className="font-medium">Processing speech...</span>
-                </div>
-              </motion.div>
-            )}
-
-            <div className="grid grid-cols-12 gap-8">
-              {/* Left Panel - Controls */}
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-                className="col-span-12 lg:col-span-3"
-              >
-                <InterviewerControlPanel
-                  isSessionActive={isSessionActive}
-                  isMicEnabled={isMicEnabled}
-                  isSpeakerEnabled={isSpeakerEnabled}
-                  isPushToTalk={isPushToTalk}
-                  isPushToTalkActive={isPushToTalkActive}
-                  sessionStartTime={sessionStartTime}
-                  questionStartTime={questionStartTime}
-                  connectionStatus={connectionStatus}
-                  userPlan={subscription?.plan || 'free'}
-                  onStartSession={startSession}
-                  onStopSession={stopSession}
-                  onToggleMic={() => setIsMicEnabled(!isMicEnabled)}
-                  onToggleSpeaker={() => setIsSpeakerEnabled(!isSpeakerEnabled)}
-                  onTogglePushToTalk={() => setIsPushToTalk(!isPushToTalk)}
-                  onPushToTalkStart={() => setIsPushToTalkActive(true)}
-                  onPushToTalkEnd={() => setIsPushToTalkActive(false)}
+                <InterviewSetupForm
+                  settings={settings}
+                  onSettingsChange={setSettings}
+                  onStartInterview={handleStartFromSetup}
+                  isLoading={isStartingInterview}
                 />
               </motion.div>
-              
-              {/* Center Panel - Conversation */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="col-span-12 lg:col-span-5"
-              >
-                <div className="h-[calc(100vh-280px)] min-h-[500px]">
-                  <InterviewerConversationPanel
-                    messages={messages}
-                    currentInterimText={currentInterimText}
-                    isSessionActive={isSessionActive}
-                    onSendMessage={sendTextMessage}
-                    onAskNextQuestion={askNextQuestion}
-                    onRepeatQuestion={() => messages.length > 0 && replayAudio(messages[messages.length - 1].audioUrl || '')}
-                    onFlagQuestion={() => addLog('Question flagged')}
-                    onEndAndReport={endAndGenerateReport}
-                    onReplayAudio={replayAudio}
-                  />
+            )}
+
+            {/* Interview Interface - shown after setup is complete */}
+            {!showSetupForm && (
+              <>
+                {/* Recording Indicator */}
+                {isRecording && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
+                  >
+                    <div className="flex items-center gap-3 px-6 py-3 bg-destructive text-destructive-foreground rounded-full shadow-lg">
+                      <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+                      <span className="font-medium">Recording...</span>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Processing Indicator */}
+                {isProcessingAudio && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
+                  >
+                    <div className="flex items-center gap-3 px-6 py-3 bg-primary text-primary-foreground rounded-full shadow-lg">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span className="font-medium">Processing speech...</span>
+                    </div>
+                  </motion.div>
+                )}
+
+                <div className="grid grid-cols-12 gap-8">
+                  {/* Left Panel - Controls */}
+                  <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="col-span-12 lg:col-span-3"
+                  >
+                    <InterviewerControlPanel
+                      isSessionActive={isSessionActive}
+                      isMicEnabled={isMicEnabled}
+                      isSpeakerEnabled={isSpeakerEnabled}
+                      isPushToTalk={isPushToTalk}
+                      isPushToTalkActive={isPushToTalkActive}
+                      sessionStartTime={sessionStartTime}
+                      questionStartTime={questionStartTime}
+                      connectionStatus={connectionStatus}
+                      userPlan={subscription?.plan || 'free'}
+                      onStartSession={startSession}
+                      onStopSession={stopSession}
+                      onToggleMic={() => setIsMicEnabled(!isMicEnabled)}
+                      onToggleSpeaker={() => setIsSpeakerEnabled(!isSpeakerEnabled)}
+                      onTogglePushToTalk={() => setIsPushToTalk(!isPushToTalk)}
+                      onPushToTalkStart={handlePushToTalkStart}
+                      onPushToTalkEnd={handlePushToTalkEnd}
+                    />
+                  </motion.div>
+                  
+                  {/* Center Panel - Conversation */}
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="col-span-12 lg:col-span-5"
+                  >
+                    <div className="h-[calc(100vh-280px)] min-h-[500px]">
+                      <InterviewerConversationPanel
+                        messages={messages}
+                        currentInterimText={currentInterimText}
+                        isSessionActive={isSessionActive}
+                        onSendMessage={sendTextMessage}
+                        onAskNextQuestion={askNextQuestion}
+                        onRepeatQuestion={() => messages.length > 0 && replayAudio(messages[messages.length - 1].audioUrl || '')}
+                        onFlagQuestion={() => addLog('Question flagged')}
+                        onEndAndReport={endAndGenerateReport}
+                        onReplayAudio={replayAudio}
+                      />
+                    </div>
+                  </motion.div>
+                  
+                  {/* Right Panel - Transcript & Settings */}
+                  <motion.div 
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="col-span-12 lg:col-span-4"
+                  >
+                    <div className="h-[calc(100vh-280px)] min-h-[500px]">
+                      <InterviewerRightPanel
+                        transcriptChunks={transcriptChunks}
+                        currentInterimText={currentInterimText}
+                        settings={settings}
+                        eventLogs={eventLogs}
+                        latencyStats={latencyStats}
+                        onSettingsChange={setSettings}
+                      />
+                    </div>
+                  </motion.div>
                 </div>
-              </motion.div>
-              
-              {/* Right Panel - Transcript & Settings */}
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-                className="col-span-12 lg:col-span-4"
-              >
-                <div className="h-[calc(100vh-280px)] min-h-[500px]">
-                  <InterviewerRightPanel
-                    transcriptChunks={transcriptChunks}
-                    currentInterimText={currentInterimText}
-                    settings={settings}
-                    eventLogs={eventLogs}
-                    latencyStats={latencyStats}
-                    onSettingsChange={setSettings}
-                  />
-                </div>
-              </motion.div>
-            </div>
+              </>
+            )}
           </div>
         </div>
       </Layout>
