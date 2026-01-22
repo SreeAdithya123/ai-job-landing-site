@@ -35,6 +35,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
     {
       section: 'Interview',
       items: [
+        { name: 'Voice Interviewer', href: '/interviewer', icon: Phone },
         { name: 'AI Interviewer', href: '/interview-copilot', icon: Laptop },
         { name: 'Virtual Interviewer', href: '/virtual-interviewer', icon: Video },
         { name: 'AI Resume Builder', href: '/resume-builder', icon: FileText },

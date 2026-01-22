@@ -27,6 +27,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Payments from "./pages/Payments";
 import Teams from "./pages/Teams";
 import AptitudeTest from "./pages/AptitudeTest";
+import Interviewer from "./pages/Interviewer";
 import NotFound from "./pages/NotFound";
 
 
@@ -63,6 +64,7 @@ function App() {
               <Route path="/payments" element={<Payments />} />
               <Route path="/teams" element={<Teams />} />
               <Route path="/aptitude-test" element={<AptitudeTest />} />
+              <Route path="/interviewer" element={<Interviewer />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
