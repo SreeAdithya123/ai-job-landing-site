@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useAdminRole } from '@/hooks/useAdminRole';
+import { useInterviewCredits } from '@/hooks/useInterviewCredits';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import InterviewerControlPanel from '@/components/interviewer/InterviewerControlPanel';
@@ -10,10 +11,12 @@ import InterviewerConversationPanel from '@/components/interviewer/InterviewerCo
 import InterviewerRightPanel from '@/components/interviewer/InterviewerRightPanel';
 import InterviewerPageHeader from '@/components/interviewer/InterviewerPageHeader';
 import InterviewSetupForm from '@/components/interviewer/InterviewSetupForm';
+import InterviewWarningModal from '@/components/interview/InterviewWarningModal';
+import AccountSuspendedModal from '@/components/interview/AccountSuspendedModal';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { Shield, Lock } from 'lucide-react';
+import { Shield, Lock, Clock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -62,6 +65,18 @@ const Interviewer = () => {
   const { user, signOut } = useAuth();
   const { subscription, isPro, isPlus } = useSubscription();
   const { isAdmin, isLoading: isAdminLoading } = useAdminRole();
+  const {
+    timeRemaining,
+    formattedTimeRemaining,
+    showWarningModal,
+    setShowWarningModal,
+    showSuspendedModal,
+    setShowSuspendedModal,
+    checkSuspensionStatus,
+    deductCreditForStart,
+    startInterviewTimer,
+    endInterview,
+  } = useInterviewCredits();
   
   // Setup state - shows form before interview starts
   const [showSetupForm, setShowSetupForm] = useState(true);
@@ -299,6 +314,21 @@ const Interviewer = () => {
   const handleStartFromSetup = useCallback(async () => {
     setIsStartingInterview(true);
     try {
+      // Check if user is suspended
+      const isSuspended = await checkSuspensionStatus();
+      if (isSuspended) {
+        setShowSuspendedModal(true);
+        return;
+      }
+
+      // Deduct credit before starting
+      const hasCredit = await deductCreditForStart('voice-interviewer');
+      if (!hasCredit) {
+        toast.error('No credits remaining. Please upgrade your plan.');
+        navigate('/payments');
+        return;
+      }
+
       await startSession();
       setShowSetupForm(false);
     } catch (error) {
@@ -306,6 +336,12 @@ const Interviewer = () => {
     } finally {
       setIsStartingInterview(false);
     }
+  }, [checkSuspensionStatus, deductCreditForStart, navigate]);
+
+  // Auto-end interview when timer runs out
+  const handleAutoEndInterview = useCallback(async () => {
+    addLog('Interview time limit reached (10 minutes)');
+    await endAndGenerateReport();
   }, []);
 
   // Start interview session
@@ -328,6 +364,9 @@ const Interviewer = () => {
       setConnectionStatus(prev => ({ ...prev, deepgram: 'connecting' }));
       
       addLog('Microphone access granted');
+      
+      // Start the 10-minute interview timer
+      startInterviewTimer(handleAutoEndInterview);
       
       // Initialize audio context and analyser for VAD
       const audioContext = new AudioContext();
@@ -361,7 +400,7 @@ const Interviewer = () => {
       addLog(`Error: ${error.message}`);
       throw error;
     }
-  }, [addLog, startVAD, isPushToTalk]);
+  }, [addLog, startVAD, isPushToTalk, startInterviewTimer, handleAutoEndInterview]);
 
   // Push-to-talk start - begins recording
   const handlePushToTalkStart = useCallback(() => {
@@ -503,7 +542,7 @@ const Interviewer = () => {
   }, []);
 
   // Stop session
-  const stopSession = useCallback(() => {
+  const stopSession = useCallback(async () => {
     if (vadIntervalRef.current) {
       clearInterval(vadIntervalRef.current);
       vadIntervalRef.current = null;
@@ -522,11 +561,14 @@ const Interviewer = () => {
       audioContextRef.current.close();
     }
     
+    // Handle early disconnect (refund credits if within 3 minutes)
+    await endInterview();
+    
     setIsSessionActive(false);
     setIsRecording(false);
     setConnectionStatus(prev => ({ ...prev, deepgram: 'disconnected' }));
     addLog('Session stopped');
-  }, [addLog]);
+  }, [addLog, endInterview]);
 
   // End session and generate report
   const endAndGenerateReport = useCallback(async () => {
@@ -690,6 +732,27 @@ const Interviewer = () => {
             {/* Interview Interface - shown after setup is complete */}
             {!showSetupForm && (
               <>
+                {/* Timer Display - Fixed at top */}
+                {isSessionActive && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="fixed top-20 left-1/2 -translate-x-1/2 z-50"
+                  >
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-lg ${
+                      timeRemaining <= 60000 
+                        ? 'bg-destructive text-destructive-foreground' 
+                        : timeRemaining <= 180000 
+                          ? 'bg-amber-500 text-white' 
+                          : 'bg-primary text-primary-foreground'
+                    }`}>
+                      <Clock className="w-4 h-4" />
+                      <span className="font-mono font-bold text-lg">{formattedTimeRemaining}</span>
+                      <span className="text-sm opacity-80">remaining</span>
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Recording Indicator */}
                 {isRecording && (
                   <motion.div 
@@ -789,6 +852,18 @@ const Interviewer = () => {
                 </div>
               </>
             )}
+
+            {/* Warning Modal for early disconnects */}
+            <InterviewWarningModal 
+              open={showWarningModal} 
+              onOpenChange={setShowWarningModal} 
+            />
+
+            {/* Suspended Modal */}
+            <AccountSuspendedModal 
+              open={showSuspendedModal} 
+              onOpenChange={setShowSuspendedModal} 
+            />
           </div>
         </div>
       </Layout>
