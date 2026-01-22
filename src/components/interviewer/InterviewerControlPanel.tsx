@@ -7,11 +7,7 @@ import {
   Volume2, 
   VolumeX, 
   Hand,
-  Wifi,
-  WifiOff,
-  Loader2,
-  Clock,
-  AlertCircle
+  Clock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,7 +57,6 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
   const [sessionTimer, setSessionTimer] = useState('00:00');
   const [questionTimer, setQuestionTimer] = useState('00:00');
 
-  // Session timer
   useEffect(() => {
     if (!sessionStartTime || !isSessionActive) {
       setSessionTimer('00:00');
@@ -78,7 +73,6 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
     return () => clearInterval(interval);
   }, [sessionStartTime, isSessionActive]);
 
-  // Question timer
   useEffect(() => {
     if (!questionStartTime || !isSessionActive) {
       setQuestionTimer('00:00');
@@ -95,107 +89,49 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
     return () => clearInterval(interval);
   }, [questionStartTime, isSessionActive]);
 
-  const getPlanBadgeColor = () => {
+  const getPlanLabel = () => {
     switch (userPlan) {
-      case 'pro': return 'bg-gradient-primary text-white';
-      case 'plus': return 'bg-accent text-accent-foreground';
-      case 'beginner': return 'bg-primary/20 text-primary';
-      default: return 'bg-muted text-muted-foreground';
+      case 'pro': return { label: 'Pro', variant: 'default' as const };
+      case 'plus': return { label: 'Plus', variant: 'default' as const };
+      case 'beginner': return { label: 'Beginner', variant: 'secondary' as const };
+      default: return { label: 'Free', variant: 'outline' as const };
     }
   };
 
+  const planInfo = getPlanLabel();
+
   return (
-    <Card className="h-full glass-panel border-border/50">
+    <Card className="bg-card border-border shadow-sm">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-            <Mic className="h-4 w-4 text-white" />
-          </div>
-          Controls
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base font-medium text-foreground">
+            Session Controls
+          </CardTitle>
+          <Badge variant={planInfo.variant}>
+            {planInfo.label}
+          </Badge>
+        </div>
       </CardHeader>
       
       <CardContent className="space-y-6">
-        {/* Session Controls */}
-        <div className="space-y-3">
+        {/* Main Action Button */}
+        <div>
           {!isSessionActive ? (
             <Button 
               onClick={onStartSession}
-              className="w-full bg-gradient-primary hover:opacity-90 text-white font-semibold py-6 text-lg shadow-glow"
+              className="w-full py-6 text-base font-medium bg-primary hover:bg-primary/90"
             >
               <Play className="h-5 w-5 mr-2" />
-              Start Session
+              Start Interview
             </Button>
           ) : (
             <Button 
               onClick={onStopSession}
               variant="destructive"
-              className="w-full py-6 text-lg"
+              className="w-full py-6 text-base font-medium"
             >
               <Square className="h-5 w-5 mr-2" />
-              Stop Session
-            </Button>
-          )}
-        </div>
-
-        <Separator />
-
-        {/* Audio Toggles */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-            <div className="flex items-center gap-3">
-              {isMicEnabled ? (
-                <Mic className="h-5 w-5 text-accent" />
-              ) : (
-                <MicOff className="h-5 w-5 text-muted-foreground" />
-              )}
-              <Label className="text-sm font-medium">Microphone</Label>
-            </div>
-            <Switch 
-              checked={isMicEnabled} 
-              onCheckedChange={onToggleMic}
-              disabled={!isSessionActive}
-            />
-          </div>
-
-          <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-            <div className="flex items-center gap-3">
-              {isSpeakerEnabled ? (
-                <Volume2 className="h-5 w-5 text-accent" />
-              ) : (
-                <VolumeX className="h-5 w-5 text-muted-foreground" />
-              )}
-              <Label className="text-sm font-medium">Speaker (TTS)</Label>
-            </div>
-            <Switch 
-              checked={isSpeakerEnabled} 
-              onCheckedChange={onToggleSpeaker}
-            />
-          </div>
-
-          <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-            <div className="flex items-center gap-3">
-              <Hand className="h-5 w-5 text-primary" />
-              <Label className="text-sm font-medium">Push-to-Talk</Label>
-            </div>
-            <Switch 
-              checked={isPushToTalk} 
-              onCheckedChange={onTogglePushToTalk}
-            />
-          </div>
-
-          {isPushToTalk && isSessionActive && (
-            <Button 
-              variant="outline"
-              className={`w-full py-8 transition-all ${isPushToTalkActive ? 'bg-accent text-accent-foreground border-accent' : ''}`}
-              onMouseDown={onPushToTalkStart}
-              onMouseUp={onPushToTalkEnd}
-              onMouseLeave={onPushToTalkEnd}
-              onTouchStart={onPushToTalkStart}
-              onTouchEnd={onPushToTalkEnd}
-            >
-              <Hand className="h-6 w-6 mr-2" />
-              {isPushToTalkActive ? 'Listening...' : 'Hold to Talk'}
+              End Session
             </Button>
           )}
         </div>
@@ -203,62 +139,116 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
         <Separator />
 
         {/* Timers */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-primary" />
-              <span className="text-sm text-muted-foreground">Session Timer</span>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-secondary/50 rounded-lg p-3 text-center">
+            <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground mb-1">
+              <Clock className="h-3 w-3" />
+              Session
             </div>
-            <span className="font-mono text-lg font-semibold text-foreground">{sessionTimer}</span>
+            <span className="font-mono text-xl font-semibold text-foreground">
+              {sessionTimer}
+            </span>
           </div>
-
-          <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-accent" />
-              <span className="text-sm text-muted-foreground">Question Timer</span>
+          <div className="bg-secondary/50 rounded-lg p-3 text-center">
+            <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground mb-1">
+              <Clock className="h-3 w-3" />
+              Question
             </div>
-            <span className="font-mono text-lg font-semibold text-foreground">{questionTimer}</span>
+            <span className="font-mono text-xl font-semibold text-foreground">
+              {questionTimer}
+            </span>
           </div>
         </div>
 
         <Separator />
 
-        {/* Status Indicators */}
+        {/* Audio Controls */}
         <div className="space-y-3">
-          <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Status</h4>
+          <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Audio
+          </h4>
           
-          <div className="flex items-center justify-between p-2 rounded-md">
-            <span className="text-sm">Deepgram</span>
-            <Badge variant={connectionStatus.deepgram === 'connected' ? 'default' : 'secondary'} className="flex items-center gap-1">
-              {connectionStatus.deepgram === 'connected' ? (
-                <Wifi className="h-3 w-3" />
-              ) : connectionStatus.deepgram === 'connecting' ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <WifiOff className="h-3 w-3" />
-              )}
-              {connectionStatus.deepgram}
-            </Badge>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
+              <div className="flex items-center gap-2.5">
+                {isMicEnabled ? (
+                  <Mic className="h-4 w-4 text-accent" />
+                ) : (
+                  <MicOff className="h-4 w-4 text-muted-foreground" />
+                )}
+                <Label className="text-sm font-normal">Microphone</Label>
+              </div>
+              <Switch 
+                checked={isMicEnabled} 
+                onCheckedChange={onToggleMic}
+                disabled={!isSessionActive}
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
+              <div className="flex items-center gap-2.5">
+                {isSpeakerEnabled ? (
+                  <Volume2 className="h-4 w-4 text-accent" />
+                ) : (
+                  <VolumeX className="h-4 w-4 text-muted-foreground" />
+                )}
+                <Label className="text-sm font-normal">Speaker</Label>
+              </div>
+              <Switch 
+                checked={isSpeakerEnabled} 
+                onCheckedChange={onToggleSpeaker}
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
+              <div className="flex items-center gap-2.5">
+                <Hand className="h-4 w-4 text-primary" />
+                <Label className="text-sm font-normal">Push-to-Talk</Label>
+              </div>
+              <Switch 
+                checked={isPushToTalk} 
+                onCheckedChange={onTogglePushToTalk}
+              />
+            </div>
           </div>
 
-          <div className="flex items-center justify-between p-2 rounded-md">
-            <span className="text-sm">Sarvam TTS</span>
-            <Badge variant={connectionStatus.sarvam === 'ready' ? 'default' : connectionStatus.sarvam === 'error' ? 'destructive' : 'secondary'}>
-              {connectionStatus.sarvam}
-            </Badge>
-          </div>
+          {isPushToTalk && isSessionActive && (
+            <Button 
+              variant="outline"
+              className={`w-full py-8 transition-all ${
+                isPushToTalkActive 
+                  ? 'bg-accent text-accent-foreground border-accent' 
+                  : 'hover:bg-secondary'
+              }`}
+              onMouseDown={onPushToTalkStart}
+              onMouseUp={onPushToTalkEnd}
+              onMouseLeave={onPushToTalkEnd}
+              onTouchStart={onPushToTalkStart}
+              onTouchEnd={onPushToTalkEnd}
+            >
+              <Hand className="h-5 w-5 mr-2" />
+              {isPushToTalkActive ? 'Listening...' : 'Hold to Talk'}
+            </Button>
+          )}
+        </div>
 
-          <div className="flex items-center justify-between p-2 rounded-md">
-            <span className="text-sm">LLM Provider</span>
-            <Badge variant="outline" className="border-primary text-primary">
-              {connectionStatus.llm}
+        {/* Connection Status - Compact */}
+        <div className="pt-2">
+          <div className="flex flex-wrap gap-1.5">
+            <Badge 
+              variant={connectionStatus.deepgram === 'connected' ? 'default' : 'secondary'}
+              className="text-xs"
+            >
+              STT: {connectionStatus.deepgram}
             </Badge>
-          </div>
-
-          <div className="flex items-center justify-between p-2 rounded-md">
-            <span className="text-sm">Plan</span>
-            <Badge className={getPlanBadgeColor()}>
-              {userPlan.charAt(0).toUpperCase() + userPlan.slice(1)}
+            <Badge 
+              variant={connectionStatus.sarvam === 'ready' ? 'default' : 'secondary'}
+              className="text-xs"
+            >
+              TTS: {connectionStatus.sarvam}
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              LLM: {connectionStatus.llm}
             </Badge>
           </div>
         </div>
