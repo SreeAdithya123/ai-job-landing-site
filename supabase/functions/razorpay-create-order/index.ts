@@ -11,15 +11,15 @@ interface CreateOrderRequest {
 }
 
 const PLAN_PRICES: Record<string, number> = {
-  beginner: 24900, // Amount in paise (₹249)
-  plus: 34900,     // Amount in paise (₹349)
-  pro: 54900,      // Amount in paise (₹549)
+  beginner: 19900, // Amount in paise (₹199)
+  plus: 39900,     // Amount in paise (₹399)
+  pro: 59900,      // Amount in paise (₹599)
 };
 
 const PLAN_CREDITS: Record<string, number> = {
   beginner: 3,
-  plus: 5,
-  pro: 10,
+  plus: 6,
+  pro: 15,
 };
 
 serve(async (req) => {

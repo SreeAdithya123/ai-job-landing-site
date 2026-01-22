@@ -31,82 +31,92 @@ const Payments = () => {
       price: "0",
       period: "month",
       currency: "₹",
-      description: "Get started - upgrade required to practice",
+      description: "Demo plan for marketing & conversions",
       features: [
-        "No interview credits",
-        "Basic feedback and scoring",
-        "General interview questions",
-        "Email support",
-        "Progress tracking",
+        "1 mock interview (10 min)",
+        "AI questions & live transcript",
+        "Basic evaluation",
+        "Resume Builder (1 basic template)",
+        "Resume Scanner (1 scan/month)",
+        "AI Career Coach (10 messages/day)",
+        "Material Generator (3/month)",
       ],
-      buttonText: "Get Started",
+      buttonText: "Start Free",
       popular: false,
       icon: Clock,
-      highlight: "Free to explore"
+      highlight: "Free Demo"
     },
     {
       id: 'beginner' as SubscriptionPlan,
-      name: "Beginner",
-      price: "249",
-      originalPrice: "299",
+      name: "Basic",
+      price: "199",
       period: "month",
       currency: "₹",
-      description: "Get started with 3 interviews per month",
+      description: "Best for students starting their journey",
       features: [
-        "3 interviews per month (1 credit = 15 min)",
-        "Basic feedback and scoring",
-        "General interview questions",
-        "Email support",
-        "Progress tracking",
+        "3 mocks/month (10 min each)",
+        "AI questions, transcript & evaluation",
+        "PDF export (1-page summary)",
+        "Resume Builder (full + PDF export)",
+        "Resume Scanner (5 scans + suggestions)",
+        "AI Career Coach (200 messages/month)",
+        "Recruiter Bot (50 messages/month)",
+        "Material Generator (10/month)",
       ],
-      buttonText: "Get Beginner",
+      buttonText: "Get Basic",
       popular: false,
       icon: Clock,
-      highlight: "3 interviews"
+      highlight: "Best for Students"
     },
     {
       id: 'plus' as SubscriptionPlan,
       name: "Plus",
-      price: "349",
-      originalPrice: "399",
+      price: "399",
       period: "month",
       currency: "₹",
-      description: "More practice time for serious job seekers",
+      description: "For serious job seekers",
       features: [
-        "5 interviews per month",
-        "Advanced AI feedback & analysis",
-        "Industry-specific questions",
-        "Video interview practice",
-        "Performance analytics dashboard",
-        "Priority email support",
+        "6 mocks/month (10-15 min)",
+        "Follow-up questions & detailed evaluation",
+        "Full PDF report + session compare (2)",
+        "Resume Builder (premium templates)",
+        "Resume Scanner (15 scans + optimization)",
+        "AI Career Coach (600 messages/month)",
+        "Recruiter Bot (300 messages/month)",
+        "Cold email/DM drafting",
+        "Material Generator (30/month)",
+        "Role-based Q bank + answers",
       ],
       buttonText: "Upgrade to Plus",
       popular: false,
       icon: Star,
-      highlight: "More practice time"
+      highlight: "Serious Job Seekers"
     },
     {
       id: 'pro' as SubscriptionPlan,
       name: "Pro",
-      price: "549",
-      originalPrice: "599",
+      price: "599",
       period: "month",
       currency: "₹",
-      description: "Maximum interviews + all premium features",
+      description: "For high intent users who want it all",
       features: [
-        "10 interviews per month",
-        "All Plus features included",
-        "AI Career Coach",
-        "Priority Support",
-        "Advanced Analytics",
-        "Resume Builder Access",
-        "Mock panel interviews",
-        "Custom question banks",
+        "15 mocks/month (up to 30 min)",
+        "Best AI model (Groq) + strong evaluation",
+        "Multi-page PDF + session compare (4)",
+        "All premium resume templates",
+        "Unlimited resume scans (fair-use)",
+        "AI rewrite per job description",
+        "ATS keyword matching",
+        "Unlimited AI Career Coach (fair-use)",
+        "Unlimited Recruiter Bot (fair-use)",
+        "Offer negotiation assistant",
+        "Unlimited materials + weekly roadmap",
+        "Priority support",
       ],
       buttonText: "Upgrade to Pro",
       popular: true,
       icon: Crown,
-      highlight: "Best value"
+      highlight: "Best Value"
     }
   ];
 
@@ -330,21 +340,11 @@ const Payments = () => {
                   
                   <div className="mb-4">
                     <div className="flex items-center justify-center space-x-2">
-                      {plan.originalPrice && (
-                        <span className="text-lg text-muted-foreground line-through">
-                          {plan.currency}{plan.originalPrice}
-                        </span>
-                      )}
                       <span className="text-4xl font-bold text-foreground">
                         {plan.currency}{plan.price}
                       </span>
                     </div>
                     <span className="text-muted-foreground">/{plan.period}</span>
-                    {plan.originalPrice && (
-                      <div className="text-sm text-green-600 font-medium mt-1">
-                        Save {plan.currency}50/month
-                      </div>
-                    )}
                   </div>
                   
                   <p className="text-muted-foreground text-sm">
