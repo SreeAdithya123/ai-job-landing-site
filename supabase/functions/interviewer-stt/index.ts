@@ -17,7 +17,7 @@ serve(async (req) => {
       throw new Error('DEEPGRAM_API_KEY not configured');
     }
 
-    const { audioData } = await req.json();
+    const { audioData, mimeType } = await req.json();
     
     if (!audioData) {
       throw new Error('No audio data provided');
@@ -25,20 +25,65 @@ serve(async (req) => {
 
     // Decode base64 audio
     const audioBytes = Uint8Array.from(atob(audioData), c => c.charCodeAt(0));
+    
+    // Validate minimum audio size (at least 1KB for meaningful audio)
+    if (audioBytes.length < 1000) {
+      console.log('Audio too short, skipping:', audioBytes.length, 'bytes');
+      return new Response(
+        JSON.stringify({
+          success: true,
+          transcript: '',
+          confidence: 0,
+          is_final: false
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
+    console.log('Processing audio:', audioBytes.length, 'bytes, mimeType:', mimeType || 'audio/webm');
+
+    // Determine content type - Deepgram supports many formats
+    const contentType = mimeType || 'audio/webm';
+    
     // Call Deepgram API for transcription
-    const response = await fetch('https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&language=en-IN', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Token ${DEEPGRAM_API_KEY}`,
-        'Content-Type': 'audio/webm',
-      },
-      body: audioBytes
-    });
+    // Using encoding=linear16 for better compatibility if needed
+    const response = await fetch(
+      'https://api.deepgram.com/v1/listen?' + new URLSearchParams({
+        model: 'nova-2',
+        smart_format: 'true',
+        language: 'en-IN',
+        punctuate: 'true',
+        detect_language: 'true'
+      }).toString(),
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${DEEPGRAM_API_KEY}`,
+          'Content-Type': contentType,
+        },
+        body: audioBytes
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Deepgram API error:', errorText);
+      
+      // If format issue, return empty transcript instead of throwing
+      if (response.status === 400) {
+        console.log('Audio format issue, returning empty transcript');
+        return new Response(
+          JSON.stringify({
+            success: true,
+            transcript: '',
+            confidence: 0,
+            is_final: false,
+            warning: 'Audio format not recognized'
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       throw new Error(`Deepgram API error: ${response.status}`);
     }
 
@@ -49,7 +94,7 @@ serve(async (req) => {
     const confidence = result?.results?.channels?.[0]?.alternatives?.[0]?.confidence || 0;
     const isFinal = true; // REST API always returns final results
 
-    console.log('Deepgram transcript:', transcript);
+    console.log('Deepgram transcript:', transcript, 'confidence:', confidence);
 
     return new Response(
       JSON.stringify({

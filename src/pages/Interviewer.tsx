@@ -134,29 +134,38 @@ const Interviewer = () => {
       audioContextRef.current = new AudioContext();
       
       // Set up MediaRecorder for capturing audio
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
-      });
+      // Try to use a format Deepgram handles well
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : 'audio/mp4';
+      
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
       
       const audioChunks: Blob[] = [];
+      let chunkCount = 0;
       
       mediaRecorder.ondataavailable = async (event) => {
         if (event.data.size > 0 && !processingRef.current && isMicEnabled) {
           audioChunks.push(event.data);
+          chunkCount++;
           
-          // Process audio chunk through STT
-          if (audioChunks.length >= 2) {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          // Buffer more audio - wait for 3 seconds worth (6 chunks at 500ms each)
+          // This gives Deepgram enough audio to process properly
+          if (chunkCount >= 6) {
+            const audioBlob = new Blob(audioChunks, { type: mimeType });
             audioChunks.length = 0;
-            await processAudioChunk(audioBlob);
+            chunkCount = 0;
+            await processAudioChunk(audioBlob, mimeType);
           }
         }
       };
       
-      mediaRecorder.start(500); // Capture every 500ms
+      mediaRecorder.start(500); // Capture every 500ms, but only process after 3 seconds
       setConnectionStatus(prev => ({ ...prev, deepgram: 'connected' }));
-      addLog('Deepgram connection established');
+      addLog(`Audio recording started (${mimeType})`);
       
       // Get initial question from AI
       await getAIResponse(true);
@@ -174,7 +183,7 @@ const Interviewer = () => {
   }, [addLog, isMicEnabled, navigate]);
 
   // Process audio chunk through Deepgram STT
-  const processAudioChunk = useCallback(async (audioBlob: Blob) => {
+  const processAudioChunk = useCallback(async (audioBlob: Blob, mimeType: string = 'audio/webm') => {
     if (processingRef.current) return;
     
     try {
@@ -192,7 +201,7 @@ const Interviewer = () => {
       });
       
       const { data, error } = await supabase.functions.invoke('interviewer-stt', {
-        body: { audioData: base64Audio }
+        body: { audioData: base64Audio, mimeType }
       });
       
       const sttLatency = Date.now() - sttStart;
