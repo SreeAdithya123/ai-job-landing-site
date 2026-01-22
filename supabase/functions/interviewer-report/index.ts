@@ -91,26 +91,13 @@ serve(async (req) => {
       .map((m: Message) => `${m.role === 'ai' ? 'Interviewer' : 'Candidate'}: ${m.content}`)
       .join('\n\n');
 
-    // Call LLM for evaluation
+    // Call LLM for evaluation with fallback models
     const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
     if (!OPENROUTER_API_KEY) {
       throw new Error('OPENROUTER_API_KEY not configured');
     }
 
-    const llmResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://ai-job-landing-site.lovable.app',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-exp:free',
-        messages: [
-          { role: 'system', content: EVALUATION_PROMPT },
-          { 
-            role: 'user', 
-            content: `Interview Settings:
+    const userPrompt = `Interview Settings:
 - Role: ${settings?.role || 'Software Engineer'}
 - Type: ${settings?.type || 'Technical'}
 - Difficulty: ${settings?.difficulty || 'Medium'}
@@ -119,19 +106,62 @@ serve(async (req) => {
 TRANSCRIPT:
 ${transcript}
 
-Please evaluate this interview and provide your assessment in the required JSON format.`
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.3,
-      })
-    });
+Please evaluate this interview and provide your assessment in the required JSON format.`;
 
-    if (!llmResponse.ok) {
-      throw new Error(`LLM API error: ${llmResponse.status}`);
+    // Try multiple models with fallback on rate limit
+    const models = [
+      'google/gemini-2.0-flash-exp:free',
+      'deepseek/deepseek-chat-v3-0324:free',
+      'meta-llama/llama-3.3-70b-instruct:free'
+    ];
+
+    let llmResult: any = null;
+    let lastError: string = '';
+
+    for (const model of models) {
+      console.log(`Trying model: ${model}`);
+      
+      const llmResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://ai-job-landing-site.lovable.app',
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: EVALUATION_PROMPT },
+            { role: 'user', content: userPrompt }
+          ],
+          max_tokens: 1000,
+          temperature: 0.3,
+        })
+      });
+
+      if (llmResponse.ok) {
+        llmResult = await llmResponse.json();
+        console.log(`Success with model: ${model}`);
+        break;
+      }
+
+      // On rate limit (429), try next model
+      if (llmResponse.status === 429) {
+        console.log(`Rate limited on ${model}, trying next...`);
+        lastError = `Rate limited on ${model}`;
+        continue;
+      }
+
+      // Other errors, log and try next
+      const errorText = await llmResponse.text();
+      console.error(`Error with ${model}:`, errorText);
+      lastError = `${model}: ${llmResponse.status}`;
     }
 
-    const llmResult = await llmResponse.json();
+    if (!llmResult) {
+      throw new Error(`All LLM models failed. Last error: ${lastError}`);
+    }
+
     const aiContent = llmResult.choices?.[0]?.message?.content || '';
 
     // Parse the JSON response
