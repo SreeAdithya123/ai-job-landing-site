@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mic, Settings, LayoutDashboard, LogOut, Wifi, WifiOff, Loader2 } from 'lucide-react';
+import { Mic, LayoutDashboard, LogOut, Wifi, WifiOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ConnectionStatus } from '@/pages/Interviewer';
@@ -18,98 +18,85 @@ const InterviewerPageHeader: React.FC<InterviewerPageHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const getDeepgramStatusColor = () => {
+  const getStatusIcon = () => {
     switch (connectionStatus.deepgram) {
-      case 'connected': return 'bg-accent text-accent-foreground';
-      case 'connecting': return 'bg-yellow-500 text-white';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
-  const getSarvamStatusColor = () => {
-    switch (connectionStatus.sarvam) {
-      case 'ready': return 'bg-accent text-accent-foreground';
-      case 'loading': return 'bg-yellow-500 text-white';
-      default: return 'bg-destructive text-destructive-foreground';
+      case 'connected': return <Wifi className="h-3.5 w-3.5" />;
+      case 'connecting': return <Loader2 className="h-3.5 w-3.5 animate-spin" />;
+      default: return <WifiOff className="h-3.5 w-3.5" />;
     }
   };
 
   return (
-    <div className="bg-card/80 backdrop-blur-md border-b border-border shadow-sm sticky top-0 z-50">
+    <header className="bg-card border-b border-border sticky top-0 z-50">
       <div className="max-w-[1800px] mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
-              <Mic className="h-6 w-6 text-white" />
+          {/* Logo & Title */}
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 bg-primary rounded-xl flex items-center justify-center shadow-md">
+              <Mic className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">
+              <h1 className="text-xl font-semibold text-foreground tracking-tight">
                 Voice Interviewer
               </h1>
-              <p className="text-muted-foreground text-sm">AI-Powered Interview Console</p>
+              <p className="text-sm text-muted-foreground">
+                AI-Powered Interview Practice
+              </p>
             </div>
           </div>
           
-          {/* Status Chips */}
-          <div className="flex items-center space-x-3">
-            <Badge className={`${getDeepgramStatusColor()} flex items-center gap-1.5`}>
-              {connectionStatus.deepgram === 'connected' ? (
-                <Wifi className="h-3 w-3" />
-              ) : connectionStatus.deepgram === 'connecting' ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <WifiOff className="h-3 w-3" />
-              )}
-              Deepgram: {connectionStatus.deepgram}
-            </Badge>
-            
-            <Badge className={getSarvamStatusColor()}>
-              TTS: {connectionStatus.sarvam}
-            </Badge>
-            
-            <Badge variant="outline" className="border-primary text-primary">
-              LLM: {connectionStatus.llm}
-            </Badge>
-            
+          {/* Status Indicators */}
+          <div className="hidden md:flex items-center gap-2">
             {isSessionActive && (
-              <Badge className="bg-accent text-accent-foreground animate-pulse">
-                ● LIVE
+              <Badge variant="default" className="bg-accent text-accent-foreground gap-1.5">
+                <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                Live Session
               </Badge>
             )}
+            
+            <Badge 
+              variant={connectionStatus.deepgram === 'connected' ? 'default' : 'secondary'}
+              className="gap-1.5"
+            >
+              {getStatusIcon()}
+              <span className="hidden lg:inline">STT:</span> {connectionStatus.deepgram}
+            </Badge>
+            
+            <Badge 
+              variant={connectionStatus.sarvam === 'ready' ? 'default' : connectionStatus.sarvam === 'error' ? 'destructive' : 'secondary'}
+            >
+              <span className="hidden lg:inline">TTS:</span> {connectionStatus.sarvam}
+            </Badge>
+            
+            <Badge variant="outline" className="text-primary border-primary">
+              <span className="hidden lg:inline">LLM:</span> {connectionStatus.llm}
+            </Badge>
           </div>
           
-          {/* Navigation Buttons */}
-          <div className="flex items-center space-x-3">
+          {/* Navigation */}
+          <div className="flex items-center gap-2">
             <Button 
-              variant="outline" 
+              variant="ghost" 
               size="sm"
               onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2"
+              className="gap-2"
             >
               <LayoutDashboard className="h-4 w-4" />
-              Dashboard
+              <span className="hidden sm:inline">Dashboard</span>
             </Button>
             <Button 
-              variant="outline" 
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Settings className="h-4 w-4" />
-              Settings
-            </Button>
-            <Button 
-              variant="destructive" 
+              variant="ghost" 
               size="sm"
               onClick={onSignOut}
-              className="flex items-center gap-2"
+              className="gap-2 text-muted-foreground hover:text-destructive"
             >
               <LogOut className="h-4 w-4" />
-              Sign Out
+              <span className="hidden sm:inline">Sign Out</span>
             </Button>
           </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 };
 
