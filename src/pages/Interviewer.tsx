@@ -394,6 +394,7 @@ const Interviewer = () => {
         body: {
           messages: messages.map(m => ({ role: m.role, content: m.text, timestamp: m.timestamp })),
           settings,
+          user_plan: subscription?.plan || 'free',
           duration_minutes: sessionStartTime 
             ? Math.round((Date.now() - sessionStartTime.getTime()) / 60000) 
             : 0
@@ -401,6 +402,10 @@ const Interviewer = () => {
       });
       
       if (error) throw error;
+
+      if (!data?.success) {
+        throw new Error(data?.error || 'Failed to generate report');
+      }
       
       toast.dismiss();
       toast.success('Interview report generated successfully!');
