@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useAdminRole } from '@/hooks/useAdminRole';
+
 import { useInterviewCredits } from '@/hooks/useInterviewCredits';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -16,7 +16,7 @@ import AccountSuspendedModal from '@/components/interview/AccountSuspendedModal'
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { Shield, Lock, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -64,7 +64,7 @@ const Interviewer = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { subscription, isPro, isPlus } = useSubscription();
-  const { isAdmin, isLoading: isAdminLoading } = useAdminRole();
+  
   const {
     timeRemaining,
     formattedTimeRemaining,
@@ -659,49 +659,6 @@ const Interviewer = () => {
     };
   }, [stopSession]);
 
-  // Show loading state while checking admin role
-  if (isAdminLoading) {
-    return (
-      <ProtectedRoute>
-        <Layout>
-          <div className="min-h-screen bg-background flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                <Shield className="w-8 h-8 text-primary" />
-              </div>
-              <p className="text-muted-foreground">Verifying access...</p>
-            </div>
-          </div>
-        </Layout>
-      </ProtectedRoute>
-    );
-  }
-
-  // Show access denied if not admin
-  if (!isAdmin) {
-    return (
-      <ProtectedRoute>
-        <Layout>
-          <div className="min-h-screen bg-background flex items-center justify-center p-6">
-            <Card className="max-w-md w-full">
-              <CardContent className="pt-8 pb-8 text-center">
-                <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Lock className="w-8 h-8 text-destructive" />
-                </div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">Access Restricted</h2>
-                <p className="text-muted-foreground mb-6">
-                  The Voice Interviewer is currently available to administrators only.
-                </p>
-                <Button onClick={() => navigate('/dashboard')} className="w-full">
-                  Return to Dashboard
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </Layout>
-      </ProtectedRoute>
-    );
-  }
 
   return (
     <ProtectedRoute>
