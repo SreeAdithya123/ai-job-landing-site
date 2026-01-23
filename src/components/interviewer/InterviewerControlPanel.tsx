@@ -18,6 +18,7 @@ import { ConnectionStatus } from '@/pages/Interviewer';
 
 interface InterviewerControlPanelProps {
   isSessionActive: boolean;
+  isStartingInterview?: boolean;
   isMicEnabled: boolean;
   isSpeakerEnabled: boolean;
   isPushToTalk: boolean;
@@ -37,6 +38,7 @@ interface InterviewerControlPanelProps {
 
 const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
   isSessionActive,
+  isStartingInterview = false,
   isMicEnabled,
   isSpeakerEnabled,
   isPushToTalk,
@@ -57,10 +59,17 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
   const [questionTimer, setQuestionTimer] = useState('00:00');
 
   useEffect(() => {
-    if (!sessionStartTime || !isSessionActive) {
+    // Start timer as soon as sessionStartTime is set (even if isSessionActive is still updating)
+    if (!sessionStartTime) {
       setSessionTimer('00:00');
       return;
     }
+
+    // Immediately calculate initial elapsed time
+    const initialElapsed = Math.floor((Date.now() - sessionStartTime.getTime()) / 1000);
+    const initialMinutes = Math.floor(initialElapsed / 60).toString().padStart(2, '0');
+    const initialSeconds = (initialElapsed % 60).toString().padStart(2, '0');
+    setSessionTimer(`${initialMinutes}:${initialSeconds}`);
 
     const interval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - sessionStartTime.getTime()) / 1000);
@@ -70,13 +79,20 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [sessionStartTime, isSessionActive]);
+  }, [sessionStartTime]);
 
   useEffect(() => {
-    if (!questionStartTime || !isSessionActive) {
+    // Start question timer as soon as questionStartTime is set
+    if (!questionStartTime) {
       setQuestionTimer('00:00');
       return;
     }
+
+    // Immediately calculate initial elapsed time
+    const initialElapsed = Math.floor((Date.now() - questionStartTime.getTime()) / 1000);
+    const initialMinutes = Math.floor(initialElapsed / 60).toString().padStart(2, '0');
+    const initialSeconds = (initialElapsed % 60).toString().padStart(2, '0');
+    setQuestionTimer(`${initialMinutes}:${initialSeconds}`);
 
     const interval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - questionStartTime.getTime()) / 1000);
@@ -86,7 +102,7 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [questionStartTime, isSessionActive]);
+  }, [questionStartTime]);
 
   const getPlanLabel = () => {
     switch (userPlan) {
@@ -115,7 +131,7 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
       <CardContent className="space-y-6">
         {/* Session Control - Only End Session (Start is handled via setup form) */}
         <div>
-          {isSessionActive && (
+          {(isSessionActive || sessionStartTime) ? (
             <Button 
               onClick={onStopSession}
               variant="destructive"
@@ -124,12 +140,14 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
               <Square className="h-5 w-5 mr-2" />
               End Session
             </Button>
-          )}
-          {!isSessionActive && (
+          ) : isStartingInterview ? (
             <div className="text-center py-4 text-muted-foreground text-sm">
-              Interview session is starting...
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                Connecting...
+              </div>
             </div>
-          )}
+          ) : null}
         </div>
 
         <Separator />
