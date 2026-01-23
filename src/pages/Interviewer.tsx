@@ -772,6 +772,7 @@ const Interviewer = () => {
                   >
                     <InterviewerControlPanel
                       isSessionActive={isSessionActive}
+                      isStartingInterview={isStartingInterview}
                       isMicEnabled={isMicEnabled}
                       isSpeakerEnabled={isSpeakerEnabled}
                       isPushToTalk={isPushToTalk}
