@@ -90,7 +90,7 @@ const Interviewer = () => {
   // Audio controls
   const [isMicEnabled, setIsMicEnabled] = useState(true);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
-  const [isPushToTalk, setIsPushToTalk] = useState(false);
+  const [isPushToTalk, setIsPushToTalk] = useState(true); // Default ON for reliable experience
   const [isPushToTalkActive, setIsPushToTalkActive] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingAudio, setIsProcessingAudio] = useState(false);
@@ -139,6 +139,7 @@ const Interviewer = () => {
   const isPlayingRef = useRef(false);
   const vadIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const mimeTypeRef = useRef<string>('audio/webm');
+  const endAndGenerateReportRef = useRef<() => Promise<void>>(() => Promise.resolve());
 
   const addLog = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -310,42 +311,20 @@ const Interviewer = () => {
     }
   }, [isProcessingAudio, addLog]);
 
-  // Start interview from setup form
-  const handleStartFromSetup = useCallback(async () => {
-    setIsStartingInterview(true);
-    try {
-      // Check if user is suspended
-      const isSuspended = await checkSuspensionStatus();
-      if (isSuspended) {
-        setShowSuspendedModal(true);
-        return;
-      }
-
-      // Deduct credit before starting
-      const hasCredit = await deductCreditForStart('voice-interviewer');
-      if (!hasCredit) {
-        toast.error('No credits remaining. Please upgrade your plan.');
-        navigate('/payments');
-        return;
-      }
-
-      await startSession();
-      setShowSetupForm(false);
-    } catch (error) {
-      console.error('Failed to start interview:', error);
-    } finally {
-      setIsStartingInterview(false);
-    }
-  }, [checkSuspensionStatus, deductCreditForStart, navigate]);
-
   // Auto-end interview when timer runs out
   const handleAutoEndInterview = useCallback(async () => {
     addLog('Interview time limit reached (10 minutes)');
-    await endAndGenerateReport();
-  }, []);
+    await endAndGenerateReportRef.current();
+  }, [addLog]);
 
-  // Start interview session
+  // Start interview session (called only from handleStartFromSetup)
   const startSession = useCallback(async () => {
+    // Guard against duplicate starts
+    if (isSessionActive) {
+      addLog('Session already active, ignoring duplicate start');
+      return;
+    }
+    
     try {
       addLog('Starting interview session...');
       
@@ -387,9 +366,6 @@ const Interviewer = () => {
         startVAD();
       }
       
-      // Get initial question from AI
-      await getAIResponse(true);
-      
     } catch (error: any) {
       console.error('Error starting session:', error);
       if (error.name === 'NotAllowedError') {
@@ -400,7 +376,7 @@ const Interviewer = () => {
       addLog(`Error: ${error.message}`);
       throw error;
     }
-  }, [addLog, startVAD, isPushToTalk, startInterviewTimer, handleAutoEndInterview]);
+  }, [addLog, startVAD, isPushToTalk, startInterviewTimer, handleAutoEndInterview, isSessionActive]);
 
   // Push-to-talk start - begins recording
   const handlePushToTalkStart = useCallback(() => {
@@ -614,6 +590,54 @@ const Interviewer = () => {
       addLog(`Report Error: ${error.message}`);
     }
   }, [messages, settings, sessionStartTime, stopSession, addLog, navigate, subscription]);
+
+  // Keep ref updated for auto-end callback
+  useEffect(() => {
+    endAndGenerateReportRef.current = endAndGenerateReport;
+  }, [endAndGenerateReport]);
+
+  // Start interview from setup form - SINGLE ENTRY POINT for starting interviews
+  // This is the ONLY function that should trigger credit deduction and session start
+  const handleStartFromSetup = useCallback(async () => {
+    // Prevent duplicate clicks
+    if (isStartingInterview || isSessionActive) {
+      addLog('Start already in progress or session active');
+      return;
+    }
+    
+    setIsStartingInterview(true);
+    try {
+      // Check if user is suspended
+      const isSuspended = await checkSuspensionStatus();
+      if (isSuspended) {
+        setShowSuspendedModal(true);
+        return;
+      }
+
+      // Deduct credit before starting
+      const hasCredit = await deductCreditForStart('voice-interviewer');
+      if (!hasCredit) {
+        toast.error('No credits remaining. Please upgrade your plan.');
+        navigate('/payments');
+        return;
+      }
+
+      // Start the session
+      await startSession();
+      
+      // Hide setup form and show interview interface
+      setShowSetupForm(false);
+      
+      // Get initial AI question after session is started
+      await getAIResponse(true);
+      
+    } catch (error) {
+      console.error('Failed to start interview:', error);
+      toast.error('Failed to start interview. Please try again.');
+    } finally {
+      setIsStartingInterview(false);
+    }
+  }, [checkSuspensionStatus, deductCreditForStart, navigate, isStartingInterview, isSessionActive, startSession, addLog, getAIResponse]);
 
   // Send manual text message
   const sendTextMessage = useCallback(async (text: string) => {
