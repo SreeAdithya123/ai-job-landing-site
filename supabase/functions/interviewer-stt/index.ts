@@ -5,6 +5,79 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface SarvamSTTResponse {
+  transcript: string;
+  language_code?: string;
+}
+
+async function callSarvamSTT(
+  audioBytes: Uint8Array,
+  apiKey: string,
+  retryCount = 0
+): Promise<{ success: boolean; transcript?: string; error?: string }> {
+  const maxRetries = 2;
+  const baseDelay = 1000;
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+
+    // Create form data with audio file
+    const audioBlob = new Blob([audioBytes], { type: 'audio/webm' });
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'audio.webm');
+    formData.append('model', 'saarika:v2.5');
+    formData.append('language_code', 'en-IN');
+
+    console.log('Calling Sarvam STT API with', audioBytes.length, 'bytes');
+
+    const response = await fetch('https://api.sarvam.ai/speech-to-text', {
+      method: 'POST',
+      headers: {
+        'api-subscription-key': apiKey,
+      },
+      body: formData,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Sarvam STT error:', response.status, errorText);
+
+      // Retry on 502, 503, 504 errors
+      if ((response.status >= 502 && response.status <= 504) && retryCount < maxRetries) {
+        const delay = baseDelay * Math.pow(2, retryCount);
+        console.log(`Sarvam STT ${response.status}, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`);
+        await new Promise(r => setTimeout(r, delay));
+        return callSarvamSTT(audioBytes, apiKey, retryCount + 1);
+      }
+
+      return { success: false, error: `Sarvam API ${response.status}: ${errorText.substring(0, 200)}` };
+    }
+
+    const result: SarvamSTTResponse = await response.json();
+    console.log('Sarvam STT result:', result);
+
+    return { 
+      success: true, 
+      transcript: result.transcript || '' 
+    };
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      if (retryCount < maxRetries) {
+        const delay = baseDelay * Math.pow(2, retryCount);
+        console.log(`Sarvam STT timeout, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`);
+        await new Promise(r => setTimeout(r, delay));
+        return callSarvamSTT(audioBytes, apiKey, retryCount + 1);
+      }
+      return { success: false, error: 'Sarvam STT timeout after retries' };
+    }
+    return { success: false, error: error.message };
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -12,9 +85,9 @@ serve(async (req) => {
   }
 
   try {
-    const DEEPGRAM_API_KEY = Deno.env.get('DEEPGRAM_API_KEY');
-    if (!DEEPGRAM_API_KEY) {
-      throw new Error('DEEPGRAM_API_KEY not configured');
+    const SARVAM_API_KEY = Deno.env.get('SARVAM_API_KEY');
+    if (!SARVAM_API_KEY) {
+      throw new Error('SARVAM_API_KEY not configured');
     }
 
     const { audioData, mimeType } = await req.json();
@@ -42,66 +115,34 @@ serve(async (req) => {
 
     console.log('Processing audio:', audioBytes.length, 'bytes, mimeType:', mimeType || 'audio/webm');
 
-    // Determine content type - Deepgram supports many formats
-    const contentType = mimeType || 'audio/webm';
-    
-    // Call Deepgram API for transcription
-    // Using encoding=linear16 for better compatibility if needed
-    const response = await fetch(
-      'https://api.deepgram.com/v1/listen?' + new URLSearchParams({
-        model: 'nova-2',
-        smart_format: 'true',
-        language: 'en-IN',
-        punctuate: 'true',
-        detect_language: 'true'
-      }).toString(),
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${DEEPGRAM_API_KEY}`,
-          'Content-Type': contentType,
-        },
-        body: audioBytes
-      }
-    );
+    // Call Sarvam STT
+    const result = await callSarvamSTT(audioBytes, SARVAM_API_KEY);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Deepgram API error:', errorText);
-      
-      // If format issue, return empty transcript instead of throwing
-      if (response.status === 400) {
-        console.log('Audio format issue, returning empty transcript');
-        return new Response(
-          JSON.stringify({
-            success: true,
-            transcript: '',
-            confidence: 0,
-            is_final: false,
-            warning: 'Audio format not recognized'
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      throw new Error(`Deepgram API error: ${response.status}`);
+    if (!result.success) {
+      console.error('Sarvam STT failed:', result.error);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: result.error,
+          transcript: '',
+          confidence: 0,
+          is_final: false
+        }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
 
-    const result = await response.json();
-    
-    // Extract transcript from Deepgram response
-    const transcript = result?.results?.channels?.[0]?.alternatives?.[0]?.transcript || '';
-    const confidence = result?.results?.channels?.[0]?.alternatives?.[0]?.confidence || 0;
-    const isFinal = true; // REST API always returns final results
-
-    console.log('Deepgram transcript:', transcript, 'confidence:', confidence);
+    console.log('Sarvam transcript:', result.transcript);
 
     return new Response(
       JSON.stringify({
         success: true,
-        transcript,
-        confidence,
-        is_final: isFinal
+        transcript: result.transcript || '',
+        confidence: result.transcript ? 0.9 : 0, // Sarvam doesn't return confidence, estimate based on response
+        is_final: true
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
