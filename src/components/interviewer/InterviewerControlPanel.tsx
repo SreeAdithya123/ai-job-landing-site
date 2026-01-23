@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Play, 
   Square, 
   Mic, 
   MicOff, 
@@ -114,17 +113,9 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
       </CardHeader>
       
       <CardContent className="space-y-6">
-        {/* Main Action Button */}
+        {/* Session Control - Only End Session (Start is handled via setup form) */}
         <div>
-          {!isSessionActive ? (
-            <Button 
-              onClick={onStartSession}
-              className="w-full py-6 text-base font-medium bg-primary hover:bg-primary/90"
-            >
-              <Play className="h-5 w-5 mr-2" />
-              Start Interview
-            </Button>
-          ) : (
+          {isSessionActive && (
             <Button 
               onClick={onStopSession}
               variant="destructive"
@@ -133,6 +124,11 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
               <Square className="h-5 w-5 mr-2" />
               End Session
             </Button>
+          )}
+          {!isSessionActive && (
+            <div className="text-center py-4 text-muted-foreground text-sm">
+              Interview session is starting...
+            </div>
           )}
         </div>
 
