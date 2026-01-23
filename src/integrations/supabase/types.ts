@@ -471,6 +471,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_user: {
+        Args: { p_target_user_id: string }
+        Returns: boolean
+      }
       admin_get_all_users: {
         Args: never
         Returns: {
@@ -480,6 +484,19 @@ export type Database = {
           email: string
           full_name: string
           plan: string
+          user_id: string
+        }[]
+      }
+      admin_get_suspended_users: {
+        Args: never
+        Returns: {
+          credits_remaining: number
+          early_disconnect_count: number
+          email: string
+          full_name: string
+          is_warned: boolean
+          plan: string
+          suspended_at: string
           user_id: string
         }[]
       }
