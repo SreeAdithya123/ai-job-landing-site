@@ -226,7 +226,7 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
             </div>
           </div>
 
-          {isPushToTalk && isSessionActive && (
+          {isPushToTalk && (isSessionActive || sessionStartTime) && (
             <Button 
               variant="outline"
               className={`w-full py-8 transition-all ${
@@ -246,20 +246,19 @@ const InterviewerControlPanel: React.FC<InterviewerControlPanelProps> = ({
           )}
         </div>
 
-        {/* Connection Status - Compact */}
         <div className="pt-2">
           <div className="flex flex-wrap gap-1.5">
             <Badge 
-              variant={connectionStatus.deepgram === 'connected' ? 'default' : 'secondary'}
+              variant={connectionStatus.stt === 'connected' ? 'default' : 'secondary'}
               className="text-xs"
             >
-              STT: {connectionStatus.deepgram}
+              STT: {connectionStatus.stt}
             </Badge>
             <Badge 
-              variant={connectionStatus.sarvam === 'ready' ? 'default' : 'secondary'}
+              variant={connectionStatus.tts === 'ready' ? 'default' : 'secondary'}
               className="text-xs"
             >
-              TTS: {connectionStatus.sarvam}
+              TTS: {connectionStatus.tts}
             </Badge>
             <Badge variant="outline" className="text-xs">
               LLM: {connectionStatus.llm}

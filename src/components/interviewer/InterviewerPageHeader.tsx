@@ -19,7 +19,7 @@ const InterviewerPageHeader: React.FC<InterviewerPageHeaderProps> = ({
   const navigate = useNavigate();
 
   const getStatusIcon = () => {
-    switch (connectionStatus.deepgram) {
+    switch (connectionStatus.stt) {
       case 'connected': return <Wifi className="h-3.5 w-3.5" />;
       case 'connecting': return <Loader2 className="h-3.5 w-3.5 animate-spin" />;
       default: return <WifiOff className="h-3.5 w-3.5" />;
@@ -55,17 +55,17 @@ const InterviewerPageHeader: React.FC<InterviewerPageHeaderProps> = ({
             )}
             
             <Badge 
-              variant={connectionStatus.deepgram === 'connected' ? 'default' : 'secondary'}
+              variant={connectionStatus.stt === 'connected' ? 'default' : 'secondary'}
               className="gap-1.5"
             >
               {getStatusIcon()}
-              <span className="hidden lg:inline">STT:</span> {connectionStatus.deepgram}
+              <span className="hidden lg:inline">STT:</span> {connectionStatus.stt}
             </Badge>
             
             <Badge 
-              variant={connectionStatus.sarvam === 'ready' ? 'default' : connectionStatus.sarvam === 'error' ? 'destructive' : 'secondary'}
+              variant={connectionStatus.tts === 'ready' ? 'default' : connectionStatus.tts === 'error' ? 'destructive' : 'secondary'}
             >
-              <span className="hidden lg:inline">TTS:</span> {connectionStatus.sarvam}
+              <span className="hidden lg:inline">TTS:</span> {connectionStatus.tts}
             </Badge>
             
             <Badge variant="outline" className="text-primary border-primary">
