@@ -140,6 +140,9 @@ const Interviewer = () => {
   const vadIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const mimeTypeRef = useRef<string>('audio/webm');
   const endAndGenerateReportRef = useRef<() => Promise<void>>(() => Promise.resolve());
+  const isRecordingRef = useRef(false); // Track recording state via ref to avoid stale closures
+  const isProcessingRef = useRef(false); // Track processing state via ref
+  const getAIResponseRef = useRef<(isInitial: boolean, newUserText?: string) => Promise<void>>(() => Promise.resolve());
 
   const addLog = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -189,7 +192,14 @@ const Interviewer = () => {
 
   // Start recording a single utterance
   const startRecording = useCallback(() => {
-    if (!streamRef.current || isRecording) return;
+    // Use ref to check recording state to avoid stale closure issues
+    if (!streamRef.current || isRecordingRef.current) {
+      console.log('startRecording: skipped - no stream or already recording', { 
+        hasStream: !!streamRef.current, 
+        isRecording: isRecordingRef.current 
+      });
+      return;
+    }
     
     try {
       const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
@@ -198,22 +208,29 @@ const Interviewer = () => {
           ? 'audio/webm'
           : 'audio/mp4';
       
+      console.log('startRecording: starting with mimeType', mimeType);
       mimeTypeRef.current = mimeType;
       const mediaRecorder = new MediaRecorder(streamRef.current, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
       
       mediaRecorder.ondataavailable = (event) => {
+        console.log('Recording: data available, size:', event.data.size);
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
       };
       
       mediaRecorder.onstop = async () => {
+        console.log('Recording: stopped, chunks:', audioChunksRef.current.length);
+        isRecordingRef.current = false;
+        setIsRecording(false);
+        
         if (audioChunksRef.current.length > 0) {
           const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
           audioChunksRef.current = [];
           
+          console.log('Recording: blob size', audioBlob.size);
           // Only process if blob is substantial (>5KB)
           if (audioBlob.size > 5000) {
             await processCompleteAudio(audioBlob, mimeType);
@@ -221,36 +238,48 @@ const Interviewer = () => {
             addLog('Audio too short, skipping');
           }
         }
-        setIsRecording(false);
       };
       
-      mediaRecorder.start();
+      // Request data every 250ms to ensure we capture audio chunks
+      mediaRecorder.start(250);
+      isRecordingRef.current = true;
       setIsRecording(true);
       setCurrentInterimText('Listening...');
-      addLog('Recording started (VAD detected speech)');
+      addLog('Recording started');
+      console.log('startRecording: recording started successfully');
     } catch (error: any) {
       console.error('Recording start error:', error);
       addLog(`Recording error: ${error.message}`);
-    }
-  }, [isRecording, addLog]);
-
-  // Stop recording
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
-      addLog('Recording stopped (silence detected)');
+      isRecordingRef.current = false;
+      setIsRecording(false);
     }
   }, [addLog]);
 
-  // Process complete audio through Deepgram STT
+  // Stop recording
+  const stopRecording = useCallback(() => {
+    console.log('stopRecording called, state:', mediaRecorderRef.current?.state);
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+      addLog('Recording stopped');
+      console.log('stopRecording: stopped successfully');
+    }
+  }, [addLog]);
+
+  // Process complete audio through Sarvam STT
   const processCompleteAudio = useCallback(async (audioBlob: Blob, mimeType: string) => {
-    if (isProcessingAudio) return;
+    // Use ref to avoid stale closures
+    if (isProcessingRef.current) {
+      console.log('processCompleteAudio: skipped - already processing');
+      return;
+    }
     
     try {
+      isProcessingRef.current = true;
       setIsProcessingAudio(true);
       setCurrentInterimText('Processing speech...');
       const sttStart = Date.now();
       
+      console.log('processCompleteAudio: sending', (audioBlob.size / 1024).toFixed(1), 'KB to STT');
       addLog(`Processing audio: ${(audioBlob.size / 1024).toFixed(1)}KB`);
       
       // Convert blob to base64
@@ -264,9 +293,13 @@ const Interviewer = () => {
         reader.readAsDataURL(audioBlob);
       });
       
+      console.log('processCompleteAudio: base64 length', base64Audio.length);
+      
       const { data, error } = await supabase.functions.invoke('interviewer-stt', {
         body: { audioData: base64Audio, mimeType }
       });
+      
+      console.log('processCompleteAudio: STT response', data, error);
       
       const sttLatency = Date.now() - sttStart;
       setLatencyStats(prev => ({ ...prev, stt: sttLatency }));
@@ -295,10 +328,10 @@ const Interviewer = () => {
         };
         setMessages(prev => [...prev, userMessage]);
         
-        addLog(`STT: "${data.transcript.substring(0, 50)}..." (${sttLatency}ms, ${Math.round(data.confidence * 100)}% conf)`);
+        addLog(`STT: "${data.transcript.substring(0, 50)}..." (${sttLatency}ms, ${Math.round((data.confidence ?? 0.9) * 100)}% conf)`);
         
-        // Get AI response - pass the transcript directly to avoid stale state
-        await getAIResponse(false, data.transcript);
+        // Get AI response - use ref to avoid circular dependency
+        await getAIResponseRef.current(false, data.transcript);
       } else {
         addLog('No speech detected in audio');
       }
@@ -307,9 +340,10 @@ const Interviewer = () => {
       addLog(`STT Error: ${error.message}`);
       setCurrentInterimText('');
     } finally {
+      isProcessingRef.current = false;
       setIsProcessingAudio(false);
     }
-  }, [isProcessingAudio, addLog]);
+  }, [addLog]);
 
   // Auto-end interview when timer runs out
   const handleAutoEndInterview = useCallback(async () => {
@@ -380,13 +414,25 @@ const Interviewer = () => {
 
   // Push-to-talk start - begins recording
   const handlePushToTalkStart = useCallback(() => {
-    if (!isSessionActive || !streamRef.current) return;
+    console.log('handlePushToTalkStart called', { 
+      isSessionActive, 
+      sessionStartTime: !!sessionStartTime,
+      hasStream: !!streamRef.current 
+    });
+    
+    // Allow PTT if session is active OR sessionStartTime is set (handles race condition)
+    if ((!isSessionActive && !sessionStartTime) || !streamRef.current) {
+      console.log('handlePushToTalkStart: blocked - session not ready');
+      return;
+    }
+    
     setIsPushToTalkActive(true);
     startRecording();
-  }, [isSessionActive, startRecording]);
+  }, [isSessionActive, sessionStartTime, startRecording]);
 
   // Push-to-talk end - stops recording and processes audio
   const handlePushToTalkEnd = useCallback(() => {
+    console.log('handlePushToTalkEnd called', { isPushToTalkActive });
     if (!isPushToTalkActive) return;
     setIsPushToTalkActive(false);
     stopRecording();
@@ -450,6 +496,11 @@ const Interviewer = () => {
       toast.error('Failed to get AI response. Please try again.');
     }
   }, [messages, settings, isPro, isPlus, isSpeakerEnabled, addLog]);
+
+  // Keep getAIResponseRef updated to avoid stale closures in processCompleteAudio
+  useEffect(() => {
+    getAIResponseRef.current = getAIResponse;
+  }, [getAIResponse]);
 
   // Text-to-Speech using Sarvam
   const speakText = useCallback(async (text: string) => {
