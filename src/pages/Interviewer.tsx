@@ -55,8 +55,8 @@ export interface LatencyStats {
 }
 
 export interface ConnectionStatus {
-  deepgram: 'connected' | 'disconnected' | 'connecting';
-  sarvam: 'ready' | 'error' | 'loading';
+  stt: 'connected' | 'disconnected' | 'connecting';
+  tts: 'ready' | 'error' | 'loading';
   llm: 'groq' | 'openrouter' | 'disconnected';
 }
 
@@ -103,8 +103,8 @@ const Interviewer = () => {
   
   // Connection status
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({
-    deepgram: 'disconnected',
-    sarvam: 'ready',
+    stt: 'disconnected',
+    tts: 'ready',
     llm: isPro || isPlus ? 'groq' : 'openrouter'
   });
   
@@ -340,7 +340,7 @@ const Interviewer = () => {
       
       setIsSessionActive(true);
       setSessionStartTime(new Date());
-      setConnectionStatus(prev => ({ ...prev, deepgram: 'connecting' }));
+      setConnectionStatus(prev => ({ ...prev, stt: 'connecting' }));
       
       addLog('Microphone access granted');
       
@@ -358,7 +358,7 @@ const Interviewer = () => {
       const source = audioContext.createMediaStreamSource(stream);
       source.connect(analyser);
       
-      setConnectionStatus(prev => ({ ...prev, deepgram: 'connected' }));
+      setConnectionStatus(prev => ({ ...prev, stt: 'connected' }));
       addLog('Audio pipeline ready');
       
       // Only start VAD if NOT in push-to-talk mode
@@ -455,7 +455,7 @@ const Interviewer = () => {
   const speakText = useCallback(async (text: string) => {
     try {
       const ttsStart = Date.now();
-      setConnectionStatus(prev => ({ ...prev, sarvam: 'loading' }));
+      setConnectionStatus(prev => ({ ...prev, tts: 'loading' }));
       addLog('Converting to speech...');
       
       const { data, error } = await supabase.functions.invoke('interviewer-tts', {
@@ -494,7 +494,7 @@ const Interviewer = () => {
         }
         
         addLog(`TTS Complete: ${ttsLatency}ms`);
-        setConnectionStatus(prev => ({ ...prev, sarvam: 'ready' }));
+        setConnectionStatus(prev => ({ ...prev, tts: 'ready' }));
       }
     } catch (error: any) {
       console.error('TTS Error:', error);
