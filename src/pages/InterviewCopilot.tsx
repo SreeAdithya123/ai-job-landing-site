@@ -14,8 +14,6 @@ import InterviewTypeCard from '../components/interview/InterviewTypeCard';
 import InterviewSessionsPanel from '../components/interview/InterviewSessionsPanel';
 import InterviewActiveInterface from '../components/interview/InterviewActiveInterface';
 import CreditCheckModal from '../components/CreditCheckModal';
-import InterviewWarningModal from '../components/interview/InterviewWarningModal';
-import AccountSuspendedModal from '../components/interview/AccountSuspendedModal';
 import { Laptop, Code, Star, Users } from 'lucide-react';
 
 export interface TranscriptEntry {
@@ -42,18 +40,13 @@ const InterviewCopilot = () => {
   const [showCreditModal, setShowCreditModal] = useState(false);
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
-  const { hasCredits, isSuspended, refetch: refetchSubscription } = useSubscription();
+  const { hasCredits, refetch: refetchSubscription } = useSubscription();
   
   const {
     formattedTimeRemaining,
-    showWarningModal,
-    setShowWarningModal,
-    showSuspendedModal,
-    setShowSuspendedModal,
     deductCreditForStart,
     startInterviewTimer,
     endInterview,
-    checkSuspensionStatus,
   } = useInterviewCredits();
 
 
@@ -194,12 +187,6 @@ const InterviewCopilot = () => {
   }];
 
   const handleSelectInterview = async (type: string) => {
-    // Check if suspended first
-    if (isSuspended) {
-      setShowSuspendedModal(true);
-      return;
-    }
-
     // Check credits before allowing interview selection
     if (!hasCredits) {
       setShowCreditModal(true);
@@ -219,13 +206,6 @@ const InterviewCopilot = () => {
   };
 
   const handleStartInterview = async () => {
-    // Check if suspended first
-    const suspended = await checkSuspensionStatus();
-    if (suspended) {
-      setShowSuspendedModal(true);
-      return;
-    }
-
     // Deduct credit at the start of interview
     const creditDeducted = await deductCreditForStart(selectedType);
     if (!creditDeducted) {
@@ -416,12 +396,6 @@ const InterviewCopilot = () => {
 
         {/* Credit Check Modal */}
         <CreditCheckModal open={showCreditModal} onOpenChange={setShowCreditModal} />
-        
-        {/* Warning Modal for unusual activity */}
-        <InterviewWarningModal open={showWarningModal} onOpenChange={setShowWarningModal} />
-        
-        {/* Suspended Account Modal */}
-        <AccountSuspendedModal open={showSuspendedModal} onOpenChange={setShowSuspendedModal} />
       </div>
     </ProtectedRoute>
   );

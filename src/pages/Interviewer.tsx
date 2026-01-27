@@ -11,8 +11,6 @@ import InterviewerConversationPanel from '@/components/interviewer/InterviewerCo
 import InterviewerRightPanel from '@/components/interviewer/InterviewerRightPanel';
 import InterviewerPageHeader from '@/components/interviewer/InterviewerPageHeader';
 import InterviewSetupForm from '@/components/interviewer/InterviewSetupForm';
-import InterviewWarningModal from '@/components/interview/InterviewWarningModal';
-import AccountSuspendedModal from '@/components/interview/AccountSuspendedModal';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -68,11 +66,6 @@ const Interviewer = () => {
   const {
     timeRemaining,
     formattedTimeRemaining,
-    showWarningModal,
-    setShowWarningModal,
-    showSuspendedModal,
-    setShowSuspendedModal,
-    checkSuspensionStatus,
     deductCreditForStart,
     startInterviewTimer,
     endInterview,
@@ -658,13 +651,6 @@ const Interviewer = () => {
     
     setIsStartingInterview(true);
     try {
-      // Check if user is suspended
-      const isSuspended = await checkSuspensionStatus();
-      if (isSuspended) {
-        setShowSuspendedModal(true);
-        return;
-      }
-
       // Deduct credit before starting
       const hasCredit = await deductCreditForStart('voice-interviewer');
       if (!hasCredit) {
@@ -688,7 +674,7 @@ const Interviewer = () => {
     } finally {
       setIsStartingInterview(false);
     }
-  }, [checkSuspensionStatus, deductCreditForStart, navigate, isStartingInterview, isSessionActive, startSession, addLog, getAIResponse]);
+  }, [deductCreditForStart, navigate, isStartingInterview, isSessionActive, startSession, addLog, getAIResponse]);
 
   // Send manual text message
   const sendTextMessage = useCallback(async (text: string) => {
@@ -885,18 +871,6 @@ const Interviewer = () => {
                 </div>
               </>
             )}
-
-            {/* Warning Modal for early disconnects */}
-            <InterviewWarningModal 
-              open={showWarningModal} 
-              onOpenChange={setShowWarningModal} 
-            />
-
-            {/* Suspended Modal */}
-            <AccountSuspendedModal 
-              open={showSuspendedModal} 
-              onOpenChange={setShowSuspendedModal} 
-            />
           </div>
         </div>
       </Layout>

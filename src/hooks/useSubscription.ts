@@ -10,9 +10,6 @@ export interface Subscription {
   credits_remaining: number;
   credits_per_month: number;
   billing_cycle_start: string;
-  early_disconnect_count?: number;
-  is_warned?: boolean;
-  is_suspended?: boolean;
   pending_partial_credit?: number;
 }
 
@@ -109,7 +106,7 @@ export const useSubscription = () => {
 
       const { data, error } = await supabase
         .from('user_subscriptions')
-        .select('plan, credits_remaining, credits_per_month, billing_cycle_start, early_disconnect_count, is_warned, is_suspended, pending_partial_credit')
+        .select('plan, credits_remaining, credits_per_month, billing_cycle_start, pending_partial_credit')
         .eq('user_id', user.id)
         .single();
 
@@ -124,7 +121,7 @@ export const useSubscription = () => {
               credits_remaining: 1,
               credits_per_month: 1,
             })
-            .select('plan, credits_remaining, credits_per_month, billing_cycle_start, early_disconnect_count, is_warned, is_suspended, pending_partial_credit')
+            .select('plan, credits_remaining, credits_per_month, billing_cycle_start, pending_partial_credit')
             .single();
 
           if (insertError) throw insertError;
@@ -166,7 +163,6 @@ export const useSubscription = () => {
   const isPlus = subscription?.plan === 'plus' || subscription?.plan === 'pro';
   const isBeginner = subscription?.plan === 'beginner' || subscription?.plan === 'free';
   const isFree = subscription?.plan === 'free';
-  const isSuspended = subscription?.is_suspended ?? false;
   const planDetails = subscription ? PLAN_DETAILS[subscription.plan] : PLAN_DETAILS.beginner;
 
   return {
@@ -178,7 +174,6 @@ export const useSubscription = () => {
     isPlus,
     isBeginner,
     isFree,
-    isSuspended,
     planDetails,
     deductCredit: deductCreditMutation.mutate,
     isDeducting: deductCreditMutation.isPending,
