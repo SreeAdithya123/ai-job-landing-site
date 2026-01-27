@@ -9,70 +9,20 @@ const MAX_INTERVIEW_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 interface EarlyDisconnectResult {
   refunded: number;
   disconnect_count: number;
-  show_warning: boolean;
-  is_suspended: boolean;
-}
-
-interface SubscriptionStatus {
-  is_suspended: boolean;
-  is_warned: boolean;
-  early_disconnect_count: number;
-  pending_partial_credit: number;
 }
 
 export const useInterviewCredits = () => {
   const { user } = useAuth();
   const [interviewStartTime, setInterviewStartTime] = useState<Date | null>(null);
-  const [showWarningModal, setShowWarningModal] = useState(false);
-  const [showSuspendedModal, setShowSuspendedModal] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(MAX_INTERVIEW_DURATION_MS);
   const [isAutoEnding, setIsAutoEnding] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const autoEndRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Check if user is suspended
-  const checkSuspensionStatus = useCallback(async (): Promise<boolean> => {
-    if (!user) return false;
-
-    const { data, error } = await supabase.rpc('is_user_suspended', {
-      p_user_id: user.id,
-    });
-
-    if (error) {
-      console.error('Error checking suspension status:', error);
-      return false;
-    }
-
-    return data === true;
-  }, [user]);
-
-  // Get full subscription status
-  const getSubscriptionStatus = useCallback(async (): Promise<SubscriptionStatus | null> => {
-    if (!user) return null;
-
-    const { data, error } = await supabase.rpc('get_user_subscription_status', {
-      p_user_id: user.id,
-    });
-
-    if (error) {
-      console.error('Error getting subscription status:', error);
-      return null;
-    }
-
-    return data as unknown as SubscriptionStatus;
-  }, [user]);
-
   // Deduct credit when starting interview
   const deductCreditForStart = useCallback(async (interviewType?: string): Promise<boolean> => {
     if (!user) {
       toast.error('Please sign in to start an interview');
-      return false;
-    }
-
-    // Check if suspended first
-    const isSuspended = await checkSuspensionStatus();
-    if (isSuspended) {
-      setShowSuspendedModal(true);
       return false;
     }
 
@@ -94,9 +44,9 @@ export const useInterviewCredits = () => {
     }
 
     return true;
-  }, [user, checkSuspensionStatus]);
+  }, [user]);
 
-  // Handle early disconnect (within 3 minutes)
+  // Handle early disconnect (within 3 minutes) - refund partial credit
   const handleEarlyDisconnect = useCallback(async (): Promise<EarlyDisconnectResult | null> => {
     if (!user) return null;
 
@@ -111,12 +61,7 @@ export const useInterviewCredits = () => {
 
     const result = data as unknown as EarlyDisconnectResult;
 
-    if (result.is_suspended) {
-      setShowSuspendedModal(true);
-      toast.error('Your account has been suspended due to unusual activity');
-    } else if (result.show_warning) {
-      setShowWarningModal(true);
-    } else if (result.refunded > 0) {
+    if (result.refunded > 0) {
       toast.info(`0.7 credit saved for your next interview (ended early)`);
     }
 
@@ -200,13 +145,7 @@ export const useInterviewCredits = () => {
     interviewStartTime,
     timeRemaining,
     formattedTimeRemaining: formatTimeRemaining(timeRemaining),
-    showWarningModal,
-    setShowWarningModal,
-    showSuspendedModal,
-    setShowSuspendedModal,
     isAutoEnding,
-    checkSuspensionStatus,
-    getSubscriptionStatus,
     deductCreditForStart,
     startInterviewTimer,
     endInterview,

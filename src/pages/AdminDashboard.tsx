@@ -26,7 +26,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { Shield, Users, Crown, Star, Zap, Search, RefreshCw, ShieldCheck, UserCog, Ban, Trash2, UserX, AlertTriangle } from 'lucide-react';
+import { Shield, Users, Crown, Star, Zap, Search, RefreshCw, ShieldCheck, UserCog } from 'lucide-react';
 import { SubscriptionPlan } from '@/hooks/useSubscription';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Database } from '@/integrations/supabase/types';
@@ -61,16 +61,6 @@ interface UserRole {
   created_at: string;
 }
 
-interface SuspendedUser {
-  user_id: string;
-  email: string;
-  full_name: string;
-  plan: string;
-  credits_remaining: number;
-  early_disconnect_count: number;
-  is_warned: boolean;
-  suspended_at: string;
-}
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -110,18 +100,6 @@ const AdminDashboard = () => {
     enabled: isAdmin === true,
   });
 
-  const { data: suspendedUsers, isLoading: suspendedLoading, refetch: refetchSuspended } = useQuery({
-    queryKey: ['admin-suspended-users'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('admin_get_suspended_users');
-      if (error) {
-        console.error('Error fetching suspended users:', error);
-        throw error;
-      }
-      return data as SuspendedUser[];
-    },
-    enabled: isAdmin === true,
-  });
 
   const addRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
@@ -175,23 +153,6 @@ const AdminDashboard = () => {
     },
   });
 
-  const unsuspendUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      const { data, error } = await supabase.rpc('admin_unsuspend_user', {
-        p_target_user_id: userId,
-      });
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-suspended-users'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-      toast.success('User unsuspended successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to unsuspend user');
-    },
-  });
 
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
@@ -224,13 +185,6 @@ const AdminDashboard = () => {
     removeRoleMutation.mutate({ userId, role });
   };
 
-  const handleUnsuspend = (userId: string) => {
-    unsuspendUserMutation.mutate(userId);
-  };
-
-  const handleDeleteUser = (userId: string) => {
-    deleteUserMutation.mutate(userId);
-  };
 
   const getUserRoles = (userId: string): AppRole[] => {
     return userRoles?.filter(r => r.user_id === userId).map(r => r.role) || [];
@@ -320,7 +274,7 @@ const AdminDashboard = () => {
                 <p className="text-muted-foreground">Manage users and subscriptions</p>
               </div>
             </div>
-            <Button variant="outline" onClick={() => { refetch(); refetchRoles(); refetchSuspended(); }}>
+            <Button variant="outline" onClick={() => { refetch(); refetchRoles(); }}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
@@ -403,9 +357,9 @@ const AdminDashboard = () => {
             </Card>
           </div>
 
-          {/* Tabs for Subscriptions, Roles, and Suspended */}
+          {/* Tabs for Subscriptions and Roles */}
           <Tabs defaultValue="subscriptions" className="space-y-4">
-            <TabsList className="grid w-full max-w-2xl grid-cols-3">
+            <TabsList className="grid w-full max-w-lg grid-cols-2">
               <TabsTrigger value="subscriptions" className="flex items-center gap-2">
                 <Crown className="h-4 w-4" />
                 Subscriptions
@@ -413,15 +367,6 @@ const AdminDashboard = () => {
               <TabsTrigger value="roles" className="flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4" />
                 User Roles
-              </TabsTrigger>
-              <TabsTrigger value="suspended" className="flex items-center gap-2">
-                <Ban className="h-4 w-4" />
-                Suspended
-                {(suspendedUsers?.length ?? 0) > 0 && (
-                  <Badge variant="destructive" className="ml-1 h-5 px-1.5 text-xs">
-                    {suspendedUsers?.length}
-                  </Badge>
-                )}
               </TabsTrigger>
             </TabsList>
 
@@ -671,148 +616,6 @@ const AdminDashboard = () => {
               </Card>
             </TabsContent>
 
-            {/* Suspended Accounts Tab */}
-            <TabsContent value="suspended">
-              <Card className="glass-card border-destructive/20">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-destructive">
-                      <UserX className="h-5 w-5" />
-                      Suspended Accounts
-                    </CardTitle>
-                    <Badge variant="destructive" className="text-sm">
-                      {suspendedUsers?.length ?? 0} suspended
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {suspendedLoading ? (
-                    <div className="space-y-4">
-                      {[...Array(3)].map((_, i) => (
-                        <Skeleton key={i} className="h-16 w-full" />
-                      ))}
-                    </div>
-                  ) : suspendedUsers && suspendedUsers.length > 0 ? (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>User</TableHead>
-                          <TableHead>Plan</TableHead>
-                          <TableHead>Credits</TableHead>
-                          <TableHead>Early Disconnects</TableHead>
-                          <TableHead>Suspended At</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {suspendedUsers.map((user) => (
-                          <TableRow key={user.user_id} className="bg-destructive/5">
-                            <TableCell>
-                              <div>
-                                <p className="font-medium">{user.full_name || 'No name'}</p>
-                                <p className="text-sm text-muted-foreground">{user.email}</p>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                {getPlanIcon(user.plan || 'free')}
-                                <Badge variant={getPlanBadgeVariant(user.plan || 'free')} className="capitalize">
-                                  {user.plan || 'free'}
-                                </Badge>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <span className="font-medium">{user.credits_remaining ?? 0}</span>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <AlertTriangle className="h-4 w-4 text-amber-500" />
-                                <span className="font-medium text-amber-600">
-                                  {user.early_disconnect_count} times
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {user.suspended_at 
-                                ? new Date(user.suspended_at).toLocaleDateString() 
-                                : 'N/A'}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleUnsuspend(user.user_id)}
-                                  disabled={unsuspendUserMutation.isPending}
-                                  className="text-green-600 border-green-300 hover:bg-green-50"
-                                >
-                                  <ShieldCheck className="h-3 w-3 mr-1" />
-                                  Unsuspend
-                                </Button>
-                                
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      variant="destructive"
-                                      disabled={deleteUserMutation.isPending}
-                                    >
-                                      <Trash2 className="h-3 w-3 mr-1" />
-                                      Delete
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-                                        <AlertTriangle className="h-5 w-5" />
-                                        Permanently Delete User?
-                                      </AlertDialogTitle>
-                                      <AlertDialogDescription className="space-y-2">
-                                        <p>
-                                          This will permanently delete <strong>{user.email}</strong> and all their data including:
-                                        </p>
-                                        <ul className="list-disc list-inside text-sm space-y-1">
-                                          <li>Profile and account information</li>
-                                          <li>All interview sessions and recordings</li>
-                                          <li>Aptitude test results</li>
-                                          <li>Credit usage history</li>
-                                          <li>Subscription data</li>
-                                        </ul>
-                                        <p className="font-medium text-destructive">
-                                          This action cannot be undone!
-                                        </p>
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() => handleDeleteUser(user.user_id)}
-                                        className="bg-destructive hover:bg-destructive/90"
-                                      >
-                                        <Trash2 className="h-4 w-4 mr-2" />
-                                        Delete Permanently
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  ) : (
-                    <div className="text-center py-12">
-                      <ShieldCheck className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-foreground mb-2">No Suspended Accounts</h3>
-                      <p className="text-muted-foreground">
-                        All user accounts are in good standing.
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
           </Tabs>
         </div>
       </Layout>
