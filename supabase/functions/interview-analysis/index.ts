@@ -86,11 +86,12 @@ Focus on:
 Return ONLY the JSON object, no additional text.
 `
 
-    // Models to try in order (fallback for rate limiting)
+    // Models to try in order (fallback for rate limiting or unavailability)
     const models = [
-      'google/gemini-2.0-flash-exp:free',
-      'deepseek/deepseek-chat-v3-0324:free',
-      'meta-llama/llama-3.3-8b-instruct:free'
+      'google/gemini-flash-1.5-8b',
+      'meta-llama/llama-3.1-8b-instruct:free',
+      'mistralai/mistral-7b-instruct:free',
+      'google/gemma-2-9b-it:free'
     ]
 
     let openrouterResponse: Response | null = null
@@ -99,47 +100,53 @@ Return ONLY the JSON object, no additional text.
     for (const model of models) {
       console.log(`📤 Trying model: ${model}...`)
       
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${Deno.env.get('OPENROUTER_API_KEY')}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://interview-copilot.app',
-          'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'Interview Copilot'
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an expert interview analyst. Provide detailed, constructive feedback on interview performance. Always respond with valid JSON only.'
-            },
-            {
-              role: 'user',
-              content: analysisPrompt
-            }
-          ],
-          temperature: 0.3
-        }),
-      })
+      try {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${Deno.env.get('OPENROUTER_API_KEY')}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://interview-copilot.app',
+            'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'Interview Copilot'
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              {
+                role: 'system',
+                content: 'You are an expert interview analyst. Provide detailed, constructive feedback on interview performance. Always respond with valid JSON only.'
+              },
+              {
+                role: 'user',
+                content: analysisPrompt
+              }
+            ],
+            temperature: 0.3
+          }),
+        })
 
-      if (response.ok) {
-        openrouterResponse = response
-        console.log(`✅ Success with model: ${model}`)
-        break
-      }
+        if (response.ok) {
+          openrouterResponse = response
+          console.log(`✅ Success with model: ${model}`)
+          break
+        }
 
-      lastError = await response.text()
-      console.warn(`⚠️ Model ${model} failed (${response.status}):`, lastError)
-      
-      // If it's not a rate limit error, don't try other models
-      if (response.status !== 429) {
-        throw new Error(`OpenRouter API error: ${response.status} - ${lastError}`)
+        lastError = await response.text()
+        console.warn(`⚠️ Model ${model} failed (${response.status}):`, lastError)
+        
+        // Continue trying other models for rate limits (429) or not found (404)
+        if (response.status !== 429 && response.status !== 404) {
+          throw new Error(`OpenRouter API error: ${response.status} - ${lastError}`)
+        }
+      } catch (fetchError) {
+        console.error(`❌ Fetch error for model ${model}:`, fetchError)
+        lastError = fetchError.message
+        // Continue to next model
       }
     }
 
     if (!openrouterResponse) {
-      throw new Error(`All models rate limited. Last error: ${lastError}`)
+      throw new Error(`All models failed. Last error: ${lastError}`)
     }
 
     const openrouterData = await openrouterResponse.json()
