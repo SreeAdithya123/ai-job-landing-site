@@ -62,6 +62,12 @@ function validateMessagesForSarvam(messages: Message[], settings: InterviewSetti
   return [systemMsg, ...conversationMsgs];
 }
 
+// Try multiple Sarvam endpoints
+const SARVAM_ENDPOINTS = [
+  'https://api.sarvam.ai/v1/chat/completions',
+  'https://api.sarvam.ai/chat/completions',
+];
+
 async function callSarvamLLM(messages: Message[], settings: InterviewSettings): Promise<string> {
   const SARVAM_API_KEY = Deno.env.get('SARVAM_API_KEY');
   if (!SARVAM_API_KEY) {
@@ -69,39 +75,57 @@ async function callSarvamLLM(messages: Message[], settings: InterviewSettings): 
   }
 
   const sarvamMessages = validateMessagesForSarvam(messages, settings);
+  let lastError = '';
 
-  console.log('Calling Sarvam LLM API (sarvam-m)...', { messageCount: sarvamMessages.length });
-  
-  // Use Sarvam's native chat completions endpoint with api-subscription-key header
-  const response = await fetch('https://api.sarvam.ai/chat/completions', {
-    method: 'POST',
-    headers: {
-      'api-subscription-key': SARVAM_API_KEY,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'sarvam-m',
-      messages: sarvamMessages,
-      max_tokens: 300,
-      temperature: 0.7,
-    })
-  });
+  for (const endpoint of SARVAM_ENDPOINTS) {
+    try {
+      console.log(`Calling Sarvam LLM API at ${endpoint}...`, { messageCount: sarvamMessages.length });
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'api-subscription-key': SARVAM_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'sarvam-m',
+          messages: sarvamMessages,
+          max_tokens: 300,
+          temperature: 0.7,
+        }),
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Sarvam LLM error:', response.status, errorText);
-    throw new Error(`Sarvam LLM API error: ${response.status} - ${errorText}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Sarvam LLM error at ${endpoint}:`, response.status, errorText);
+        lastError = `${response.status} - ${errorText}`;
+        continue; // Try next endpoint
+      }
+
+      const result = await response.json();
+      console.log('Sarvam LLM response received successfully from:', endpoint);
+      
+      const content = result.choices?.[0]?.message?.content;
+      if (!content) {
+        lastError = 'No content in Sarvam LLM response';
+        continue;
+      }
+      
+      return content;
+    } catch (error) {
+      console.error(`Sarvam LLM error at ${endpoint}:`, error.message);
+      lastError = error.message;
+      continue;
+    }
   }
 
-  const result = await response.json();
-  console.log('Sarvam LLM response received successfully');
-  
-  const content = result.choices?.[0]?.message?.content;
-  if (!content) {
-    throw new Error('No content in Sarvam LLM response');
-  }
-  
-  return content;
+  throw new Error(`Sarvam LLM API failed: ${lastError}`);
 }
 
 serve(async (req) => {
