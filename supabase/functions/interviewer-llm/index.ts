@@ -34,10 +34,10 @@ Your personality:
 - Patient and supportive
 - Focuses on bringing out the best in candidates`;
 
-async function callGroq(messages: Message[], settings: InterviewSettings): Promise<{ text: string; provider: string }> {
-  const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
-  if (!GROQ_API_KEY) {
-    throw new Error('GROQ_API_KEY not configured');
+async function callSarvam(messages: Message[], settings: InterviewSettings): Promise<{ text: string; provider: string }> {
+  const SARVAM_API_KEY = Deno.env.get('SARVAM_API_KEY');
+  if (!SARVAM_API_KEY) {
+    throw new Error('SARVAM_API_KEY not configured');
   }
 
   const systemMessage = `${SYSTEM_PROMPT}
@@ -48,18 +48,21 @@ Interview Context:
 - Difficulty: ${settings.difficulty}
 - Duration: ${settings.duration} minutes`;
 
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  // Sarvam API uses system message as first message in the array
+  const sarvamMessages = [
+    { role: 'system', content: systemMessage },
+    ...messages
+  ];
+
+  const response = await fetch('https://api.sarvam.ai/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${GROQ_API_KEY}`,
+      'api-subscription-key': SARVAM_API_KEY,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages: [
-        { role: 'system', content: systemMessage },
-        ...messages
-      ],
+      model: 'sarvam-m',
+      messages: sarvamMessages,
       max_tokens: 300,
       temperature: 0.7,
     })
@@ -67,14 +70,14 @@ Interview Context:
 
   if (!response.ok) {
     const error = await response.text();
-    console.error('Groq API error:', error);
-    throw new Error(`Groq API error: ${response.status}`);
+    console.error('Sarvam API error:', error);
+    throw new Error(`Sarvam API error: ${response.status}`);
   }
 
   const result = await response.json();
   return {
     text: result.choices?.[0]?.message?.content || '',
-    provider: 'groq'
+    provider: 'sarvam'
   };
 }
 
@@ -155,12 +158,12 @@ serve(async (req) => {
 
     let result: { text: string; provider: string };
 
-    // Route based on plan: paid users get Groq, free users get OpenRouter
+    // Route based on plan: paid users get Sarvam, free users get OpenRouter
     const isPaid = user_plan === 'pro' || user_plan === 'plus' || user_plan === 'beginner';
     
     try {
       if (isPaid) {
-        result = await callGroq(conversationMessages, settings);
+        result = await callSarvam(conversationMessages, settings);
       } else {
         result = await callOpenRouter(conversationMessages, settings);
       }
@@ -170,7 +173,7 @@ serve(async (req) => {
       try {
         result = isPaid 
           ? await callOpenRouter(conversationMessages, settings)
-          : await callGroq(conversationMessages, settings);
+          : await callSarvam(conversationMessages, settings);
       } catch (fallbackError) {
         throw new Error('Both LLM providers failed');
       }
