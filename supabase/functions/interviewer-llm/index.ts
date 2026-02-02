@@ -44,7 +44,7 @@ Interview Context:
 - Duration: ${settings.duration} minutes`;
 }
 
-// Ensure message array is valid for Sarvam: system first, then alternating user/assistant with user first
+// Sarvam requires: system first, then user/assistant alternating starting with user
 function validateMessagesForSarvam(messages: Message[], settings: InterviewSettings): Message[] {
   const systemMsg: Message = { role: 'system', content: buildSystemMessage(settings) };
   
@@ -62,7 +62,7 @@ function validateMessagesForSarvam(messages: Message[], settings: InterviewSetti
   return [systemMsg, ...conversationMsgs];
 }
 
-async function callSarvam(messages: Message[], settings: InterviewSettings): Promise<{ text: string; provider: string }> {
+async function callSarvamLLM(messages: Message[], settings: InterviewSettings): Promise<string> {
   const SARVAM_API_KEY = Deno.env.get('SARVAM_API_KEY');
   if (!SARVAM_API_KEY) {
     throw new Error('SARVAM_API_KEY not configured');
@@ -70,12 +70,13 @@ async function callSarvam(messages: Message[], settings: InterviewSettings): Pro
 
   const sarvamMessages = validateMessagesForSarvam(messages, settings);
 
-  console.log('Calling Sarvam API with model sarvam-m...', { messageCount: sarvamMessages.length });
+  console.log('Calling Sarvam LLM API (sarvam-m)...', { messageCount: sarvamMessages.length });
   
-  const response = await fetch('https://api.sarvam.ai/v1/chat/completions', {
+  // Use Sarvam's native chat completions endpoint with api-subscription-key header
+  const response = await fetch('https://api.sarvam.ai/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${SARVAM_API_KEY}`,
+      'api-subscription-key': SARVAM_API_KEY,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -87,58 +88,20 @@ async function callSarvam(messages: Message[], settings: InterviewSettings): Pro
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    console.error('Sarvam API error:', response.status, error);
-    throw new Error(`Sarvam API error: ${response.status} - ${error}`);
+    const errorText = await response.text();
+    console.error('Sarvam LLM error:', response.status, errorText);
+    throw new Error(`Sarvam LLM API error: ${response.status} - ${errorText}`);
   }
 
   const result = await response.json();
-  console.log('Sarvam API response received successfully');
-  return {
-    text: result.choices?.[0]?.message?.content || '',
-    provider: 'sarvam'
-  };
-}
-
-async function callLovableAI(messages: Message[], settings: InterviewSettings): Promise<{ text: string; provider: string }> {
-  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-  if (!LOVABLE_API_KEY) {
-    throw new Error('LOVABLE_API_KEY not configured');
-  }
-
-  const systemMessage = buildSystemMessage(settings);
-
-  console.log('Calling Lovable AI Gateway with gemini-3-flash-preview...');
+  console.log('Sarvam LLM response received successfully');
   
-  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'google/gemini-3-flash-preview',
-      messages: [
-        { role: 'system', content: systemMessage },
-        ...messages.filter(m => m.role === 'user' || m.role === 'assistant')
-      ],
-      max_tokens: 300,
-      temperature: 0.7,
-    })
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    console.error('Lovable AI Gateway error:', response.status, error);
-    throw new Error(`Lovable AI Gateway error: ${response.status}`);
+  const content = result.choices?.[0]?.message?.content;
+  if (!content) {
+    throw new Error('No content in Sarvam LLM response');
   }
-
-  const result = await response.json();
-  console.log('Lovable AI Gateway response received successfully');
-  return {
-    text: result.choices?.[0]?.message?.content || '',
-    provider: 'lovable-ai'
-  };
+  
+  return content;
 }
 
 serve(async (req) => {
@@ -147,7 +110,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, interview_settings, user_plan, is_initial } = await req.json();
+    const { messages, interview_settings, is_initial } = await req.json();
 
     const settings: InterviewSettings = {
       role: interview_settings?.role || 'Software Engineer',
@@ -170,37 +133,16 @@ serve(async (req) => {
       ];
     }
 
-    let result: { text: string; provider: string };
+    // Use Sarvam LLM exclusively (matching STT and TTS)
+    const aiText = await callSarvamLLM(conversationMessages, settings);
 
-    // Route based on plan: paid users get Sarvam, free users get Lovable AI
-    const isPaid = user_plan === 'pro' || user_plan === 'plus' || user_plan === 'beginner';
-    
-    try {
-      if (isPaid) {
-        result = await callSarvam(conversationMessages, settings);
-      } else {
-        result = await callLovableAI(conversationMessages, settings);
-      }
-    } catch (primaryError) {
-      console.error('Primary LLM failed, trying fallback:', primaryError);
-      // Fallback to the other provider
-      try {
-        result = isPaid 
-          ? await callLovableAI(conversationMessages, settings)
-          : await callSarvam(conversationMessages, settings);
-      } catch (fallbackError) {
-        console.error('Fallback LLM also failed:', fallbackError);
-        throw new Error('Both LLM providers failed');
-      }
-    }
-
-    console.log(`LLM Response (${result.provider}):`, result.text.substring(0, 100));
+    console.log('LLM Response:', aiText.substring(0, 100));
 
     return new Response(
       JSON.stringify({
         success: true,
-        ai_text: result.text,
-        provider_used: result.provider
+        ai_text: aiText,
+        provider_used: 'sarvam'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
