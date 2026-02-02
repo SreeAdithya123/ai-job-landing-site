@@ -137,6 +137,7 @@ const Interviewer = () => {
   const isRecordingRef = useRef(false); // Track recording state via ref to avoid stale closures
   const isProcessingRef = useRef(false); // Track processing state via ref
   const getAIResponseRef = useRef<(isInitial: boolean, newUserText?: string) => Promise<void>>(() => Promise.resolve());
+  const lastRecordingErrorAtRef = useRef<number>(0);
 
   const addLog = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -285,6 +286,14 @@ const Interviewer = () => {
     } catch (error: any) {
       console.error('Recording start error:', error);
       addLog(`Recording error: ${error.message}`);
+
+      // Avoid spamming toasts if VAD/handlers retry rapidly.
+      const now = Date.now();
+      if (now - lastRecordingErrorAtRef.current > 5000) {
+        toast.error('Could not start audio recording in this browser. Try Chrome/Edge or reload the page.');
+        lastRecordingErrorAtRef.current = now;
+      }
+
       isRecordingRef.current = false;
       setIsRecording(false);
       mediaRecorderRef.current = null;
