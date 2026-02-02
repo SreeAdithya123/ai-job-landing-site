@@ -10,9 +10,25 @@ interface SarvamSTTResponse {
   language_code?: string;
 }
 
+function normalizeAudioMimeType(mimeType: unknown): string {
+  if (typeof mimeType !== 'string') return 'audio/webm';
+  const mt = mimeType.trim().toLowerCase();
+  if (!mt) return 'audio/webm';
+  // Keep only the type/subtype part (drop codecs params for Blob/file naming)
+  return mt.split(';')[0] || 'audio/webm';
+}
+
+function extensionForMimeType(mimeType: string): string {
+  if (mimeType.includes('ogg')) return 'ogg';
+  if (mimeType.includes('mp4')) return 'm4a';
+  if (mimeType.includes('webm')) return 'webm';
+  return 'webm';
+}
+
 async function callSarvamSTT(
   audioBytes: Uint8Array,
   apiKey: string,
+  mimeType: string,
   retryCount = 0
 ): Promise<{ success: boolean; transcript?: string; error?: string }> {
   const maxRetries = 2;
@@ -22,14 +38,16 @@ async function callSarvamSTT(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
 
-    // Create form data with audio file
-    const audioBlob = new Blob([audioBytes], { type: 'audio/webm' });
+    // Create form data with audio file (preserve container/mime where possible)
+    const normalizedMimeType = normalizeAudioMimeType(mimeType);
+    const ext = extensionForMimeType(normalizedMimeType);
+    const audioBlob = new Blob([audioBytes], { type: normalizedMimeType });
     const formData = new FormData();
-    formData.append('file', audioBlob, 'audio.webm');
+    formData.append('file', audioBlob, `audio.${ext}`);
     formData.append('model', 'saarika:v2.5');
     formData.append('language_code', 'en-IN');
 
-    console.log('Calling Sarvam STT API with', audioBytes.length, 'bytes');
+    console.log('Calling Sarvam STT API with', audioBytes.length, 'bytes', 'mimeType:', normalizedMimeType);
 
     const response = await fetch('https://api.sarvam.ai/speech-to-text', {
       method: 'POST',
@@ -51,7 +69,7 @@ async function callSarvamSTT(
         const delay = baseDelay * Math.pow(2, retryCount);
         console.log(`Sarvam STT ${response.status}, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`);
         await new Promise(r => setTimeout(r, delay));
-        return callSarvamSTT(audioBytes, apiKey, retryCount + 1);
+        return callSarvamSTT(audioBytes, apiKey, mimeType, retryCount + 1);
       }
 
       return { success: false, error: `Sarvam API ${response.status}: ${errorText.substring(0, 200)}` };
@@ -70,7 +88,7 @@ async function callSarvamSTT(
         const delay = baseDelay * Math.pow(2, retryCount);
         console.log(`Sarvam STT timeout, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`);
         await new Promise(r => setTimeout(r, delay));
-        return callSarvamSTT(audioBytes, apiKey, retryCount + 1);
+        return callSarvamSTT(audioBytes, apiKey, mimeType, retryCount + 1);
       }
       return { success: false, error: 'Sarvam STT timeout after retries' };
     }
@@ -113,10 +131,11 @@ serve(async (req) => {
       );
     }
 
-    console.log('Processing audio:', audioBytes.length, 'bytes, mimeType:', mimeType || 'audio/webm');
+    const normalizedMimeType = normalizeAudioMimeType(mimeType);
+    console.log('Processing audio:', audioBytes.length, 'bytes, mimeType:', normalizedMimeType);
 
     // Call Sarvam STT
-    const result = await callSarvamSTT(audioBytes, SARVAM_API_KEY);
+    const result = await callSarvamSTT(audioBytes, SARVAM_API_KEY, normalizedMimeType);
 
     if (!result.success) {
       console.error('Sarvam STT failed:', result.error);
