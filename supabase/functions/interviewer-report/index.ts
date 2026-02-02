@@ -101,9 +101,9 @@ serve(async (req) => {
 
     // Call LLM for evaluation with fallback providers/models
     const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
-    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
-    if (!OPENROUTER_API_KEY && !GROQ_API_KEY) {
-      throw new Error('No LLM providers configured (OPENROUTER_API_KEY / GROQ_API_KEY)');
+    const SARVAM_API_KEY = Deno.env.get('SARVAM_API_KEY');
+    if (!OPENROUTER_API_KEY && !SARVAM_API_KEY) {
+      throw new Error('No LLM providers configured (OPENROUTER_API_KEY / SARVAM_API_KEY)');
     }
 
     const userPrompt = `Interview Settings:
@@ -126,17 +126,17 @@ Please evaluate this interview and provide your assessment in the required JSON 
 
     const isPaid = user_plan === 'pro' || user_plan === 'plus' || user_plan === 'beginner';
 
-    const callGroq = async (): Promise<{ content: string; provider: string }> => {
-      if (!GROQ_API_KEY) throw new Error('GROQ_API_KEY not configured');
+    const callSarvam = async (): Promise<{ content: string; provider: string }> => {
+      if (!SARVAM_API_KEY) throw new Error('SARVAM_API_KEY not configured');
 
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const res = await fetch('https://api.sarvam.ai/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
+          'api-subscription-key': SARVAM_API_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: 'sarvam-m',
           messages: [
             { role: 'system', content: EVALUATION_PROMPT },
             { role: 'user', content: userPrompt },
@@ -148,11 +148,11 @@ Please evaluate this interview and provide your assessment in the required JSON 
 
       if (!res.ok) {
         const t = await res.text();
-        throw new Error(`Groq error ${res.status}: ${t}`);
+        throw new Error(`Sarvam error ${res.status}: ${t}`);
       }
 
       const j = await res.json();
-      return { content: j.choices?.[0]?.message?.content || '', provider: 'groq' };
+      return { content: j.choices?.[0]?.message?.content || '', provider: 'sarvam' };
     };
 
     const callOpenRouter = async (): Promise<{ content: string; provider: string }> => {
@@ -203,16 +203,16 @@ Please evaluate this interview and provide your assessment in the required JSON 
     let aiContent = '';
     let evaluationProvider = 'fallback';
 
-    // Provider preference: paid => Groq first, otherwise OpenRouter first
+    // Provider preference: paid => Sarvam first, otherwise OpenRouter first
     try {
-      const primary = isPaid ? callGroq : callOpenRouter;
+      const primary = isPaid ? callSarvam : callOpenRouter;
       const { content, provider } = await primary();
       aiContent = content;
       evaluationProvider = provider;
     } catch (primaryErr) {
       console.error('Primary evaluator failed, trying fallback...', primaryErr);
       try {
-        const secondary = isPaid ? callOpenRouter : callGroq;
+        const secondary = isPaid ? callOpenRouter : callSarvam;
         const { content, provider } = await secondary();
         aiContent = content;
         evaluationProvider = provider;
