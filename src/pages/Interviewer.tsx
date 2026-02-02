@@ -17,6 +17,7 @@ import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { getSupportedMediaRecorderMimeTypes } from '@/utils/mediaRecorder';
 
 export interface Message {
   id: string;
@@ -193,64 +194,108 @@ const Interviewer = () => {
       });
       return;
     }
+
+    if (typeof MediaRecorder === 'undefined') {
+      const msg = 'Recording is not supported in this browser (MediaRecorder unavailable).';
+      console.error(msg);
+      addLog(msg);
+      toast.error('Audio recording is not supported in this browser. Try Chrome/Edge.');
+      return;
+    }
+
+     // Some browsers can grant permission but still provide a stream without an audio track.
+     if (streamRef.current.getAudioTracks().length === 0) {
+       const msg = 'No audio track available in microphone stream.';
+       console.error(msg);
+       addLog(msg);
+       return;
+     }
     
     try {
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
-        ? 'audio/webm;codecs=opus'
-        : MediaRecorder.isTypeSupported('audio/webm')
-          ? 'audio/webm'
-          : 'audio/mp4';
-      
-      console.log('startRecording: starting with mimeType', mimeType);
-      mimeTypeRef.current = mimeType;
-      const mediaRecorder = new MediaRecorder(streamRef.current, { mimeType });
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-      
-      mediaRecorder.ondataavailable = (event) => {
-        console.log('Recording: data available, size:', event.data.size);
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-      
-      mediaRecorder.onstop = async () => {
-        console.log('Recording: stopped, chunks:', audioChunksRef.current.length);
-        isRecordingRef.current = false;
-        setIsRecording(false);
-        
-        if (audioChunksRef.current.length > 0) {
-          const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+      const mimeTypesToTry = getSupportedMediaRecorderMimeTypes();
+      let lastError: unknown = null;
+
+      for (const mimeType of mimeTypesToTry) {
+        try {
+          console.log('startRecording: trying mimeType', mimeType || '(browser default)');
+          mimeTypeRef.current = mimeType || 'audio/webm';
+
+          const mediaRecorder = mimeType
+            ? new MediaRecorder(streamRef.current, { mimeType })
+            : new MediaRecorder(streamRef.current);
+
+          // Reset state for this attempt
+          mediaRecorderRef.current = mediaRecorder;
           audioChunksRef.current = [];
-          
-          console.log('Recording: blob size', audioBlob.size);
-          // Only process if blob is substantial (>5KB)
-          if (audioBlob.size > 5000) {
-            await processCompleteAudio(audioBlob, mimeType);
-          } else {
-            addLog('Audio too short, skipping');
+
+          mediaRecorder.ondataavailable = (event) => {
+            console.log('Recording: data available, size:', event.data.size);
+            if (event.data.size > 0) {
+              audioChunksRef.current.push(event.data);
+            }
+          };
+
+          mediaRecorder.onstop = async () => {
+            console.log('Recording: stopped, chunks:', audioChunksRef.current.length);
+            isRecordingRef.current = false;
+            setIsRecording(false);
+
+            if (audioChunksRef.current.length > 0) {
+              const blobType = mimeType || mediaRecorder.mimeType || mimeTypeRef.current;
+              const audioBlob = new Blob(audioChunksRef.current, { type: blobType });
+              audioChunksRef.current = [];
+
+              console.log('Recording: blob size', audioBlob.size, 'type:', blobType);
+              // Only process if blob is substantial (>5KB)
+              if (audioBlob.size > 5000) {
+                await processCompleteAudio(audioBlob, blobType);
+              } else {
+                addLog('Audio too short, skipping');
+              }
+            }
+          };
+
+          // Request data every 250ms to ensure we capture audio chunks
+          mediaRecorder.start(250);
+
+          isRecordingRef.current = true;
+          setIsRecording(true);
+          setCurrentInterimText('Listening...');
+          addLog('Recording started');
+          console.log('startRecording: recording started successfully');
+          return;
+        } catch (err) {
+          lastError = err;
+          console.error('startRecording: mimeType attempt failed', mimeType || '(default)', err);
+          // Make sure we don't leave a half-initialized recorder around.
+          try {
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+              mediaRecorderRef.current.stop();
+            }
+          } catch {
+            // ignore
           }
+          mediaRecorderRef.current = null;
+          audioChunksRef.current = [];
         }
-      };
-      
-      // Request data every 250ms to ensure we capture audio chunks
-      mediaRecorder.start(250);
-      isRecordingRef.current = true;
-      setIsRecording(true);
-      setCurrentInterimText('Listening...');
-      addLog('Recording started');
-      console.log('startRecording: recording started successfully');
+      }
+
+      // If all attempts failed, surface the last error.
+      throw lastError instanceof Error ? lastError : new Error('MediaRecorder failed to start');
     } catch (error: any) {
       console.error('Recording start error:', error);
       addLog(`Recording error: ${error.message}`);
       isRecordingRef.current = false;
       setIsRecording(false);
+      mediaRecorderRef.current = null;
+      audioChunksRef.current = [];
     }
   }, [addLog]);
 
   // Stop recording
   const stopRecording = useCallback(() => {
     console.log('stopRecording called, state:', mediaRecorderRef.current?.state);
+    if (!isRecordingRef.current) return;
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
       addLog('Recording stopped');
