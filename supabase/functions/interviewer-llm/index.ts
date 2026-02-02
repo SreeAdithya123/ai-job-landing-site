@@ -34,27 +34,43 @@ Your personality:
 - Patient and supportive
 - Focuses on bringing out the best in candidates`;
 
-async function callSarvam(messages: Message[], settings: InterviewSettings): Promise<{ text: string; provider: string }> {
-  const SARVAM_API_KEY = Deno.env.get('SARVAM_API_KEY');
-  if (!SARVAM_API_KEY) {
-    throw new Error('SARVAM_API_KEY not configured');
-  }
-
-  const systemMessage = `${SYSTEM_PROMPT}
+function buildSystemMessage(settings: InterviewSettings): string {
+  return `${SYSTEM_PROMPT}
 
 Interview Context:
 - Role: ${settings.role}
 - Interview Type: ${settings.type}
 - Difficulty: ${settings.difficulty}
 - Duration: ${settings.duration} minutes`;
+}
 
-  // Sarvam API uses system message as first message in the array
-  const sarvamMessages = [
-    { role: 'system', content: systemMessage },
-    ...messages
-  ];
+// Ensure message array is valid for Sarvam: system first, then alternating user/assistant with user first
+function validateMessagesForSarvam(messages: Message[], settings: InterviewSettings): Message[] {
+  const systemMsg: Message = { role: 'system', content: buildSystemMessage(settings) };
+  
+  // Filter to only user and assistant messages
+  const conversationMsgs = messages.filter(m => m.role === 'user' || m.role === 'assistant');
+  
+  // If empty or doesn't start with user, add a starter
+  if (conversationMsgs.length === 0 || conversationMsgs[0].role !== 'user') {
+    return [
+      systemMsg,
+      { role: 'user', content: `Please introduce yourself briefly and start the ${settings.type} interview for the ${settings.role} position. Ask your first question.` }
+    ];
+  }
+  
+  return [systemMsg, ...conversationMsgs];
+}
 
-  console.log('Calling Sarvam API with model sarvam-m...');
+async function callSarvam(messages: Message[], settings: InterviewSettings): Promise<{ text: string; provider: string }> {
+  const SARVAM_API_KEY = Deno.env.get('SARVAM_API_KEY');
+  if (!SARVAM_API_KEY) {
+    throw new Error('SARVAM_API_KEY not configured');
+  }
+
+  const sarvamMessages = validateMessagesForSarvam(messages, settings);
+
+  console.log('Calling Sarvam API with model sarvam-m...', { messageCount: sarvamMessages.length });
   
   const response = await fetch('https://api.sarvam.ai/v1/chat/completions', {
     method: 'POST',
@@ -73,7 +89,7 @@ Interview Context:
   if (!response.ok) {
     const error = await response.text();
     console.error('Sarvam API error:', response.status, error);
-    throw new Error(`Sarvam API error: ${response.status}`);
+    throw new Error(`Sarvam API error: ${response.status} - ${error}`);
   }
 
   const result = await response.json();
@@ -84,71 +100,45 @@ Interview Context:
   };
 }
 
-async function callOpenRouter(messages: Message[], settings: InterviewSettings): Promise<{ text: string; provider: string }> {
-  const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
-  if (!OPENROUTER_API_KEY) {
-    throw new Error('OPENROUTER_API_KEY not configured');
+async function callLovableAI(messages: Message[], settings: InterviewSettings): Promise<{ text: string; provider: string }> {
+  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+  if (!LOVABLE_API_KEY) {
+    throw new Error('LOVABLE_API_KEY not configured');
   }
 
-  const systemMessage = `${SYSTEM_PROMPT}
+  const systemMessage = buildSystemMessage(settings);
 
-Interview Context:
-- Role: ${settings.role}
-- Interview Type: ${settings.type}
-- Difficulty: ${settings.difficulty}
-- Duration: ${settings.duration} minutes`;
-
-  // Use stable, available models - prioritize paid then free
-  const models = [
-    'google/gemini-flash-1.5-8b',
-    'meta-llama/llama-3.1-8b-instruct:free',
-    'mistralai/mistral-7b-instruct:free',
-  ];
-
-  let lastError = '';
+  console.log('Calling Lovable AI Gateway with gemini-3-flash-preview...');
   
-  for (const model of models) {
-    console.log(`Trying OpenRouter model: ${model}`);
-    
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://ai-job-landing-site.lovable.app',
-        'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'AI Interviewer',
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: 'system', content: systemMessage },
-          ...messages
-        ],
-        max_tokens: 300,
-        temperature: 0.7,
-      })
-    });
+  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-3-flash-preview',
+      messages: [
+        { role: 'system', content: systemMessage },
+        ...messages.filter(m => m.role === 'user' || m.role === 'assistant')
+      ],
+      max_tokens: 300,
+      temperature: 0.7,
+    })
+  });
 
-    if (response.ok) {
-      const result = await response.json();
-      const text = result.choices?.[0]?.message?.content || '';
-      if (text) {
-        console.log(`OpenRouter success with model: ${model}`);
-        return { text, provider: `openrouter-${model}` };
-      }
-    } else {
-      const errorText = await response.text();
-      console.error(`OpenRouter model ${model} failed:`, response.status, errorText);
-      lastError = errorText;
-      
-      // Continue to next model on 404 or 429
-      if (response.status === 404 || response.status === 429) {
-        continue;
-      }
-    }
+  if (!response.ok) {
+    const error = await response.text();
+    console.error('Lovable AI Gateway error:', response.status, error);
+    throw new Error(`Lovable AI Gateway error: ${response.status}`);
   }
 
-  throw new Error(`OpenRouter API error: all models failed. Last: ${lastError}`);
+  const result = await response.json();
+  console.log('Lovable AI Gateway response received successfully');
+  return {
+    text: result.choices?.[0]?.message?.content || '',
+    provider: 'lovable-ai'
+  };
 }
 
 serve(async (req) => {
@@ -182,23 +172,24 @@ serve(async (req) => {
 
     let result: { text: string; provider: string };
 
-    // Route based on plan: paid users get Sarvam, free users get OpenRouter
+    // Route based on plan: paid users get Sarvam, free users get Lovable AI
     const isPaid = user_plan === 'pro' || user_plan === 'plus' || user_plan === 'beginner';
     
     try {
       if (isPaid) {
         result = await callSarvam(conversationMessages, settings);
       } else {
-        result = await callOpenRouter(conversationMessages, settings);
+        result = await callLovableAI(conversationMessages, settings);
       }
     } catch (primaryError) {
       console.error('Primary LLM failed, trying fallback:', primaryError);
       // Fallback to the other provider
       try {
         result = isPaid 
-          ? await callOpenRouter(conversationMessages, settings)
+          ? await callLovableAI(conversationMessages, settings)
           : await callSarvam(conversationMessages, settings);
       } catch (fallbackError) {
+        console.error('Fallback LLM also failed:', fallbackError);
         throw new Error('Both LLM providers failed');
       }
     }
