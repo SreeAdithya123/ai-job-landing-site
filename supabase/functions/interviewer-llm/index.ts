@@ -54,10 +54,12 @@ Interview Context:
     ...messages
   ];
 
-  const response = await fetch('https://api.sarvam.ai/chat/completions', {
+  console.log('Calling Sarvam API with model sarvam-m...');
+  
+  const response = await fetch('https://api.sarvam.ai/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'api-subscription-key': SARVAM_API_KEY,
+      'Authorization': `Bearer ${SARVAM_API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -70,11 +72,12 @@ Interview Context:
 
   if (!response.ok) {
     const error = await response.text();
-    console.error('Sarvam API error:', error);
+    console.error('Sarvam API error:', response.status, error);
     throw new Error(`Sarvam API error: ${response.status}`);
   }
 
   const result = await response.json();
+  console.log('Sarvam API response received successfully');
   return {
     text: result.choices?.[0]?.message?.content || '',
     provider: 'sarvam'
@@ -95,36 +98,57 @@ Interview Context:
 - Difficulty: ${settings.difficulty}
 - Duration: ${settings.duration} minutes`;
 
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://ai-job-landing-site.lovable.app',
-      'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'AI Interviewer',
-    },
-    body: JSON.stringify({
-      model: 'google/gemini-2.0-flash-exp:free',
-      messages: [
-        { role: 'system', content: systemMessage },
-        ...messages
-      ],
-      max_tokens: 300,
-      temperature: 0.7,
-    })
-  });
+  // Use stable, available models - prioritize paid then free
+  const models = [
+    'google/gemini-flash-1.5-8b',
+    'meta-llama/llama-3.1-8b-instruct:free',
+    'mistralai/mistral-7b-instruct:free',
+  ];
 
-  if (!response.ok) {
-    const error = await response.text();
-    console.error('OpenRouter API error:', error);
-    throw new Error(`OpenRouter API error: ${response.status}`);
+  let lastError = '';
+  
+  for (const model of models) {
+    console.log(`Trying OpenRouter model: ${model}`);
+    
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://ai-job-landing-site.lovable.app',
+        'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'AI Interviewer',
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          { role: 'system', content: systemMessage },
+          ...messages
+        ],
+        max_tokens: 300,
+        temperature: 0.7,
+      })
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      const text = result.choices?.[0]?.message?.content || '';
+      if (text) {
+        console.log(`OpenRouter success with model: ${model}`);
+        return { text, provider: `openrouter-${model}` };
+      }
+    } else {
+      const errorText = await response.text();
+      console.error(`OpenRouter model ${model} failed:`, response.status, errorText);
+      lastError = errorText;
+      
+      // Continue to next model on 404 or 429
+      if (response.status === 404 || response.status === 429) {
+        continue;
+      }
+    }
   }
 
-  const result = await response.json();
-  return {
-    text: result.choices?.[0]?.message?.content || '',
-    provider: 'openrouter'
-  };
+  throw new Error(`OpenRouter API error: all models failed. Last: ${lastError}`);
 }
 
 serve(async (req) => {
