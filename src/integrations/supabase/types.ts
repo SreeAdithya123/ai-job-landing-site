@@ -400,6 +400,63 @@ export type Database = {
         }
         Relationships: []
       }
+      resumes: {
+        Row: {
+          achievements: Json | null
+          career_summary: string | null
+          certifications: Json | null
+          created_at: string | null
+          education: Json | null
+          experience: Json | null
+          id: string
+          personal_info: Json
+          projects: Json | null
+          selected_template: string | null
+          skills: Json | null
+          status: string | null
+          template_settings: Json | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievements?: Json | null
+          career_summary?: string | null
+          certifications?: Json | null
+          created_at?: string | null
+          education?: Json | null
+          experience?: Json | null
+          id?: string
+          personal_info?: Json
+          projects?: Json | null
+          selected_template?: string | null
+          skills?: Json | null
+          status?: string | null
+          template_settings?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievements?: Json | null
+          career_summary?: string | null
+          certifications?: Json | null
+          created_at?: string | null
+          education?: Json | null
+          experience?: Json | null
+          id?: string
+          personal_info?: Json
+          projects?: Json | null
+          selected_template?: string | null
+          skills?: Json | null
+          status?: string | null
+          template_settings?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

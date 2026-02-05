@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.generate-aptitude-questions]
 verify_jwt = false
+
+[functions.resume-generate]
+verify_jwt = false
