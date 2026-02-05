@@ -1,92 +1,101 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system with futuristic Lavender-Neon AI aesthetic */
+/* AI Neural Light Design System - Clean, Premium, Modern SaaS */
 
 @layer base {
   :root {
-    --background: #F8FAFC;
-    --foreground: #1E293B;
+    /* Background Colors */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
-    --card: #FFFFFF;
-    --card-foreground: #1E293B;
+    /* Card Colors */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: #FFFFFF;
-    --popover-foreground: #1E293B;
+    /* Popover Colors */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: #8B5CF6;
-    --primary-foreground: #FFFFFF;
-    --primary-light: #C4B5FD;
-    --primary-hover: #7C3AED;
+    /* Primary - Neural Indigo */
+    --primary: 243 75% 59%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 243 55% 51%;
 
-    --secondary: #F1F5F9;
-    --secondary-foreground: #1E293B;
+    /* Secondary - Sky Blue */
+    --secondary: 199 92% 60%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: #F1F5F9;
-    --muted-foreground: #64748B;
+    /* Muted */
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: #14B8A6;
-    --accent-foreground: #FFFFFF;
+    /* Accent - Signal Pink */
+    --accent: 330 85% 70%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: #EF4444;
-    --destructive-foreground: #FFFFFF;
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: #E5E7EB;
-    --input: #E5E7EB;
-    --ring: #14B8A6;
+    /* Border & Input */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 243 75% 59%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: #FFFFFF;
-    --sidebar-foreground: #1E293B;
-    --sidebar-primary: #8B5CF6;
-    --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #F1F5F9;
-    --sidebar-accent-foreground: #1E293B;
-    --sidebar-border: #E5E7EB;
-    --sidebar-ring: #14B8A6;
+    /* Sidebar */
+    --sidebar-background: 210 40% 98%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 243 75% 59%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 214 32% 91%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 243 75% 59%;
   }
 
   .dark {
-    --background: #0F172A;
-    --foreground: #F8FAFC;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
 
-    --card: #1E293B;
-    --card-foreground: #F8FAFC;
+    --card: 222 40% 14%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: #1E293B;
-    --popover-foreground: #F8FAFC;
+    --popover: 222 40% 14%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: #8B5CF6;
-    --primary-foreground: #FFFFFF;
+    --primary: 243 75% 59%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 243 70% 65%;
 
-    --secondary: #334155;
-    --secondary-foreground: #F8FAFC;
+    --secondary: 199 80% 50%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: #334155;
-    --muted-foreground: #94A3B8;
+    --muted: 222 30% 20%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: #14B8A6;
-    --accent-foreground: #FFFFFF;
+    --accent: 330 85% 70%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: #EF4444;
-    --destructive-foreground: #FFFFFF;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: #334155;
-    --input: #334155;
-    --ring: #14B8A6;
-    
-    --sidebar-background: #1E293B;
-    --sidebar-foreground: #F8FAFC;
-    --sidebar-primary: #8B5CF6;
-    --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #334155;
-    --sidebar-accent-foreground: #F8FAFC;
-    --sidebar-border: #334155;
-    --sidebar-ring: #14B8A6;
+    --border: 222 30% 20%;
+    --input: 222 30% 20%;
+    --ring: 243 75% 59%;
+
+    --sidebar-background: 222 40% 14%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 243 75% 59%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 30% 20%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 30% 20%;
+    --sidebar-ring: 243 75% 59%;
   }
 }
 
@@ -96,10 +105,8 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
-    min-height: 100vh;
   }
 }
 
@@ -109,39 +116,36 @@
   }
 
   .glass-card {
-    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-glass;
+    @apply bg-card border border-border shadow-soft rounded-xl;
   }
 
   .glass-panel {
-    @apply bg-white/60 backdrop-blur-glass border border-white/30 shadow-glass;
+    @apply bg-card/80 backdrop-blur-sm border border-border shadow-soft rounded-xl;
   }
 
   .glow-border {
-    @apply border-2 border-transparent;
-    background: linear-gradient(white, white) padding-box,
-                linear-gradient(135deg, #8B5CF6, #14B8A6) border-box;
+    @apply border-2 border-primary/20 rounded-xl;
   }
 
   .glow-border:focus-within {
-    @apply shadow-glow-accent;
+    @apply border-primary shadow-glow;
   }
 
   .btn-primary {
-    @apply bg-gradient-primary text-white font-medium rounded-xl px-6 py-3 
-           shadow-lg hover:shadow-glow transform transition-all duration-200 
-           hover:-translate-y-0.5 hover:shadow-xl;
+    @apply bg-primary text-primary-foreground font-medium rounded-xl px-6 py-3 
+           shadow-soft hover:shadow-md transform transition-all duration-200 
+           hover:-translate-y-0.5 hover:bg-primary/90;
   }
 
   .btn-secondary {
-    @apply glass-card text-primary font-medium rounded-xl px-6 py-3 
-           hover:bg-white/90 transform transition-all duration-200 
+    @apply bg-transparent border border-secondary text-secondary font-medium rounded-xl px-6 py-3 
+           hover:bg-secondary/10 transform transition-all duration-200 
            hover:-translate-y-0.5;
   }
 
   .input-field {
-    @apply bg-white/80 border border-gray-200 rounded-xl px-4 py-3 
-           focus:border-accent focus:ring-2 focus:ring-accent/20 
-           focus:shadow-glow-accent transition-all duration-200
-           backdrop-blur-sm;
+    @apply bg-card border border-border rounded-xl px-4 py-3 
+           focus:border-primary focus:ring-2 focus:ring-primary/20 
+           focus:shadow-glow transition-all duration-200;
   }
 }
