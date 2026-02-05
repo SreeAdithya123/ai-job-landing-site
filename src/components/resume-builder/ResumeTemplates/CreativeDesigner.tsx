@@ -1,0 +1,217 @@
+ import React from 'react';
+ import type { ResumeData, TemplateSettings } from '@/types/resume';
+ import { Mail, Phone, MapPin, Linkedin, Globe } from 'lucide-react';
+ 
+ interface CreativeDesignerProps {
+   data: ResumeData;
+   settings: TemplateSettings;
+ }
+ 
+ const colorThemes = {
+   blue: { primary: '#0ea5e9', secondary: '#0284c7', bg: '#f0f9ff' },
+   green: { primary: '#22c55e', secondary: '#16a34a', bg: '#f0fdf4' },
+   purple: { primary: '#a855f7', secondary: '#9333ea', bg: '#faf5ff' },
+   gray: { primary: '#71717a', secondary: '#52525b', bg: '#fafafa' },
+   teal: { primary: '#2dd4bf', secondary: '#14b8a6', bg: '#f0fdfa' }
+ };
+ 
+ export const CreativeDesigner: React.FC<CreativeDesignerProps> = ({ data, settings }) => {
+   const theme = colorThemes[settings.colorTheme];
+ 
+   return (
+     <div 
+       className="bg-white min-h-[1122px] w-[794px] mx-auto shadow-xl print:shadow-none flex"
+       style={{ fontFamily: settings.fontStyle === 'inter' ? 'Inter, sans-serif' : settings.fontStyle }}
+     >
+       {/* Left Sidebar */}
+       <aside className="w-[280px] text-white p-6" style={{ backgroundColor: theme.primary }}>
+         {/* Profile Section */}
+         <div className="text-center mb-8">
+           <div className="w-24 h-24 rounded-full bg-white/20 mx-auto mb-4 flex items-center justify-center">
+             <span className="text-3xl font-bold">
+               {data.personalInfo.fullName?.split(' ').map(n => n[0]).join('') || 'YN'}
+             </span>
+           </div>
+           <h1 className="text-xl font-bold">{data.personalInfo.fullName || 'Your Name'}</h1>
+           {data.careerInfo?.targetRole && (
+             <p className="text-sm opacity-80 mt-1">{data.careerInfo.targetRole}</p>
+           )}
+         </div>
+ 
+         {/* Contact */}
+         <section className="mb-6">
+           <h2 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70">Contact</h2>
+           <div className="space-y-2 text-sm">
+             {data.personalInfo.email && (
+               <div className="flex items-center gap-2 opacity-90">
+                 <Mail className="h-3 w-3" /> <span className="text-xs">{data.personalInfo.email}</span>
+               </div>
+             )}
+             {data.personalInfo.phone && (
+               <div className="flex items-center gap-2 opacity-90">
+                 <Phone className="h-3 w-3" /> <span className="text-xs">{data.personalInfo.phone}</span>
+               </div>
+             )}
+             {data.personalInfo.location && (
+               <div className="flex items-center gap-2 opacity-90">
+                 <MapPin className="h-3 w-3" /> <span className="text-xs">{data.personalInfo.location}</span>
+               </div>
+             )}
+             {data.personalInfo.linkedin && (
+               <div className="flex items-center gap-2 opacity-90">
+                 <Linkedin className="h-3 w-3" /> <span className="text-xs">{data.personalInfo.linkedin}</span>
+               </div>
+             )}
+             {data.personalInfo.portfolio && (
+               <div className="flex items-center gap-2 opacity-90">
+                 <Globe className="h-3 w-3" /> <span className="text-xs">{data.personalInfo.portfolio}</span>
+               </div>
+             )}
+           </div>
+         </section>
+ 
+         {/* Skills */}
+         {(data.skills.core.length > 0 || data.skills.technologies.length > 0) && (
+           <section className="mb-6">
+             <h2 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70">Skills</h2>
+             <div className="space-y-2">
+               {[...data.skills.core, ...data.skills.technologies].slice(0, 8).map((skill, i) => (
+                 <div key={i} className="flex items-center gap-2">
+                   <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                     <div 
+                       className="h-full bg-white rounded-full" 
+                       style={{ width: `${85 - i * 5}%` }}
+                     />
+                   </div>
+                   <span className="text-xs w-20">{skill}</span>
+                 </div>
+               ))}
+             </div>
+           </section>
+         )}
+ 
+         {/* Education */}
+         {data.education.length > 0 && (
+           <section className="mb-6">
+             <h2 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70">Education</h2>
+             <div className="space-y-3">
+               {data.education.map((edu) => (
+                 <div key={edu.id}>
+                   <p className="text-sm font-medium">{edu.degree}</p>
+                   <p className="text-xs opacity-80">{edu.institution}</p>
+                   <p className="text-xs opacity-60">{edu.graduationYear}</p>
+                 </div>
+               ))}
+             </div>
+           </section>
+         )}
+ 
+         {/* Certifications */}
+         {data.certifications.length > 0 && (
+           <section>
+             <h2 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70">Certifications</h2>
+             <ul className="space-y-1">
+               {data.certifications.map((cert) => (
+                 <li key={cert.id} className="text-xs opacity-90">• {cert.name}</li>
+               ))}
+             </ul>
+           </section>
+         )}
+       </aside>
+ 
+       {/* Main Content */}
+       <main className="flex-1 p-8" style={{ backgroundColor: theme.bg }}>
+         {/* Summary */}
+         {data.careerSummary && (
+           <section className="mb-6 p-4 rounded-lg bg-white shadow-sm">
+             <h2 className="text-sm font-bold uppercase tracking-wider mb-2" style={{ color: theme.secondary }}>
+               About Me
+             </h2>
+             <p className="text-sm text-gray-600 leading-relaxed">{data.careerSummary}</p>
+           </section>
+         )}
+ 
+         {/* Experience */}
+         {data.experience.length > 0 && (
+           <section className="mb-6">
+             <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: theme.secondary }}>
+               Experience
+             </h2>
+             <div className="space-y-4">
+               {data.experience.map((exp) => (
+                 <div key={exp.id} className="bg-white p-4 rounded-lg shadow-sm">
+                   <div className="flex justify-between items-start mb-2">
+                     <div>
+                       <h3 className="font-semibold text-gray-800">{exp.role}</h3>
+                       <p className="text-sm" style={{ color: theme.primary }}>{exp.company}</p>
+                     </div>
+                     <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">{exp.duration}</span>
+                   </div>
+                   {exp.responsibilities.length > 0 && (
+                     <ul className="space-y-1">
+                       {exp.responsibilities.map((resp, i) => (
+                         <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                           <span style={{ color: theme.primary }}>▸</span> {resp}
+                         </li>
+                       ))}
+                     </ul>
+                   )}
+                 </div>
+               ))}
+             </div>
+           </section>
+         )}
+ 
+         {/* Projects */}
+         {data.projects.length > 0 && (
+           <section className="mb-6">
+             <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: theme.secondary }}>
+               Projects
+             </h2>
+             <div className="grid grid-cols-2 gap-3">
+               {data.projects.map((project) => (
+                 <div key={project.id} className="bg-white p-3 rounded-lg shadow-sm">
+                   <h3 className="font-medium text-sm text-gray-800">{project.title}</h3>
+                   <p className="text-xs text-gray-500 mt-1 line-clamp-2">{project.description}</p>
+                   {project.technologies.length > 0 && (
+                     <div className="flex flex-wrap gap-1 mt-2">
+                       {project.technologies.slice(0, 3).map((tech, i) => (
+                         <span 
+                           key={i} 
+                           className="text-xs px-2 py-0.5 rounded"
+                           style={{ backgroundColor: `${theme.primary}20`, color: theme.secondary }}
+                         >
+                           {tech}
+                         </span>
+                       ))}
+                     </div>
+                   )}
+                 </div>
+               ))}
+             </div>
+           </section>
+         )}
+ 
+         {/* Achievements */}
+         {data.achievements.length > 0 && (
+           <section>
+             <h2 className="text-sm font-bold uppercase tracking-wider mb-3" style={{ color: theme.secondary }}>
+               Achievements
+             </h2>
+             <div className="flex flex-wrap gap-2">
+               {data.achievements.map((ach) => (
+                 <span 
+                   key={ach.id} 
+                   className="text-xs px-3 py-1.5 rounded-full bg-white shadow-sm"
+                   style={{ color: theme.secondary }}
+                 >
+                   🏆 {ach.title}
+                 </span>
+               ))}
+             </div>
+           </section>
+         )}
+       </main>
+     </div>
+   );
+ };

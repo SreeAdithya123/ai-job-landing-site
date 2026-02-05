@@ -4,6 +4,11 @@
  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
  import { Download, Save, Palette, Type, ArrowLeft, Loader2 } from 'lucide-react';
  import { ModernCorporate } from './ResumeTemplates/ModernCorporate';
+ import { MinimalProfessional } from './ResumeTemplates/MinimalProfessional';
+ import { CreativeDesigner } from './ResumeTemplates/CreativeDesigner';
+ import { TechnicalEngineer } from './ResumeTemplates/TechnicalEngineer';
+ import { AcademicOverleaf } from './ResumeTemplates/AcademicOverleaf';
+ import { ExecutiveResume } from './ResumeTemplates/ExecutiveResume';
  import type { ResumeData, TemplateId, TemplateSettings } from '@/types/resume';
  import jsPDF from 'jspdf';
  import html2canvas from 'html2canvas';
@@ -106,9 +111,23 @@
      }
    };
  
-   // For now, all templates use ModernCorporate as base
    const renderTemplate = () => {
-     return <ModernCorporate data={data} settings={settings} />;
+      switch (selectedTemplate) {
+        case 'modern-corporate':
+          return <ModernCorporate data={data} settings={settings} />;
+        case 'minimal-professional':
+          return <MinimalProfessional data={data} settings={settings} />;
+        case 'creative-designer':
+          return <CreativeDesigner data={data} settings={settings} />;
+        case 'technical-engineer':
+          return <TechnicalEngineer data={data} settings={settings} />;
+        case 'academic-overleaf':
+          return <AcademicOverleaf data={data} settings={settings} />;
+        case 'executive-resume':
+          return <ExecutiveResume data={data} settings={settings} />;
+        default:
+          return <ModernCorporate data={data} settings={settings} />;
+      }
    };
  
    return (
