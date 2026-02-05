@@ -1,0 +1,110 @@
+ import React from 'react';
+ import { motion } from 'framer-motion';
+ import { Button } from '@/components/ui/button';
+ import { FileText, Sparkles, Target, Download, Palette, Shield } from 'lucide-react';
+ 
+ interface ResumeBuilderLandingProps {
+   onStart: () => void;
+ }
+ 
+ const features = [
+   {
+     icon: Sparkles,
+     title: 'AI-Powered Content',
+     description: 'Intelligent enhancement of your experience and skills'
+   },
+   {
+     icon: Target,
+     title: 'ATS Optimized',
+     description: 'Designed to pass Applicant Tracking Systems'
+   },
+   {
+     icon: Palette,
+     title: 'Premium Templates',
+     description: '6 professionally designed resume layouts'
+   },
+   {
+     icon: Download,
+     title: 'Instant Download',
+     description: 'Export as PDF ready for applications'
+   },
+   {
+     icon: Shield,
+     title: 'Recruiter Ready',
+     description: 'Formatted for maximum recruiter impact'
+   },
+   {
+     icon: FileText,
+     title: 'Easy Editing',
+     description: 'Switch templates without regenerating'
+   }
+ ];
+ 
+ export const ResumeBuilderLanding: React.FC<ResumeBuilderLandingProps> = ({ onStart }) => {
+   return (
+     <div className="min-h-screen flex flex-col">
+       {/* Hero Section */}
+       <motion.div
+         className="flex-1 flex flex-col items-center justify-center px-6 py-16 text-center"
+         initial={{ opacity: 0, y: 20 }}
+         animate={{ opacity: 1, y: 0 }}
+         transition={{ duration: 0.6 }}
+       >
+         <div className="mb-6">
+           <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto shadow-2xl shadow-primary/20">
+             <FileText className="h-10 w-10 text-white" />
+           </div>
+         </div>
+ 
+         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight">
+           Build Your Resume with
+           <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"> AI Precision</span>
+         </h1>
+ 
+         <p className="text-xl text-slate-400 max-w-2xl mb-8">
+           ATS-optimized. Recruiter-ready. Designed to stand out.
+         </p>
+ 
+         <Button
+           onClick={onStart}
+           size="lg"
+           className="bg-gradient-to-r from-primary to-accent text-white px-8 py-6 text-lg font-semibold rounded-xl shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105"
+         >
+           <Sparkles className="mr-2 h-5 w-5" />
+           Start Building
+         </Button>
+ 
+         <p className="text-sm text-slate-500 mt-4">
+           Takes about 5 minutes • Auto-saves your progress
+         </p>
+       </motion.div>
+ 
+       {/* Features Grid */}
+       <motion.div
+         className="px-6 pb-16"
+         initial={{ opacity: 0, y: 40 }}
+         animate={{ opacity: 1, y: 0 }}
+         transition={{ duration: 0.6, delay: 0.2 }}
+       >
+         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+           {features.map((feature, index) => (
+             <motion.div
+               key={index}
+               className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 hover:border-primary/30 transition-all duration-300"
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
+               whileHover={{ y: -4 }}
+             >
+               <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex items-center justify-center mb-4">
+                 <feature.icon className="h-6 w-6 text-primary" />
+               </div>
+               <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+               <p className="text-slate-400 text-sm">{feature.description}</p>
+             </motion.div>
+           ))}
+         </div>
+       </motion.div>
+     </div>
+   );
+ };
