@@ -25,7 +25,7 @@ const Hero = () => {
           >
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="font-body text-sm font-medium text-muted-foreground tracking-button">
-              Tools for the Minds Shaping Tomorrow
+              Preparation Made Simple
             </span>
           </motion.div>
 
@@ -36,12 +36,12 @@ const Hero = () => {
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              The Sky Isn't the{' '}
+              The Sky Is Not the{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
                 Limit
               </span>
               <br />
-              It's the{' '}
+              It Is the{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-primary animate-glow">
                 Foundation
               </span>
@@ -54,8 +54,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }} 
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            At Vyoman, we understand that the future is not just something that happens; it's something we actively create. 
-            Our mission is to equip the architects of tomorrow with intelligent software that transforms potential into reality.
+            Vyoman helps you prepare for the moments that define your future. Practice interviews, improve communication, and build confidence with intelligent tools designed for real growth.
           </motion.p>
 
           <motion.p 
@@ -64,8 +63,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }} 
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            We craft tools that are not merely functional, but truly transformative — designed to foster deep learning, 
-            accelerate personal growth, and prepare you for the challenges and opportunities that lie ahead.
+            Whether you are a student preparing for placements or a professional aiming higher, Vyoman gives you a structured way to practice, learn, and improve.
           </motion.p>
           
           <motion.div 
@@ -75,11 +73,11 @@ const Hero = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             <Button size="lg" onClick={handleGetStarted} className="shadow-glow hover:shadow-xl group font-body tracking-button">
-              Get Started for Free
+              Start Practicing
               <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button variant="secondary" size="lg" onClick={handleViewAIInterviewer} className="glass-card hover:bg-white/90 font-body tracking-button">
-              View AI Interviewer Product
+              Explore AI Interviewer
             </Button>
             <Button variant="outline" size="lg" onClick={() => navigate('/payments')} className="border-primary/30 hover:bg-primary/10 font-body tracking-button">
               View Plans
@@ -97,7 +95,7 @@ const Hero = () => {
                 <span className="text-white font-bold">🎯</span>
               </div>
               <h3 className="font-headline font-semibold text-foreground mb-2 text-h3">Purpose-Built Intelligence</h3>
-              <p className="font-body text-sm text-muted-foreground leading-body">Every feature designed with specific human needs in mind</p>
+              <p className="font-body text-sm text-muted-foreground leading-body">Designed specifically for career preparation and interview success.</p>
             </div>
 
             <div className="glass-card p-6 text-center">
@@ -105,7 +103,7 @@ const Hero = () => {
                 <span className="text-white font-bold">🔄</span>
               </div>
               <h3 className="font-headline font-semibold text-foreground mb-2 text-h3">Adaptive Learning</h3>
-              <p className="font-body text-sm text-muted-foreground leading-body">Systems that learn from your unique patterns and goals</p>
+              <p className="font-body text-sm text-muted-foreground leading-body">The system evolves with your performance and experience level.</p>
             </div>
 
             <div className="glass-card p-6 text-center">
@@ -113,7 +111,7 @@ const Hero = () => {
                 <span className="text-white font-bold">⚖️</span>
               </div>
               <h3 className="font-headline font-semibold text-foreground mb-2 text-h3">Ethical AI First</h3>
-              <p className="font-body text-sm text-muted-foreground leading-body">Transparent, explainable AI that keeps you in control</p>
+              <p className="font-body text-sm text-muted-foreground leading-body">Your data, privacy, and growth remain our priority.</p>
             </div>
           </motion.div>
         </div>

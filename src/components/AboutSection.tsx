@@ -1,34 +1,34 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from './ui/card';
-import { Cloud, Target, RefreshCw, Sparkles, Globe } from 'lucide-react';
+import { Target, Shield, RefreshCw, Sparkles, Eye } from 'lucide-react';
 
 const AboutSection = () => {
   const principles = [
     {
       icon: Target,
       title: "Human-Centric AI", 
-      description: "We design AI to augment human capabilities, not replace them. Our tools are intuitive partners that enhance your natural intelligence."
+      description: "We design AI to augment human capabilities. Our tools are intuitive partners that enhance your natural intelligence."
     },
     {
-      icon: Cloud,
+      icon: Shield,
       title: "Ethical Foundation",
-      description: "Transparency, fairness, and accountability are non-negotiable. We build AI that is unbiased, respects privacy, and serves the greater good."
+      description: "Transparency, fairness, and accountability guide everything we build. Your privacy and trust come first."
     },
     {
       icon: RefreshCw,
       title: "Continuous Evolution",
-      description: "Just as the sky is ever-changing, so are our tools. We embrace iterative development, constantly learning and adapting."
+      description: "Just as learning never stops, neither does our platform. We constantly refine and improve based on real feedback."
     },
     {
       icon: Sparkles,
-      title: "Clarity & Craft",
-      description: "We believe in elegant solutions and precise execution. Every product reflects our dedication to clarity and craftsmanship."
+      title: "Clarity and Craft",
+      description: "We believe in elegant solutions and precise execution. Every product reflects our dedication to quality."
     },
     {
-      icon: Globe,
-      title: "Cosmic Intent",
-      description: "Inspired by the vastness of the cosmos, we approach challenges with boundless curiosity and a long-term vision."
+      icon: Eye,
+      title: "Long-term Vision",
+      description: "We approach challenges with curiosity and patience. The future we are building is meant to last."
     }
   ];
 
@@ -36,7 +36,7 @@ const AboutSection = () => {
     {
       emoji: "🎯",
       title: "Purpose-Built Intelligence",
-      description: "We don't build AI for the sake of AI. Every feature, every algorithm, every interaction is designed with a specific human need in mind."
+      description: "We do not build AI for the sake of AI. Every feature is designed with a specific human need in mind."
     },
     {
       emoji: "🔄",
@@ -66,16 +66,14 @@ const AboutSection = () => {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            The Sky Isn't the Limit.{' '}
+          <h2 className="font-headline text-h1 lg:text-display text-foreground mb-6 tracking-title">
+            The Sky Is Not the Limit.{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-              It's the Foundation.
+              It Is the Foundation.
             </span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-            The name Vyoman, derived from the ancient Sanskrit word for "sky," represents vastness, potential, 
-            and the very fabric of existence. We don't see the sky as a distant limit, but as the omnipresent, 
-            supportive element that allows everything to flourish.
+          <p className="font-body text-body-lg text-muted-foreground max-w-4xl mx-auto leading-body">
+            Vyoman means sky in Sanskrit. We see the sky not as a limit but as the foundation that supports everything. Our platform is built on this belief.
           </p>
         </motion.div>
 
@@ -88,18 +86,12 @@ const AboutSection = () => {
           viewport={{ once: true }}
         >
           <div className="glass-card p-8 lg:p-12">
-            <h3 className="text-2xl font-bold text-foreground mb-6 text-center">Our Philosophy</h3>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-              At Vyoman, we are driven by a singular, ambitious goal: to reimagine human potential through the 
-              intelligent application of Artificial Intelligence. We are not interested in creating technology 
-              for technology's sake. Instead, our focus is on developing AI systems that are inherently fast, 
-              meticulously ethical, and genuinely useful.
+            <h3 className="font-headline text-h2 text-foreground mb-6 text-center">Our Philosophy</h3>
+            <p className="font-body text-body-lg text-muted-foreground leading-body mb-6">
+              We believe preparation builds confidence, and confidence builds opportunity. Technology should support human growth, not replace it.
             </p>
-            <p className="text-muted-foreground leading-relaxed">
-              Our commitment to ethical AI is unwavering. We understand the immense responsibility that comes 
-              with building intelligent systems, and we prioritize data privacy, algorithmic fairness, and user 
-              control in every aspect of our development process. This dedication to thoughtful innovation ensures 
-              that Vyoman's tools are not just cutting-edge, but also trustworthy companions on your journey of growth.
+            <p className="font-body text-body text-muted-foreground leading-body">
+              Every feature within Vyoman is designed to strengthen your thinking, communication, and professional readiness. Our goal is simple. Help individuals present their true potential when it matters most.
             </p>
           </div>
         </motion.div>
@@ -112,7 +104,7 @@ const AboutSection = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
           viewport={{ once: true }}
         >
-          <h3 className="text-3xl font-bold text-foreground mb-12 text-center">What Makes Us Different</h3>
+          <h3 className="font-headline text-h2 text-foreground mb-12 text-center">What Makes Us Different</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {differentiators.map((item, index) => (
               <motion.div
@@ -127,8 +119,8 @@ const AboutSection = () => {
                     <div className="flex items-start space-x-4">
                       <div className="text-3xl">{item.emoji}</div>
                       <div>
-                        <h4 className="font-semibold text-foreground mb-3">{item.title}</h4>
-                        <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
+                        <h4 className="font-headline font-semibold text-foreground mb-3">{item.title}</h4>
+                        <p className="font-body text-muted-foreground text-sm leading-body">{item.description}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -145,7 +137,7 @@ const AboutSection = () => {
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
         >
-          <h3 className="text-3xl font-bold text-foreground mb-12 text-center">Our Guiding Principles</h3>
+          <h3 className="font-headline text-h2 text-foreground mb-12 text-center">Our Guiding Principles</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {principles.map((principle, index) => (
               <motion.div
@@ -160,8 +152,8 @@ const AboutSection = () => {
                     <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center mb-4 mx-auto">
                       <principle.icon className="h-6 w-6 text-white" />
                     </div>
-                    <h4 className="font-semibold text-foreground mb-3">{principle.title}</h4>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{principle.description}</p>
+                    <h4 className="font-headline font-semibold text-foreground mb-3">{principle.title}</h4>
+                    <p className="font-body text-muted-foreground text-sm leading-body">{principle.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -178,11 +170,9 @@ const AboutSection = () => {
           viewport={{ once: true }}
         >
           <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 rounded-2xl p-8 lg:p-12">
-            <h3 className="text-2xl font-bold text-foreground mb-6">Our Commitment</h3>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-4xl mx-auto">
-              We are not just building software; we are building a future where technology is a force for good. 
-              A future where individuals are empowered to learn, grow, and thrive. A future inspired by the 
-              infinite potential of the sky, and built with the meticulous care of human hands.{' '}
+            <h3 className="font-headline text-h2 text-foreground mb-6">Our Commitment</h3>
+            <p className="font-body text-body-lg text-muted-foreground leading-body max-w-4xl mx-auto">
+              We are not just building software. We are building tools that help people grow, learn, and succeed.{' '}
               <span className="font-medium text-foreground">Join us on this journey.</span>
             </p>
           </div>

@@ -17,48 +17,48 @@ const Features = () => {
   const features = [
     {
       icon: Video,
-      title: "AI Video Interviews",
-      description: "Practice with realistic video interviews that simulate real-world scenarios with AI interviewers."
+      title: "AI Voice Interviews",
+      description: "Practice speaking in real interview scenarios with natural conversation flow."
     },
     {
       icon: Mic,
       title: "Voice Analysis",
-      description: "Get feedback on your tone, pace, clarity, and confidence level through advanced voice recognition."
+      description: "Get feedback on your tone, pace, and clarity through advanced voice recognition."
     },
     {
       icon: MessageSquare,
       title: "Real-time Feedback",
-      description: "Receive instant feedback on your answers, body language, and overall performance during practice."
+      description: "Receive instant feedback on your answers and overall performance during practice."
     },
     {
       icon: BarChart3,
       title: "Performance Analytics",
-      description: "Track your progress with detailed analytics and identify areas for improvement over time."
+      description: "Track improvement through structured reports and visual insights."
     },
     {
       icon: FileText,
       title: "Custom Question Banks",
-      description: "Access industry-specific questions tailored to your field and experience level."
+      description: "Access questions tailored to your field and experience level."
     },
     {
       icon: Users,
       title: "Mock Panel Interviews",
-      description: "Practice with multiple AI interviewers to simulate panel interview scenarios."
+      description: "Practice with multiple AI interviewers to simulate panel scenarios."
     },
     {
       icon: Zap,
       title: "Instant Scoring",
-      description: "Get immediate scores and rankings based on your interview performance."
+      description: "Get immediate scores based on your interview performance."
     },
     {
       icon: Shield,
       title: "Privacy Protected",
-      description: "Your practice sessions are completely private and secure with end-to-end encryption."
+      description: "Your practice sessions are completely private and secure."
     },
     {
       icon: Clock,
       title: "Flexible Scheduling",
-      description: "Practice interviews on your schedule, no appointments or waiting required."
+      description: "Practice interviews on your schedule. No appointments or waiting required."
     }
   ];
 
@@ -76,7 +76,7 @@ const Features = () => {
             Powerful Features for Interview Success
           </h2>
           <p className="font-body text-body-lg text-muted-foreground max-w-3xl mx-auto leading-body">
-            Everything you need to master your interview skills and land your dream job, powered by advanced AI technology.
+            Everything you need to practice, improve, and prepare with confidence.
           </p>
         </motion.div>
 

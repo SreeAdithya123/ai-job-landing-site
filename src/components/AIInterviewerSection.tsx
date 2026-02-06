@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Brain, Target, Zap } from 'lucide-react';
+import { ArrowRight, Mic, MessageSquare, BarChart3 } from 'lucide-react';
 
 const AIInterviewerSection = () => {
   const navigate = useNavigate();
@@ -14,19 +13,19 @@ const AIInterviewerSection = () => {
 
   const features = [
     {
-      icon: Brain,
-      title: "AI-Powered Analysis",
-      description: "Advanced algorithms analyze your responses, body language, and vocal patterns"
+      icon: Mic,
+      title: "Realistic Voice Interviews",
+      description: "Practice speaking in real interview scenarios with natural conversation flow."
     },
     {
-      icon: Target,
-      title: "Hyper-Realistic Simulations",
-      description: "Practice with tailored scenarios for your target role and industry"
+      icon: MessageSquare,
+      title: "Immediate Performance Feedback",
+      description: "Receive clear insights on your responses, clarity, and delivery."
     },
     {
-      icon: Zap,
-      title: "Instant Actionable Feedback",
-      description: "Precise insights that human interviewers might miss"
+      icon: BarChart3,
+      title: "Communication Analysis",
+      description: "Understand how your tone, pace, and confidence come across."
     }
   ];
 
@@ -42,39 +41,36 @@ const AIInterviewerSection = () => {
             viewport={{ once: true }}
           >
             <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full px-4 py-2 mb-6">
-              <Brain className="h-4 w-4 text-accent" />
-              <span className="text-sm font-medium text-muted-foreground">Now Available</span>
+              <Mic className="h-4 w-4 text-accent" />
+              <span className="font-body text-sm font-medium text-muted-foreground">Now Available</span>
             </div>
 
-            <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
-              Elevate Your Interview Game.{' '}
+            <h2 className="font-headline text-h1 lg:text-display text-foreground mb-6 tracking-title">
+              Elevate Your{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-                Powered by Vyoman AI.
+                Interview Preparation
               </span>
             </h2>
             
-            <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-              We are thrilled to announce the launch of <strong>AI Interviewer</strong>, our latest innovation 
-              designed to revolutionize how you prepare for your next career opportunity.
+            <p className="font-body text-body-lg text-muted-foreground mb-6 leading-body">
+              Vyoman AI Interviewer simulates real interview environments through voice interaction and intelligent questioning.
             </p>
 
-            <p className="text-muted-foreground mb-8 leading-relaxed">
-              Built on Vyoman's foundational principles of intelligent, ethical, and human-centric AI, 
-              AI Interviewer is your personal, AI-powered interview coach, providing unparalleled insights 
-              and practice to help you ace every interview and land your dream job faster.
+            <p className="font-body text-body text-muted-foreground mb-8 leading-body">
+              You speak naturally. The AI listens, evaluates, and responds with feedback that helps you refine both your answers and delivery.
             </p>
 
             <Button 
               size="lg"
               onClick={handleViewProduct}
-              className="shadow-glow hover:shadow-xl group mb-8"
+              className="shadow-glow hover:shadow-xl group mb-8 font-body tracking-button"
             >
-              View AI Interviewer Product
+              Try AI Interviewer
               <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
 
-            <p className="text-sm text-muted-foreground italic">
-              This is more than just a tool; it's a strategic advantage, meticulously crafted to accelerate your career trajectory.
+            <p className="font-body text-sm text-muted-foreground">
+              Practice makes progress. Start your first session today.
             </p>
           </motion.div>
 
@@ -100,8 +96,8 @@ const AIInterviewerSection = () => {
                     <feature.icon className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+                    <h3 className="font-headline font-semibold text-foreground mb-2">{feature.title}</h3>
+                    <p className="font-body text-sm text-muted-foreground leading-body">{feature.description}</p>
                   </div>
                 </div>
               </motion.div>
@@ -114,9 +110,9 @@ const AIInterviewerSection = () => {
               transition={{ duration: 0.6, delay: 0.4 }}
               viewport={{ once: true }}
             >
-              <p className="text-foreground font-medium mb-2">Gone are the days of generic advice and uncertain preparation.</p>
-              <p className="text-sm text-muted-foreground">
-                Experience the future of interview preparation, backed by the trusted intelligence of Vyoman.
+              <p className="font-body text-foreground font-medium mb-2">The days of uncertain preparation are over.</p>
+              <p className="font-body text-sm text-muted-foreground">
+                Vyoman helps you see exactly where you stand.
               </p>
             </motion.div>
           </motion.div>
