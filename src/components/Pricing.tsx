@@ -137,7 +137,7 @@ const Pricing = () => {
             Simple, Transparent Pricing
           </h2>
           <p className="font-body text-body-lg text-muted-foreground max-w-3xl mx-auto leading-body">
-            Start free and upgrade as you grow. All plans include our core AI interview technology with no hidden fees.
+            Start practicing for free. Upgrade when you are ready for deeper insights and unlimited sessions.
           </p>
           
           {/* Credit info */}

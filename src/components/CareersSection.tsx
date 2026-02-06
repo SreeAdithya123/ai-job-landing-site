@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
@@ -15,7 +14,7 @@ const CareersSection = () => {
     {
       icon: Clock,
       title: "Long-term Thinking",
-      description: "We're building for the future, not just the next quarter. Our decisions today shape the world of tomorrow."
+      description: "We are building for the future, not just the next quarter. Our decisions today shape what is possible tomorrow."
     },
     {
       icon: MapPin,
@@ -35,16 +34,14 @@ const CareersSection = () => {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
+          <h2 className="font-headline text-h1 lg:text-display text-foreground mb-6 tracking-title">
             Work with People Who{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
               Care About the Details
             </span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-            At Vyoman, we are building more than just software; we are cultivating a culture of excellence, 
-            curiosity, and profound impact. Our team is comprised of individuals who share a deep commitment 
-            to craftsmanship, ethical innovation, and the belief that technology can genuinely elevate the human experience.
+          <p className="font-body text-body-lg text-muted-foreground max-w-4xl mx-auto leading-body">
+            We are building technology that impacts real lives. If you care about thoughtful design, ethical AI, and meaningful innovation, you will feel at home here. We value curiosity, ownership, and craftsmanship.
           </p>
         </motion.div>
 
@@ -70,8 +67,8 @@ const CareersSection = () => {
                     <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center mb-4 mx-auto">
                       <value.icon className="h-6 w-6 text-white" />
                     </div>
-                    <h3 className="font-semibold text-foreground mb-3">{value.title}</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{value.description}</p>
+                    <h3 className="font-headline font-semibold text-foreground mb-3">{value.title}</h3>
+                    <p className="font-body text-muted-foreground text-sm leading-body">{value.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -88,19 +85,12 @@ const CareersSection = () => {
           viewport={{ once: true }}
         >
           <div className="glass-card p-8 lg:p-12">
-            <h3 className="text-2xl font-bold text-foreground mb-6 text-center">Our Mission</h3>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-              If you are driven by a desire to create tools that genuinely make a difference in people's lives, 
-              if you thrive in environments where intellectual rigor meets creative freedom, and if you believe 
-              that the intersection of human insight and artificial intelligence holds the key to solving some 
-              of the world's most pressing challenges, then Vyoman might be the perfect place for you to grow 
-              and contribute.
+            <h3 className="font-headline text-h2 text-foreground mb-6 text-center">Our Mission</h3>
+            <p className="font-body text-body-lg text-muted-foreground leading-body mb-6">
+              If you are driven by a desire to create tools that make a real difference in people's lives, and if you thrive in environments where rigor meets creative freedom, Vyoman might be the right place for you.
             </p>
-            <p className="text-muted-foreground leading-relaxed">
-              We are looking for individuals who are not just skilled in their respective domains, but who 
-              also bring a sense of purpose, curiosity, and collaborative spirit to everything they do. 
-              Whether you're a seasoned professional or an emerging talent, what matters most to us is your 
-              passion for excellence and your commitment to building a better future through technology.
+            <p className="font-body text-body text-muted-foreground leading-body">
+              We are looking for people who bring purpose, curiosity, and a collaborative spirit to everything they do.
             </p>
           </div>
         </motion.div>
@@ -119,16 +109,15 @@ const CareersSection = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mb-6 mx-auto">
                 <Heart className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">Join Our Team</h3>
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                Ready to shape the future of AI-powered tools? We're always looking for passionate individuals 
-                who share our vision of ethical, human-centric technology.
+              <h3 className="font-headline text-h2 text-foreground mb-4">Join Our Team</h3>
+              <p className="font-body text-body text-muted-foreground mb-6 leading-body">
+                Ready to shape the future of AI-powered career tools? We are always looking for people who share our vision of ethical, human-centric technology.
               </p>
-              <Button size="lg" className="shadow-glow hover:shadow-xl mb-4">
-                View Open Positions
+              <Button size="lg" className="shadow-glow hover:shadow-xl mb-4 font-body tracking-button">
+                Explore Opportunities
               </Button>
-              <p className="text-sm text-muted-foreground">
-                Don't see a perfect fit? We'd still love to hear from you.
+              <p className="font-body text-sm text-muted-foreground">
+                We would love to hear from you.
               </p>
             </CardContent>
           </Card>
@@ -139,15 +128,14 @@ const CareersSection = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mb-6 mx-auto">
                 <Mail className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">Get in Touch</h3>
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                Have questions about our products, partnerships, or just want to say hello? 
-                We'd love to hear from you and learn about your journey.
+              <h3 className="font-headline text-h2 text-foreground mb-4">Get in Touch</h3>
+              <p className="font-body text-body text-muted-foreground mb-6 leading-body">
+                Have questions about our products, partnerships, or want to say hello? We would love to hear from you.
               </p>
-              <Button variant="secondary" size="lg" className="glass-card hover:bg-white/90 mb-4">
+              <Button variant="secondary" size="lg" className="glass-card hover:bg-white/90 mb-4 font-body tracking-button">
                 Contact Us
               </Button>
-              <p className="text-sm text-muted-foreground">
+              <p className="font-body text-sm text-muted-foreground">
                 We typically respond within 24 hours.
               </p>
             </CardContent>
@@ -163,10 +151,8 @@ const CareersSection = () => {
           viewport={{ once: true }}
         >
           <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 rounded-2xl p-8">
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-              At Vyoman, every team member is a stakeholder in our shared mission to create technology 
-              that genuinely serves humanity. We offer competitive compensation, comprehensive benefits, 
-              and most importantly, the opportunity to work on products that make a real difference in people's lives.
+            <p className="font-body text-body-lg text-muted-foreground leading-body max-w-3xl mx-auto">
+              At Vyoman, every team member is a stakeholder in our shared mission to create technology that genuinely serves people. We offer competitive compensation, comprehensive benefits, and the opportunity to work on products that make a real difference.
             </p>
           </div>
         </motion.div>

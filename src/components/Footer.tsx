@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const Footer = () => {
@@ -9,31 +8,31 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center shadow-glow">
-                <span className="text-white font-bold text-sm">AI</span>
+                <span className="text-white font-bold text-sm">V</span>
               </div>
-              <span className="text-xl font-bold">AI Interviewer</span>
+              <span className="font-headline text-xl font-bold">Vyoman</span>
             </div>
-            <p className="text-gray-300 mb-4">
-              AI-powered tools to help you ace interviews, apply faster, and land offers with confidence.
+            <p className="font-body text-gray-300 mb-4 leading-body">
+              AI-powered tools to help you prepare for interviews, build your resume, and approach opportunities with confidence.
             </p>
-            <p className="text-sm text-gray-400">
-              © 2025 AI Interviewer | Made with 💡 using ElevenLabs + GPT
+            <p className="font-body text-sm text-gray-400">
+              2025 Vyoman. Built for career success.
             </p>
           </div>
           
           <div>
-            <h3 className="font-semibold mb-4 text-white">Product</h3>
-            <ul className="space-y-2 text-sm text-gray-300">
-              <li><a href="/interview-copilot" className="hover:text-accent transition-colors">Interview Copilot</a></li>
+            <h3 className="font-headline font-semibold mb-4 text-white">Product</h3>
+            <ul className="space-y-2 text-sm text-gray-300 font-body">
+              <li><a href="/interview-copilot" className="hover:text-accent transition-colors">AI Interviewer</a></li>
               <li><a href="/mock-interview" className="hover:text-accent transition-colors">Mock Interview</a></li>
-              <li><a href="/resume-builder" className="hover:text-accent transition-colors">AI Resume Builder</a></li>
-              <li><a href="/pricing" className="hover:text-accent transition-colors">Pricing</a></li>
+              <li><a href="/resume-builder" className="hover:text-accent transition-colors">Resume Builder</a></li>
+              <li><a href="/payments" className="hover:text-accent transition-colors">Pricing</a></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="font-semibold mb-4 text-white">Company</h3>
-            <ul className="space-y-2 text-sm text-gray-300">
+            <h3 className="font-headline font-semibold mb-4 text-white">Company</h3>
+            <ul className="space-y-2 text-sm text-gray-300 font-body">
               <li><a href="/about" className="hover:text-accent transition-colors">About</a></li>
               <li><a href="/careers" className="hover:text-accent transition-colors">Careers</a></li>
               <li><a href="/privacy" className="hover:text-accent transition-colors">Privacy Policy</a></li>
