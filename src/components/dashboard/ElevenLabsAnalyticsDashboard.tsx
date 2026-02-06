@@ -11,17 +11,17 @@ const ElevenLabsAnalyticsDashboard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-center space-x-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            <CardTitle>Analytics Dashboard</CardTitle>
+      <Card className="glass-card">
+        <CardHeader className="pb-3 sm:pb-4">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <CardTitle className="text-base sm:text-lg font-headline">Analytics Dashboard</CardTitle>
           </div>
-          <CardDescription>Loading your interview analytics...</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Loading your interview analytics...</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="flex items-center justify-center py-8 sm:py-12">
+            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
           </div>
         </CardContent>
       </Card>
@@ -30,16 +30,16 @@ const ElevenLabsAnalyticsDashboard: React.FC = () => {
 
   if (error) {
     return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-center space-x-2">
-            <BarChart3 className="h-5 w-5 text-destructive" />
-            <CardTitle>Analytics Dashboard</CardTitle>
+      <Card className="glass-card">
+        <CardHeader className="pb-3 sm:pb-4">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
+            <CardTitle className="text-base sm:text-lg font-headline">Analytics Dashboard</CardTitle>
           </div>
-          <CardDescription>Error loading analytics data</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Error loading analytics data</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Unable to load analytics data. Please try again later.
           </p>
         </CardContent>
@@ -49,16 +49,16 @@ const ElevenLabsAnalyticsDashboard: React.FC = () => {
 
   if (!analytics || analytics.scoreProgression.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-center space-x-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            <CardTitle>Analytics Dashboard</CardTitle>
+      <Card className="glass-card">
+        <CardHeader className="pb-3 sm:pb-4">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <CardTitle className="text-base sm:text-lg font-headline">Analytics Dashboard</CardTitle>
           </div>
-          <CardDescription>Complete interviews to see your progress</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Complete interviews to see your progress</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Your analytics will appear here after completing your first interview with ElevenLabs AI.
           </p>
         </CardContent>
@@ -67,10 +67,10 @@ const ElevenLabsAnalyticsDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground mb-2">Interview Analytics Dashboard</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-lg sm:text-2xl font-bold font-headline text-foreground mb-1 sm:mb-2">Interview Analytics Dashboard</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Track your progress with visual insights from your AI interview sessions
         </p>
       </div>
