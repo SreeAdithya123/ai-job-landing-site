@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from './ui/card';
@@ -73,10 +72,10 @@ const Features = () => {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6 bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
+          <h2 className="font-headline text-h1 font-bold text-foreground mb-6 tracking-title bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
             Powerful Features for Interview Success
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="font-body text-body-lg text-muted-foreground max-w-3xl mx-auto leading-body">
             Everything you need to master your interview skills and land your dream job, powered by advanced AI technology.
           </p>
         </motion.div>
@@ -95,10 +94,10 @@ const Features = () => {
                   <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center mb-4 mx-auto shadow-glow">
                     <feature.icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-3">
+                  <h3 className="font-headline text-h3 font-semibold text-foreground mb-3">
                     {feature.title}
                   </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
+                  <p className="font-body text-muted-foreground text-sm leading-body">
                     {feature.description}
                   </p>
                 </CardContent>

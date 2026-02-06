@@ -18,6 +18,36 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter', 'system-ui', 'sans-serif'],
+				headline: ['Sora', 'system-ui', 'sans-serif'],
+				body: ['Inter', 'system-ui', 'sans-serif'],
+				metric: ['Space Grotesk', 'system-ui', 'sans-serif'],
+				'resume-heading': ['Playfair Display', 'Georgia', 'serif'],
+				'resume-heading-alt': ['Merriweather', 'Georgia', 'serif'],
+				'resume-body': ['Lora', 'Georgia', 'serif'],
+				'resume-body-alt': ['Source Serif 4', 'Georgia', 'serif'],
+			},
+			fontSize: {
+				'display': ['3.5rem', { lineHeight: '1.1', letterSpacing: '-0.02em' }],
+				'h1': ['2.5rem', { lineHeight: '1.2', letterSpacing: '-0.01em' }],
+				'h2': ['1.75rem', { lineHeight: '1.3', letterSpacing: '-0.01em' }],
+				'h3': ['1.375rem', { lineHeight: '1.4' }],
+				'body-lg': ['1.125rem', { lineHeight: '1.65' }],
+				'body': ['1rem', { lineHeight: '1.65' }],
+			},
+			letterSpacing: {
+				'headline': '-0.02em',
+				'title': '-0.01em',
+				'button': '0.02em',
+				'label': '0.03em',
+			},
+			lineHeight: {
+				'headline': '1.1',
+				'title': '1.2',
+				'subheading': '1.3',
+				'body': '1.65',
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

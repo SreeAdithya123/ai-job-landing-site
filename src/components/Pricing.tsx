@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
@@ -131,20 +130,20 @@ const Pricing = () => {
         >
           <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full mb-6 border border-primary/20">
             <Shield className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Trusted by 50,000+ job seekers</span>
+            <span className="font-body text-sm font-medium text-primary tracking-button">Trusted by 50,000+ job seekers</span>
           </div>
           
-          <h2 className="text-5xl lg:text-6xl font-bold text-foreground mb-6 bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent leading-tight">
+          <h2 className="font-headline text-display font-bold text-foreground mb-6 tracking-headline bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent leading-tight">
             Simple, Transparent Pricing
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="font-body text-body-lg text-muted-foreground max-w-3xl mx-auto leading-body">
             Start free and upgrade as you grow. All plans include our core AI interview technology with no hidden fees.
           </p>
           
           {/* Credit info */}
           <div className="mt-8 inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full border border-primary/20">
             <Zap className="h-4 w-4 text-primary" />
-            <span className="text-primary font-medium">1 credit = 15 minutes of interview time</span>
+            <span className="font-body text-primary font-medium">1 credit = 15 minutes of interview time</span>
           </div>
         </motion.div>
 
@@ -160,7 +159,7 @@ const Pricing = () => {
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                  <div className="bg-gradient-to-r from-primary to-accent text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg flex items-center space-x-2 border-2 border-white">
+                  <div className="bg-gradient-to-r from-primary to-accent text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg flex items-center space-x-2 border-2 border-white font-body">
                     <Crown className="h-4 w-4 fill-current" />
                     <span>Best Value</span>
                   </div>
@@ -168,7 +167,7 @@ const Pricing = () => {
               )}
               {isCurrentPlan(plan.id) && (
                 <div className="absolute -top-4 right-4 z-10">
-                  <Badge className="bg-accent text-accent-foreground">Current Plan</Badge>
+                  <Badge className="bg-accent text-accent-foreground font-body">Current Plan</Badge>
                 </div>
               )}
               
@@ -188,34 +187,34 @@ const Pricing = () => {
                     </div>
                   </div>
                   
-                  <CardTitle className="text-2xl font-bold text-foreground mb-2">
+                  <CardTitle className="font-headline text-h2 font-bold text-foreground mb-2">
                     {plan.name}
                   </CardTitle>
                   
-                  <div className="text-sm text-primary font-medium mb-4">
+                  <div className="font-body text-sm text-primary font-medium mb-4 tracking-button">
                     {plan.highlight}
                   </div>
                   
                   <div className="mb-4">
                     <div className="flex items-center justify-center space-x-2">
                       {plan.originalPrice && (
-                        <span className="text-lg text-muted-foreground line-through">
+                        <span className="font-body text-lg text-muted-foreground line-through">
                           {plan.currency}{plan.originalPrice}
                         </span>
                       )}
-                      <span className="text-4xl font-bold text-foreground">
+                      <span className="font-metric text-4xl font-bold text-foreground">
                         {plan.currency}{plan.price}
                       </span>
                     </div>
-                    <span className="text-muted-foreground">/{plan.period}</span>
+                    <span className="font-body text-muted-foreground">/{plan.period}</span>
                     {plan.originalPrice && (
-                      <div className="text-sm text-green-600 font-medium mt-1">
+                      <div className="font-body text-sm text-green-600 font-medium mt-1">
                         Save {plan.currency}50/month
                       </div>
                     )}
                   </div>
                   
-                  <p className="text-muted-foreground text-sm leading-relaxed">
+                  <p className="font-body text-muted-foreground text-sm leading-body">
                     {plan.description}
                   </p>
                 </CardHeader>
@@ -227,7 +226,7 @@ const Pricing = () => {
                         <div className="flex-shrink-0 w-5 h-5 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mt-0.5">
                           <Check className="h-3 w-3 text-white" />
                         </div>
-                        <span className="text-muted-foreground text-sm leading-relaxed">
+                        <span className="font-body text-muted-foreground text-sm leading-body">
                           {feature}
                         </span>
                       </li>
@@ -238,7 +237,7 @@ const Pricing = () => {
                     onClick={() => handleGetStarted(plan.id)}
                     variant={plan.buttonVariant}
                     disabled={isCurrentPlan(plan.id)}
-                    className={`w-full h-12 font-semibold ${
+                    className={`w-full h-12 font-semibold font-body tracking-button ${
                       plan.popular 
                         ? 'shadow-xl hover:shadow-2xl scale-105 bg-gradient-to-r from-primary to-accent text-white' 
                         : 'hover:bg-primary/10 hover:border-primary/30'
@@ -252,7 +251,7 @@ const Pricing = () => {
                       <Button
                         variant="link"
                         onClick={() => navigate('/payments')}
-                        className="text-xs text-primary p-0 h-auto"
+                        className="font-body text-xs text-primary p-0 h-auto"
                       >
                         View all plan details →
                       </Button>
@@ -279,10 +278,10 @@ const Pricing = () => {
                 <Shield className="h-6 w-6 text-white" />
               </div>
             </div>
-            <h3 className="text-2xl font-bold text-foreground mb-3">
+            <h3 className="font-headline text-h2 font-bold text-foreground mb-3">
               30-Day Money-Back Guarantee
             </h3>
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="font-body text-muted-foreground leading-body">
               Not satisfied with your results? Get a full refund within 30 days, no questions asked. We're confident you'll love our AI interview platform.
             </p>
           </div>
@@ -293,22 +292,22 @@ const Pricing = () => {
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center mx-auto mb-3">
                 <Clock className="h-5 w-5 text-white" />
               </div>
-              <h4 className="font-semibold text-foreground mb-2">Instant Access</h4>
-              <p className="text-sm text-muted-foreground">Start practicing immediately after signup</p>
+              <h4 className="font-headline font-semibold text-foreground mb-2">Instant Access</h4>
+              <p className="font-body text-sm text-muted-foreground leading-body">Start practicing immediately after signup</p>
             </div>
             <div className="text-center">
               <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mx-auto mb-3">
                 <Zap className="h-5 w-5 text-white" />
               </div>
-              <h4 className="font-semibold text-foreground mb-2">No Setup Required</h4>
-              <p className="text-sm text-muted-foreground">Works in any browser, no downloads needed</p>
+              <h4 className="font-headline font-semibold text-foreground mb-2">No Setup Required</h4>
+              <p className="font-body text-sm text-muted-foreground leading-body">Works in any browser, no downloads needed</p>
             </div>
             <div className="text-center">
               <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-lg flex items-center justify-center mx-auto mb-3">
                 <Users className="h-5 w-5 text-white" />
               </div>
-              <h4 className="font-semibold text-foreground mb-2">Expert Support</h4>
-              <p className="text-sm text-muted-foreground">Get help from our interview specialists</p>
+              <h4 className="font-headline font-semibold text-foreground mb-2">Expert Support</h4>
+              <p className="font-body text-sm text-muted-foreground leading-body">Get help from our interview specialists</p>
             </div>
           </div>
         </motion.div>

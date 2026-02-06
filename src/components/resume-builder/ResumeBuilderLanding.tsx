@@ -56,25 +56,25 @@ export const ResumeBuilderLanding: React.FC<ResumeBuilderLandingProps> = ({ onSt
           </div>
         </div>
 
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 tracking-tight">
+        <h1 className="font-headline text-display text-foreground mb-4 tracking-headline">
           Build Your Resume with
           <span className="text-primary"> AI Precision</span>
         </h1>
 
-        <p className="text-xl text-muted-foreground max-w-2xl mb-8">
+        <p className="font-body text-body-lg text-muted-foreground max-w-2xl mb-8 leading-body">
           ATS-optimized. Recruiter-ready. Designed to stand out.
         </p>
 
         <Button
           onClick={onStart}
           size="lg"
-          className="px-8 py-6 text-lg font-semibold"
+          className="px-8 py-6 font-body text-lg font-semibold tracking-button"
         >
           <Sparkles className="mr-2 h-5 w-5" />
           Start Building
         </Button>
 
-        <p className="text-sm text-muted-foreground mt-4">
+        <p className="font-body text-sm text-muted-foreground mt-4">
           Takes about 5 minutes • Auto-saves your progress
         </p>
       </motion.div>
@@ -99,8 +99,8 @@ export const ResumeBuilderLanding: React.FC<ResumeBuilderLandingProps> = ({ onSt
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
                 <feature.icon className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
-              <p className="text-muted-foreground text-sm">{feature.description}</p>
+              <h3 className="font-headline text-h3 font-semibold text-foreground mb-2">{feature.title}</h3>
+              <p className="font-body text-muted-foreground text-sm leading-body">{feature.description}</p>
             </motion.div>
           ))}
         </div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
@@ -89,7 +88,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
             <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center shadow-glow">
               <Code className="h-4 w-4 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900 whitespace-nowrap">AI Interviewer</span>
+            <span className="font-headline text-xl font-bold text-gray-900 whitespace-nowrap tracking-title">AI Interviewer</span>
           </div>
           {onClose && (
             <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-100 rounded">
@@ -103,7 +102,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       <nav className="flex-1 px-4 py-6 space-y-8 overflow-y-auto">
         {menuItems.map((section) => (
           <div key={section.section}>
-            <h3 className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+            <h3 className="font-headline px-2 text-xs font-semibold text-gray-500 uppercase tracking-label mb-3">
               {section.section}
             </h3>
             <div className="space-y-1">
@@ -112,7 +111,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
                   key={item.name}
                   to={item.href}
                   className={({ isActive }) => `
-                    flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200
+                    flex items-center px-2 py-2 font-body text-sm font-medium rounded-md transition-colors duration-200
                     ${isActive 
                       ? 'bg-primary/10 text-primary border-r-2 border-primary shadow-glow-accent' 
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
@@ -137,8 +136,8 @@ const Sidebar = ({ onClose }: SidebarProps) => {
               <User className="h-4 w-4 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-gray-900 truncate">{userName}</div>
-              <div className="text-xs text-gray-500 truncate">{userEmail}</div>
+              <div className="font-body text-sm font-medium text-gray-900 truncate">{userName}</div>
+              <div className="font-body text-xs text-gray-500 truncate">{userEmail}</div>
             </div>
           </div>
           
@@ -146,14 +145,14 @@ const Sidebar = ({ onClose }: SidebarProps) => {
           <div className="space-y-2">
             <button 
               onClick={handleManageAccount}
-              className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors"
+              className="w-full flex items-center justify-center px-3 py-2 font-body text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-md hover:bg-primary/20 transition-colors tracking-button"
             >
               <Settings className="h-3 w-3 mr-1" />
               <span className="whitespace-nowrap">Manage Account</span>
             </button>
             <button 
               onClick={handleLogout}
-              className="w-full flex items-center justify-center px-3 py-2 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
+              className="w-full flex items-center justify-center px-3 py-2 font-body text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors tracking-button"
             >
               <LogOut className="h-3 w-3 mr-1" />
               <span className="whitespace-nowrap">Logout</span>
@@ -165,7 +164,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
               to="/payments"
               onClick={onClose}
               className={({ isActive }) => `
-                w-full flex items-center justify-center px-3 py-2 text-xs font-medium rounded-md transition-colors
+                w-full flex items-center justify-center px-3 py-2 font-body text-xs font-medium rounded-md transition-colors tracking-button
                 ${isActive 
                   ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg' 
                   : 'text-primary bg-primary/10 border border-primary/20 hover:bg-primary/20'
