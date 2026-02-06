@@ -1,309 +1,241 @@
 
-# AI Resume Builder - Implementation Plan
+
+# Typography System Upgrade - Implementation Plan
 
 ## Overview
-Build a complete AI-powered Resume Builder that replaces the current placeholder page at `/resume-builder`. The feature will include a multi-step questionnaire, AI content generation, premium template gallery, real-time template switching, ATS optimization, and PDF export functionality.
+This plan implements a premium, product-grade typography system across the entire Vyoman website, replacing the current single-font setup with a multi-font hierarchy that reflects AI intelligence, career professionalism, and futuristic design.
 
 ---
 
-## Architecture Summary
+## Font Family System
 
-```text
-+------------------+     +-------------------+     +------------------+
-|  Resume Builder  | --> | AI Edge Function  | --> | Supabase Storage |
-|  (React Pages)   |     | (resume-generate) |     | (JSON + PDF)     |
-+------------------+     +-------------------+     +------------------+
-        |                         |
-        v                         v
-+------------------+     +-------------------+
-| Template Gallery |     | Lovable AI Gateway|
-| (6 Premium       |     | (google/gemini-   |
-|  Templates)      |     |  3-flash-preview) |
-+------------------+     +-------------------+
-```
+### Three-Font Hierarchy
+
+| Font | Role | Usage |
+|------|------|-------|
+| **Sora** | Headlines & Branding | Hero headlines, section titles, navigation headings, CTA headlines |
+| **Inter** | Body & UI | Paragraphs, forms, buttons, descriptions, dashboard labels |
+| **Space Grotesk** | Metrics & Highlights | Scores, analytics numbers, performance stats, confidence metrics |
+
+### Resume Builder Fonts (Document-Style)
+- **Headings**: Playfair Display, Merriweather
+- **Body**: Lora, Source Serif Pro
 
 ---
 
-## Database Schema
+## Typography Scale
 
-### New Table: `resumes`
+### Size System
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | Primary key |
-| user_id | uuid | FK to auth.users |
-| title | text | Resume name/version |
-| personal_info | jsonb | Name, email, phone, LinkedIn, portfolio, location |
-| career_summary | text | AI-generated professional summary |
-| education | jsonb[] | Array of education entries |
-| skills | jsonb | Categorized skills (core, tools, technologies, soft) |
-| projects | jsonb[] | Array of project entries |
-| experience | jsonb[] | Array of work experiences |
-| certifications | jsonb[] | Array of certifications |
-| achievements | jsonb[] | Array of achievements/activities |
-| selected_template | text | Template ID |
-| template_settings | jsonb | Color theme, font style |
-| status | text | draft / completed |
-| created_at | timestamptz | Creation timestamp |
-| updated_at | timestamptz | Last update timestamp |
+| Token | Desktop Size | Mobile Size | Use Case |
+|-------|-------------|-------------|----------|
+| `text-display` | 56px | 36px | Hero headlines |
+| `text-h1` | 40px | 32px | Page titles |
+| `text-h2` | 28px | 24px | Section titles |
+| `text-h3` | 22px | 20px | Card headers |
+| `text-body-lg` | 18px | 16px | Featured paragraphs |
+| `text-body` | 16px | 15px | Default body text |
+| `text-sm` | 14px | 13px | Labels, captions |
+| `text-metric` | Variable | Variable | Dashboard numbers |
 
-RLS Policies:
-- Users can CRUD their own resumes
-- No public access
+### Line Height System
 
----
+| Element | Line Height |
+|---------|-------------|
+| Headlines | 1.1 - 1.2 |
+| Subheadings | 1.3 |
+| Body text | 1.65 (optimal readability) |
 
-## Component Structure
+### Letter Spacing
 
-```text
-src/
-  pages/
-    ResumeBuilder.tsx              # Main orchestrator page
-  components/
-    resume-builder/
-      ResumeBuilderLanding.tsx     # Hero + CTA section
-      ResumeQuestionnaire.tsx      # Multi-step form wizard
-      QuestionnaireSteps/
-        PersonalInfoStep.tsx       # Step 1: Personal details
-        CareerSummaryStep.tsx      # Step 2: Career goals (AI-assisted)
-        EducationStep.tsx          # Step 3: Education entries
-        SkillsStep.tsx             # Step 4: Skills input
-        ProjectsStep.tsx           # Step 5: Projects (AI-enhanced)
-        ExperienceStep.tsx         # Step 6: Work experience
-        CertificationsStep.tsx     # Step 7: Certifications
-        AchievementsStep.tsx       # Step 8: Achievements
-      ResumeGeneration.tsx         # AI generation loader
-      TemplateGallery.tsx          # Template selection grid
-      TemplatePreview.tsx          # Live resume preview
-      ResumeTemplates/
-        ModernCorporate.tsx        # Template 1
-        MinimalProfessional.tsx    # Template 2
-        CreativeDesigner.tsx       # Template 3
-        TechnicalEngineer.tsx      # Template 4
-        AcademicOverleaf.tsx       # Template 5
-        ExecutiveResume.tsx        # Template 6
-      ResumeExport.tsx             # PDF/DOCX export controls
-```
+| Element | Spacing |
+|---------|---------|
+| Hero headlines | -0.02em |
+| Section titles | -0.01em |
+| Buttons | 0.02em |
+| Labels | 0.03em |
 
 ---
 
-## User Flow Implementation
-
-### Phase 1: Landing Screen
-- Hero section with gradient background
-- Title: "Build Your Resume with AI Precision"
-- Subtitle: "ATS-optimized. Recruiter-ready. Designed to stand out."
-- "Start Building" CTA button
-- Feature cards showcasing capabilities
-
-### Phase 2: Multi-Step Questionnaire
-A wizard-style form with:
-- Progress bar at top (8 steps)
-- Step navigation (Previous/Next)
-- Auto-save draft to localStorage
-- Form validation using Zod schemas
-
-**Step Details:**
-1. **Personal Information**: Name, phone, email, LinkedIn, portfolio, location
-2. **Career Summary**: AI asks targeted questions, generates professional summary
-3. **Education**: Dynamic form for multiple degrees
-4. **Skills**: Tag-based input with AI categorization
-5. **Projects**: Multi-entry with AI description enhancement
-6. **Experience**: Work history with AI bullet point optimization
-7. **Certifications**: Simple multi-entry form
-8. **Achievements**: Awards, hackathons, leadership roles
-
-### Phase 3: AI Resume Generation
-- Animated loader: "Designing your professional resume..."
-- Edge function processes all form data
-- AI enhances content with ATS-optimized terminology
-- Returns structured resume JSON
-
-### Phase 4: Template Gallery
-- 6 premium templates in a responsive grid
-- Each card shows:
-  - Template preview thumbnail
-  - Template name
-  - Color theme indicator
-- Click to select and apply
-
-### Phase 5: Template Customization
-- Live preview panel
-- Template switcher (instant, no regeneration)
-- Color theme picker
-- Font style selector
-
-### Phase 6: Export
-- Download PDF button (using jsPDF)
-- Share link option
-- Save to account
-
----
-
-## Edge Function: `resume-generate`
-
-**Location:** `supabase/functions/resume-generate/index.ts`
-
-**Responsibilities:**
-1. Receive questionnaire data from frontend
-2. Call Lovable AI Gateway (google/gemini-3-flash-preview)
-3. Generate:
-   - Professional summary from career goals
-   - Enhanced project descriptions with action verbs
-   - Corporate-style experience bullet points
-   - ATS-optimized content integration
-4. Return structured resume JSON
-
-**ATS Keywords Integration:**
-The AI prompt will naturally embed terminology like:
-- "Cross-functional collaboration"
-- "Scalable system design"
-- "Data-driven decision making"
-- "Agile development lifecycle"
-- "Performance optimization"
-
----
-
-## Template System Design
-
-Each template component receives the same `resumeData` prop and renders it differently:
-
-```typescript
-interface ResumeData {
-  personalInfo: PersonalInfo;
-  careerSummary: string;
-  education: Education[];
-  skills: SkillCategories;
-  projects: Project[];
-  experience: Experience[];
-  certifications: Certification[];
-  achievements: Achievement[];
-}
-
-interface TemplateSettings {
-  colorTheme: 'blue' | 'green' | 'purple' | 'gray' | 'teal';
-  fontStyle: 'inter' | 'roboto' | 'helvetica' | 'sora';
-}
-```
-
-Templates are pure React components that:
-- Accept resume data and settings
-- Render styled HTML
-- Are print-friendly (CSS @media print)
-- Export to PDF via html-to-canvas + jsPDF
-
----
-
-## PDF Export Implementation
-
-Using jsPDF (already installed v3.0.0):
-1. Capture template HTML using html-to-canvas
-2. Convert to PDF maintaining layout
-3. Ensure ATS readability (text-based, not image-based)
-4. Trigger download
-
----
-
-## Responsiveness
-
-- Desktop: Side-by-side preview + form
-- Tablet: Stacked sections with toggle
-- Mobile: Scroll wizard with sticky progress bar
-
----
-
-## Technical Details
-
-### Files to Create
-
-| File | Purpose |
-|------|---------|
-| `src/pages/ResumeBuilder.tsx` | Complete rewrite of main page |
-| `src/components/resume-builder/ResumeBuilderLanding.tsx` | Landing hero |
-| `src/components/resume-builder/ResumeQuestionnaire.tsx` | Multi-step form |
-| `src/components/resume-builder/QuestionnaireSteps/*.tsx` | 8 step components |
-| `src/components/resume-builder/ResumeGeneration.tsx` | AI generation loader |
-| `src/components/resume-builder/TemplateGallery.tsx` | Template grid |
-| `src/components/resume-builder/TemplatePreview.tsx` | Live preview |
-| `src/components/resume-builder/ResumeTemplates/*.tsx` | 6 template components |
-| `src/components/resume-builder/ResumeExport.tsx` | Export controls |
-| `src/hooks/useResumeBuilder.ts` | State management hook |
-| `src/types/resume.ts` | TypeScript interfaces |
-| `src/services/resumeService.ts` | API service layer |
-| `supabase/functions/resume-generate/index.ts` | AI edge function |
+## Implementation Details
 
 ### Files to Modify
 
 | File | Changes |
 |------|---------|
-| `supabase/config.toml` | Add `[functions.resume-generate]` config |
-| `src/App.tsx` | No changes needed (route exists) |
+| `index.html` | Add Google Fonts preconnect and import for Sora, Space Grotesk, Playfair Display, Merriweather, Lora, Source Serif Pro |
+| `src/index.css` | Add font-family CSS variables, typography utility classes, micro-typography enhancements |
+| `tailwind.config.ts` | Add fontFamily definitions, custom typography scale, line-height and letter-spacing tokens |
+| `src/components/Hero.tsx` | Apply Sora for headlines, proper spacing |
+| `src/pages/Dashboard.tsx` | Apply Space Grotesk for metrics, Inter for UI |
+| `src/components/Features.tsx` | Apply typography hierarchy |
+| `src/components/Pricing.tsx` | Apply typography with proper spacing |
+| `src/components/Sidebar.tsx` | Apply Inter for navigation |
+| `src/components/resume-builder/ResumeBuilderLanding.tsx` | Apply Sora for headlines |
+| Resume template files (6 files) | Apply document fonts (Playfair, Merriweather, Lora, Source Serif) |
 
-### Database Migration
+---
 
-```sql
-CREATE TABLE public.resumes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  title TEXT NOT NULL DEFAULT 'My Resume',
-  personal_info JSONB NOT NULL DEFAULT '{}',
-  career_summary TEXT,
-  education JSONB DEFAULT '[]',
-  skills JSONB DEFAULT '{}',
-  projects JSONB DEFAULT '[]',
-  experience JSONB DEFAULT '[]',
-  certifications JSONB DEFAULT '[]',
-  achievements JSONB DEFAULT '[]',
-  selected_template TEXT DEFAULT 'modern-corporate',
-  template_settings JSONB DEFAULT '{"colorTheme": "blue", "fontStyle": "inter"}',
-  status TEXT DEFAULT 'draft',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+## Technical Implementation
 
--- RLS Policies
-ALTER TABLE public.resumes ENABLE ROW LEVEL SECURITY;
+### 1. Font Loading (index.html)
 
-CREATE POLICY "Users can view own resumes" ON public.resumes
-  FOR SELECT USING (auth.uid() = user_id);
+Preconnect to Google Fonts and load all required fonts with appropriate weights:
+- Sora: 400, 500, 600, 700
+- Inter: 300, 400, 500, 600, 700
+- Space Grotesk: 400, 500, 600, 700
+- Playfair Display: 400, 600, 700
+- Merriweather: 400, 700
+- Lora: 400, 500, 600
+- Source Serif Pro: 400, 600
 
-CREATE POLICY "Users can create own resumes" ON public.resumes
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+### 2. CSS Variables & Utilities (src/index.css)
 
-CREATE POLICY "Users can update own resumes" ON public.resumes
-  FOR UPDATE USING (auth.uid() = user_id);
+New CSS custom properties:
+```css
+--font-headline: 'Sora', sans-serif;
+--font-body: 'Inter', sans-serif;
+--font-metric: 'Space Grotesk', sans-serif;
+--font-resume-heading: 'Playfair Display', serif;
+--font-resume-body: 'Lora', serif;
+```
 
-CREATE POLICY "Users can delete own resumes" ON public.resumes
-  FOR DELETE USING (auth.uid() = user_id);
+Utility classes:
+- `.font-headline` - Sora
+- `.font-body` - Inter
+- `.font-metric` - Space Grotesk
+- `.text-display` - 56px hero headlines
+- `.tracking-headline` - -0.02em
+- `.tracking-title` - -0.01em
+- `.tracking-button` - 0.02em
+- `.leading-headline` - 1.1
+- `.leading-body` - 1.65
 
--- Updated_at trigger
-CREATE TRIGGER update_resumes_updated_at
-  BEFORE UPDATE ON public.resumes
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+Micro-typography enhancements:
+- `-webkit-font-smoothing: antialiased`
+- `-moz-osx-font-smoothing: grayscale`
+- `text-rendering: optimizeLegibility`
+- `font-feature-settings: 'kern' 1`
+
+### 3. Tailwind Configuration (tailwind.config.ts)
+
+New fontFamily tokens:
+```js
+fontFamily: {
+  headline: ['Sora', 'sans-serif'],
+  body: ['Inter', 'sans-serif'],
+  metric: ['Space Grotesk', 'sans-serif'],
+  'resume-heading': ['Playfair Display', 'serif'],
+  'resume-body': ['Lora', 'serif']
+}
+```
+
+Extended fontSize scale with responsive variants and line-height:
+```js
+fontSize: {
+  'display': ['3.5rem', { lineHeight: '1.1', letterSpacing: '-0.02em' }],
+  'h1': ['2.5rem', { lineHeight: '1.2', letterSpacing: '-0.01em' }],
+  'h2': ['1.75rem', { lineHeight: '1.3', letterSpacing: '-0.01em' }],
+  'h3': ['1.375rem', { lineHeight: '1.4' }],
+  'body-lg': ['1.125rem', { lineHeight: '1.65' }],
+  'body': ['1rem', { lineHeight: '1.65' }]
+}
+```
+
+---
+
+## Component Updates
+
+### Hero Section (Hero.tsx)
+- Main headline: `font-headline text-display tracking-headline`
+- Subtitle: `font-body text-body-lg leading-body`
+- Badge text: `font-body text-sm tracking-button`
+
+### Dashboard (Dashboard.tsx)
+- Page title: `font-headline text-h1`
+- Stats/metrics: `font-metric text-3xl`
+- Labels: `font-body text-sm`
+- Body text: `font-body text-body leading-body`
+
+### Features Section (Features.tsx)
+- Section title: `font-headline text-h1 tracking-title`
+- Card titles: `font-headline text-h3`
+- Descriptions: `font-body text-body leading-body`
+
+### Pricing Section (Pricing.tsx)
+- Main headline: `font-headline text-display tracking-headline`
+- Plan names: `font-headline text-h2`
+- Prices: `font-metric text-4xl`
+- Features list: `font-body text-sm leading-body`
+
+### Sidebar (Sidebar.tsx)
+- Section headers: `font-headline text-xs uppercase tracking-wider`
+- Nav items: `font-body text-sm`
+
+### Resume Templates (6 files)
+- Headings: `font-resume-heading` (Playfair Display)
+- Body text: `font-resume-body` (Lora/Source Serif)
+- Name/titles: Merriweather
+- Skills/labels: Space Grotesk
+
+---
+
+## Text Color Hierarchy
+
+Following the existing design system colors:
+- **Primary text**: `text-foreground` (#0F172A in light mode)
+- **Secondary text**: `text-muted-foreground` (#64748B)
+- **Accent links**: `text-secondary` (Sky Blue #38BDF8)
+
+---
+
+## Performance Optimization
+
+1. **Font Display**: Use `font-display: swap` for all fonts
+2. **Preconnect**: Add preconnect hints for Google Fonts
+3. **Subset**: Load only required character sets (latin, latin-ext)
+4. **Variable Fonts**: Consider using variable font versions where available
+
+---
+
+## Responsive Behavior
+
+Typography scales automatically:
+- **Desktop**: Full size scale
+- **Tablet** (< 1024px): 90% scale for display/h1
+- **Mobile** (< 768px): 75-80% scale for large headings
+
+Implemented via Tailwind responsive prefixes:
+```jsx
+className="text-3xl md:text-4xl lg:text-display font-headline"
 ```
 
 ---
 
 ## Implementation Order
 
-1. **Database Setup**: Create `resumes` table with RLS policies
-2. **Types & Services**: Create TypeScript interfaces and service layer
-3. **Edge Function**: Build `resume-generate` with Lovable AI integration
-4. **Landing Page**: Build the hero and CTA section
-5. **Questionnaire Steps**: Build all 8 form steps with validation
-6. **AI Generation**: Build the generation loader and integration
-7. **Template System**: Build 6 template components
-8. **Template Gallery**: Build selection UI with live switching
-9. **PDF Export**: Implement jsPDF export functionality
-10. **Polish**: Add responsiveness, animations, error handling
+1. **Font Loading**: Update `index.html` with Google Fonts imports
+2. **CSS Foundation**: Add CSS variables and utilities to `src/index.css`
+3. **Tailwind Config**: Extend theme with font families and typography scale
+4. **Global Base**: Update base body styles
+5. **Component Updates**: Apply typography classes to key components:
+   - Hero.tsx
+   - Dashboard.tsx
+   - Features.tsx
+   - Pricing.tsx
+   - Sidebar.tsx
+   - ResumeBuilderLanding.tsx
+6. **Resume Templates**: Update document fonts in all 6 template components
 
 ---
 
-## Estimated Scope
+## Expected Outcome
 
-- ~20 new files
-- ~2,500-3,000 lines of code
-- 1 new database table
-- 1 new edge function
-- Full integration with existing auth and subscription system
+The typography upgrade will transform the website from a generic SaaS look to a premium, product-grade experience with:
+- Clear visual hierarchy
+- AI-native, intelligent feel
+- Excellent readability
+- Consistent spacing and rhythm
+- Professional resume documents
+- Futuristic yet human-centered design
+
