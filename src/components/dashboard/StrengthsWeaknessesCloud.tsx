@@ -9,8 +9,8 @@ interface StrengthsWeaknessesCloudProps {
 }
 
 const StrengthsWeaknessesCloud: React.FC<StrengthsWeaknessesCloudProps> = ({ 
-  strengths, 
-  weaknesses 
+  strengths = [], 
+  weaknesses = [] 
 }) => {
   const getWordSize = (count: number, maxCount: number) => {
     const minSize = 12;
@@ -18,8 +18,12 @@ const StrengthsWeaknessesCloud: React.FC<StrengthsWeaknessesCloudProps> = ({
     return minSize + ((count / maxCount) * (maxSize - minSize));
   };
 
-  const maxStrengthCount = Math.max(...strengths.map(s => s.count), 1);
-  const maxWeaknessCount = Math.max(...weaknesses.map(w => w.count), 1);
+  // Guard against undefined or empty arrays
+  const safeStrengths = strengths || [];
+  const safeWeaknesses = weaknesses || [];
+
+  const maxStrengthCount = safeStrengths.length > 0 ? Math.max(...safeStrengths.map(s => s.count), 1) : 1;
+  const maxWeaknessCount = safeWeaknesses.length > 0 ? Math.max(...safeWeaknesses.map(w => w.count), 1) : 1;
 
   return (
     <div className="grid md:grid-cols-2 gap-6">
@@ -34,8 +38,8 @@ const StrengthsWeaknessesCloud: React.FC<StrengthsWeaknessesCloudProps> = ({
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3 justify-center min-h-[120px] items-center">
-            {strengths.length > 0 ? (
-              strengths.map((strength, index) => (
+            {safeStrengths.length > 0 ? (
+              safeStrengths.map((strength, index) => (
                 <Badge
                   key={index}
                   variant="secondary"
@@ -66,8 +70,8 @@ const StrengthsWeaknessesCloud: React.FC<StrengthsWeaknessesCloudProps> = ({
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3 justify-center min-h-[120px] items-center">
-            {weaknesses.length > 0 ? (
-              weaknesses.map((weakness, index) => (
+            {safeWeaknesses.length > 0 ? (
+              safeWeaknesses.map((weakness, index) => (
                 <Badge
                   key={index}
                   variant="secondary"
