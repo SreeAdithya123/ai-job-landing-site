@@ -1,210 +1,132 @@
 
-
-# Content Rewrite Implementation Plan
+# Dashboard Redesign - Complete Responsive Overhaul
 
 ## Overview
-This plan rewrites all landing page content to sound more human, professional, and emotionally intelligent. The tone will be founder-driven, career-focused, and motivational but grounded. All em dashes and robotic SaaS language will be removed.
+This plan completely redesigns the dashboard to be fully responsive, eliminating gaps, streamlining the layout, and applying the AI Neural Light design system consistently. The design will be clean, professional, and work seamlessly across all screen sizes.
 
 ---
 
-## Typography Verification
+## Current Issues Identified
 
-The current typography system is correctly implemented:
-- Sora for headlines (font-headline)
-- Inter for body text (font-body)
-- Space Grotesk for metrics (font-metric)
-- Proper letter-spacing and line-height utilities defined
-
-The typography classes are being applied across components, though some sections (AIInterviewerSection, AboutSection, CareersSection, CommunitySection) need the typography classes added for consistency.
+| Issue | Description |
+|-------|-------------|
+| Duplicate headers | Two header sections with redundant navigation |
+| Excessive padding | `py-16` creates large gaps between sections |
+| Broken grid layouts | Aptitude card uses `col-span-2` incorrectly |
+| Misaligned sidebar content | Subscription + Progress cards 1/3 + 2/3 split breaks on mobile |
+| Inconsistent spacing | Various `mb-12`, `gap-8` creating uneven sections |
+| Non-responsive tables | Interview history table overflows on mobile |
+| Redundant buttons | Multiple "View History" buttons in different places |
 
 ---
 
-## Content Changes by Section
+## New Dashboard Architecture
 
-### 1. Hero Section (Hero.tsx)
+### Layout Structure
+
+```text
++--------------------------------------------------+
+| Compact Header (Sticky)                          |
+| Logo | Title + Subtitle | Quick Actions          |
++--------------------------------------------------+
+| Main Content Area (Responsive Grid)              |
+|                                                  |
+| [Stats Row - 4 cards responsive]                 |
+|                                                  |
+| [Quick Actions Row]                              |
+| AI Interviewer | Virtual Interviewer             |
+|                                                  |
+| [Analytics Section - 2 col responsive]           |
+| Charts | Progress                                |
+|                                                  |
+| [Subscription + Skills - 2 col responsive]       |
+|                                                  |
+| [Interview History - Full width responsive]      |
+|                                                  |
+| [Recent Analyses - Grid responsive]              |
++--------------------------------------------------+
+```
+
+---
+
+## Detailed Changes
+
+### 1. Dashboard.tsx - Complete Restructure
+
+**Header Simplification:**
+- Remove the duplicate text-center title section
+- Keep only one compact sticky header
+- Consolidate action buttons into a single row
+- Responsive navigation that collapses on mobile
+
+**Main Content Grid:**
+- Reduce padding from `py-16` to `py-6`
+- Use consistent `gap-6` instead of mixed `gap-8`, `mb-12`
+- Implement proper responsive breakpoints: `grid-cols-1 md:grid-cols-2 lg:grid-cols-4`
+- Remove redundant buttons and streamline CTAs
+
+**Section Organization:**
+```text
+1. Welcome/Progress Message (full width)
+2. Stats Cards (4 columns responsive → 2 columns tablet → 1 column mobile)
+3. Interview Quick Actions (2 columns responsive → 1 column mobile)
+4. Subscription + Skills Row (2 columns responsive)
+5. Charts Section (2 columns responsive → 1 column mobile)
+6. Interview History Table (full width, horizontally scrollable on mobile)
+7. Analytics Dashboard (full width)
+8. Recent Analyses (2 columns responsive → 1 column mobile)
+```
+
+### 2. ProgressTracking.tsx - Responsive Optimization
 
 **Current Issues:**
-- Content is overly abstract and SaaS-generic
-- Uses metaphorical language that feels disconnected
+- Stats grid has `lg:grid-cols-4` but content inside is cramped
+- Charts section uses inconsistent `lg:grid-cols-2`
+- No mobile-first design
 
-**New Content:**
+**Changes:**
+- Extract stats cards to be used directly in Dashboard.tsx for better control
+- Simplify charts to stack properly on mobile
+- Reduce chart heights on mobile devices
+- Add proper touch-friendly spacing
 
-| Element | New Copy |
-|---------|----------|
-| Badge | "Preparation Made Simple" |
-| Headline | "The Sky Is Not the Limit. It Is the Foundation." |
-| Subheading | "Vyoman helps you prepare for the moments that define your future. Practice interviews, improve communication, and build confidence with intelligent tools designed for real growth." |
-| Supporting Text | "Whether you are a student preparing for placements or a professional aiming higher, Vyoman gives you a structured way to practice, learn, and improve." |
-| CTA 1 | "Start Practicing" |
-| CTA 2 | "Explore AI Interviewer" |
+### 3. SubscriptionCard.tsx - Compact Design
 
-**Card Updates:**
-- Purpose-Built Intelligence: "Designed specifically for career preparation and interview success."
-- Adaptive Learning: "The system evolves with your performance and experience level."
-- Ethical AI First: "Your data, privacy, and growth remain our priority."
+**Changes:**
+- Make card more compact with tighter padding
+- Responsive text sizes
+- Full-width on mobile, proper sizing on desktop
 
----
+### 4. AptitudePerformanceCard.tsx - Fix Grid Issue
 
-### 2. AI Interviewer Section (AIInterviewerSection.tsx)
+**Current Issue:**
+- Uses `col-span-2` but parent grid is `grid-cols-1 lg:grid-cols-2`
+- This causes overflow/misalignment
 
-**New Content:**
+**Fix:**
+- Remove `col-span-2` from the card
+- Let it naturally fit the grid
+- OR adjust parent grid to accommodate
 
-| Element | New Copy |
-|---------|----------|
-| Badge | "Now Available" |
-| Headline | "Elevate Your Interview Preparation" |
-| Main Paragraph | "Vyoman AI Interviewer simulates real interview environments through voice interaction and intelligent questioning." |
-| Second Paragraph | "You speak naturally. The AI listens, evaluates, and responds with feedback that helps you refine both your answers and delivery." |
-| CTA | "Try AI Interviewer" |
-| Bottom Note | "Practice makes progress. Start your first session today." |
+### 5. InterviewHistoryTable.tsx - Mobile Optimization
 
-**Feature Cards:**
-- Realistic Voice Interviews: "Practice speaking in real interview scenarios with natural conversation flow."
-- Immediate Performance Feedback: "Receive clear insights on your responses, clarity, and delivery."
-- Communication Analysis: "Understand how your tone, pace, and confidence come across."
+**Changes:**
+- Add horizontal scroll wrapper for mobile
+- Hide less important columns on small screens
+- Make table cells more compact
+- Responsive font sizes
 
-**Bottom Card:**
-- "The days of uncertain preparation are over. Vyoman helps you see exactly where you stand."
+### 6. ElevenLabsAnalyticsDashboard.tsx - Responsive Charts
 
----
+**Changes:**
+- Reduce chart heights on mobile (h-80 → h-64 on mobile)
+- Stack all charts vertically on mobile
+- Proper spacing between chart cards
 
-### 3. About/Philosophy Section (AboutSection.tsx)
+### 7. RecentInterviewAnalyses.tsx - Grid Fix
 
-**New Content:**
-
-| Element | New Copy |
-|---------|----------|
-| Headline | "The Sky Is Not the Limit. It Is the Foundation." |
-| Subheading | "Vyoman means sky in Sanskrit. We see the sky not as a limit but as the foundation that supports everything. Our platform is built on this belief." |
-
-**Philosophy Card:**
-- Title: "Our Philosophy"
-- Content: "We believe preparation builds confidence, and confidence builds opportunity. Technology should support human growth, not replace it. Every feature within Vyoman is designed to strengthen your thinking, communication, and professional readiness. Our goal is simple. Help individuals present their true potential when it matters most."
-
-**Differentiators (Updated):**
-- Purpose-Built Intelligence: "We do not build AI for the sake of AI. Every feature is designed with a specific human need in mind."
-- Adaptive Learning: "Our systems learn from your unique patterns, preferences, and goals. The more you use Vyoman, the better it becomes at helping you succeed."
-- Ethical AI First: "We believe AI should enhance human capability, not replace human judgment. Our tools are transparent, explainable, and always keep you in control."
-- Growth-Oriented Design: "Every interaction is an opportunity to learn something new. Our interfaces are designed to challenge you gently, helping you develop skills naturally over time."
-
-**Principles (Updated):**
-- Human-Centric AI: "We design AI to augment human capabilities. Our tools are intuitive partners that enhance your natural intelligence."
-- Ethical Foundation: "Transparency, fairness, and accountability guide everything we build. Your privacy and trust come first."
-- Continuous Evolution: "Just as learning never stops, neither does our platform. We constantly refine and improve based on real feedback."
-- Clarity and Craft: "We believe in elegant solutions and precise execution. Every product reflects our dedication to quality."
-- Long-term Vision: "We approach challenges with curiosity and patience. The future we are building is meant to last."
-
-**Commitment Card:**
-- "We are not just building software. We are building tools that help people grow, learn, and succeed. Join us on this journey."
-
----
-
-### 4. Features Section (Features.tsx)
-
-**New Content:**
-
-| Element | New Copy |
-|---------|----------|
-| Headline | "Powerful Features for Interview Success" |
-| Subheading | "Everything you need to practice, improve, and prepare with confidence." |
-
-**Feature Cards (Updated):**
-- AI Voice Interviews: "Practice speaking in real interview scenarios with natural conversation flow."
-- Voice Analysis: "Get feedback on your tone, pace, and clarity through advanced voice recognition."
-- Real-time Feedback: "Receive instant feedback on your answers and overall performance during practice."
-- Performance Analytics: "Track improvement through structured reports and visual insights."
-- Custom Question Banks: "Access questions tailored to your field and experience level."
-- Mock Panel Interviews: "Practice with multiple AI interviewers to simulate panel scenarios."
-- Instant Scoring: "Get immediate scores based on your interview performance."
-- Privacy Protected: "Your practice sessions are completely private and secure."
-- Flexible Scheduling: "Practice interviews on your schedule. No appointments or waiting required."
-
----
-
-### 5. Community Section (CommunitySection.tsx)
-
-**New Content:**
-
-| Element | New Copy |
-|---------|----------|
-| Headline | "Made for Humans. Powered by Purpose." |
-| Subheading | "Vyoman is more than a product. It is a growing community of learners, professionals, and builders who believe in continuous improvement. Members share insights, participate in mock sessions, and support each other's growth journeys." |
-
-**Vision Card:**
-- Title: "Our Vision for Community"
-- Content: "We believe in the power of shared purpose. The Vyoman Community is a space where curiosity thrives and collaboration leads to real progress. Whether you are preparing for your first interview or your tenth, you will find support here."
-
-**Features (Updated):**
-- Exclusive Content: "Early access to new features and behind-the-scenes insights."
-- Direct Access to Team: "Connect with our engineers, designers, and product leads."
-- Collaborative Projects: "Work with other members on challenges and learning initiatives."
-- Mentorship and Support: "Find guidance from experienced professionals and offer your own expertise."
-- Events and Workshops: "Participate in virtual meetups, AMAs, and hands-on learning sessions."
-
-**Audiences (Updated):**
-- Career Seekers: "Get structured practice and clear feedback to improve your interview skills."
-- Developers and Designers: "Collaborate on projects and refine your technical communication."
-- Educators and Trainers: "Share insights and explore new ways to prepare students for success."
-- Lifelong Learners: "Connect with people who value continuous improvement and growth."
-
-**CTA Section:**
-- Title: "Join the Movement"
-- Content: "Join a growing community of people who are committed to preparation and continuous improvement. The Vyoman Community is where ideas take shape and progress happens together."
-- CTA: "Join the Community"
-
----
-
-### 6. Careers Section (CareersSection.tsx)
-
-**New Content:**
-
-| Element | New Copy |
-|---------|----------|
-| Headline | "Work with People Who Care About the Details" |
-| Subheading | "We are building technology that impacts real lives. If you care about thoughtful design, ethical AI, and meaningful innovation, you will feel at home here. We value curiosity, ownership, and craftsmanship." |
-
-**Values (Updated):**
-- Attention to Detail: "We believe that excellence lives in the details. Every line of code, every design decision, every user interaction matters."
-- Long-term Thinking: "We are building for the future, not just the next quarter. Our decisions today shape what is possible tomorrow."
-- Global Impact: "Our work reaches across continents and cultures, creating tools that empower people everywhere."
-
-**Mission Card:**
-- Title: "Our Mission"
-- Content: "If you are driven by a desire to create tools that make a real difference in people's lives, and if you thrive in environments where rigor meets creative freedom, Vyoman might be the right place for you. We are looking for people who bring purpose, curiosity, and a collaborative spirit to everything they do."
-
-**Join Our Team Card:**
-- Title: "Join Our Team"
-- Content: "Ready to shape the future of AI-powered career tools? We are always looking for people who share our vision of ethical, human-centric technology."
-- CTA: "Explore Opportunities"
-
-**Contact Card:**
-- Title: "Get in Touch"
-- Content: "Have questions about our products, partnerships, or want to say hello? We would love to hear from you."
-- CTA: "Contact Us"
-
-**Footer Message:**
-- "At Vyoman, every team member is a stakeholder in our shared mission to create technology that genuinely serves people. We offer competitive compensation, comprehensive benefits, and the opportunity to work on products that make a real difference."
-
----
-
-### 7. Pricing Section (Pricing.tsx)
-
-**New Content:**
-
-| Element | New Copy |
-|---------|----------|
-| Headline | "Simple, Transparent Pricing" |
-| Subheading | "Start practicing for free. Upgrade when you are ready for deeper insights and unlimited sessions." |
-
-No changes to plan details or features. The pricing structure remains the same.
-
----
-
-### 8. Footer (Footer.tsx)
-
-**New Content:**
-- Description: "AI-powered tools to help you prepare for interviews, build your resume, and approach opportunities with confidence."
-- Copyright: "2025 Vyoman. Built for career success."
+**Current:** `grid-cols-1 lg:grid-cols-2`  
+**Change:** `grid-cols-1 md:grid-cols-2` for earlier tablet breakpoint
 
 ---
 
@@ -212,51 +134,94 @@ No changes to plan details or features. The pricing structure remains the same.
 
 ### Files to Modify
 
-| File | Changes |
-|------|---------|
-| src/components/Hero.tsx | Rewrite all content with humanized copy, add missing typography classes |
-| src/components/AIInterviewerSection.tsx | Rewrite content, add font-headline and font-body classes |
-| src/components/AboutSection.tsx | Rewrite philosophy and principles, add typography classes |
-| src/components/Features.tsx | Rewrite feature descriptions |
-| src/components/CommunitySection.tsx | Rewrite all content, add typography classes |
-| src/components/CareersSection.tsx | Rewrite content with grounded, human tone, add typography classes |
-| src/components/Pricing.tsx | Update headline and subheading |
-| src/components/Footer.tsx | Update description and branding |
+| File | Priority | Changes |
+|------|----------|---------|
+| `src/pages/Dashboard.tsx` | High | Complete restructure of layout, remove duplicate headers, fix spacing |
+| `src/components/ProgressTracking.tsx` | High | Responsive grid fixes, mobile chart heights |
+| `src/components/SubscriptionCard.tsx` | Medium | Compact styling |
+| `src/components/InterviewHistoryTable.tsx` | Medium | Mobile table optimization |
+| `src/components/dashboard/AptitudePerformanceCard.tsx` | Medium | Remove col-span-2, responsive stats |
+| `src/components/RecentInterviewAnalyses.tsx` | Low | Grid breakpoint adjustment |
+| `src/components/dashboard/ElevenLabsAnalyticsDashboard.tsx` | Low | Mobile chart heights |
+| `src/components/dashboard/FeedbackSummaryCharts.tsx` | Low | Mobile chart heights |
+| `src/components/dashboard/ScoreProgressChart.tsx` | Low | Mobile chart height |
 
 ---
 
-## Writing Guidelines Applied
+## New CSS Utilities to Add (src/index.css)
 
-1. Short to medium length sentences
-2. No em dashes or long hyphens
-3. No buzzwords like "leverage," "synergy," "revolutionary"
-4. No overly poetic metaphors
-5. Focus on real outcomes and value
-6. Confident but supportive language
-7. Speaking directly to students and job seekers
+```css
+/* Dashboard-specific responsive utilities */
+.dashboard-section {
+  @apply mb-6;
+}
+
+.dashboard-grid {
+  @apply grid gap-4 md:gap-6;
+}
+
+.stats-grid {
+  @apply grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4;
+}
+
+.chart-container {
+  @apply h-48 sm:h-64 lg:h-80;
+}
+```
+
+---
+
+## Responsive Breakpoint Strategy
+
+| Breakpoint | Width | Layout |
+|------------|-------|--------|
+| Mobile | < 640px | Single column, stacked cards, compact stats |
+| Tablet | 640px - 1024px | 2 columns for most grids |
+| Desktop | 1024px+ | Full multi-column layouts |
+
+---
+
+## Spacing System (Consistent)
+
+| Element | Spacing |
+|---------|---------|
+| Section gaps | `gap-6` (24px) |
+| Card padding | `p-4` mobile, `p-6` desktop |
+| Container padding | `px-4` mobile, `px-6` desktop |
+| Vertical rhythm | `space-y-6` between sections |
+
+---
+
+## Key Design Decisions
+
+1. **Remove duplicate header** - Keep only the compact sticky header with essential actions
+2. **Consolidate CTAs** - Remove redundant "View History" buttons scattered throughout
+3. **Mobile-first grids** - All grids start with mobile layout and scale up
+4. **Consistent card styling** - All cards use `glass-card` utility with consistent rounded corners
+5. **Reduced vertical padding** - From `py-16` to `py-6` for tighter layout
+6. **Touch-friendly targets** - Minimum 44px tap targets on mobile
+7. **Horizontal scroll for tables** - Better than breaking layout on mobile
 
 ---
 
 ## Implementation Order
 
-1. Hero.tsx - The main entry point and first impression
-2. AIInterviewerSection.tsx - Core product explanation
-3. AboutSection.tsx - Philosophy and values
-4. Features.tsx - Product capabilities
-5. CommunitySection.tsx - Community value proposition
-6. CareersSection.tsx - Team and hiring content
-7. Pricing.tsx - Simple pricing updates
-8. Footer.tsx - Final branding touch
+1. **Dashboard.tsx** - Main layout restructure (highest impact)
+2. **ProgressTracking.tsx** - Fix stats and charts grids
+3. **AptitudePerformanceCard.tsx** - Remove col-span issue
+4. **InterviewHistoryTable.tsx** - Mobile table optimization
+5. **Chart components** - Mobile height adjustments
+6. **RecentInterviewAnalyses.tsx** - Grid breakpoint fix
+7. **CSS utilities** - Add dashboard-specific classes
 
 ---
 
 ## Expected Outcome
 
-After implementation, all landing page content will:
-- Sound human and founder-driven
-- Be clear and concise
-- Focus on real outcomes for career preparation
-- Avoid robotic SaaS language
-- Use consistent typography with Sora for headlines and Inter for body text
-- Feel trustworthy and motivational without being preachy
-
+After implementation:
+- Zero layout gaps or overflow issues
+- Smooth responsive behavior from 320px to 1920px+
+- Consistent spacing and visual rhythm
+- Professional, clean SaaS dashboard appearance
+- Improved mobile usability with touch-friendly elements
+- Faster perceived performance with compact layout
