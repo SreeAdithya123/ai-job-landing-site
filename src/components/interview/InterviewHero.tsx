@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Target, Zap } from 'lucide-react';
@@ -9,19 +8,19 @@ const InterviewHero: React.FC = () => {
       icon: Sparkles,
       title: 'AI-Powered',
       description: 'Advanced AI technology provides realistic interview scenarios',
-      gradient: 'from-blue-500 to-blue-600'
+      gradient: 'from-primary to-secondary'
     },
     {
       icon: Target,
       title: 'Real-time Feedback',
       description: 'Get instant feedback on your responses and performance',
-      gradient: 'from-green-500 to-green-600'
+      gradient: 'from-secondary to-accent'
     },
     {
       icon: Zap,
       title: 'Performance Analytics',
       description: 'Track your progress with detailed analytics and insights',
-      gradient: 'from-purple-500 to-purple-600'
+      gradient: 'from-accent to-primary'
     }
   ];
 
@@ -33,10 +32,10 @@ const InterviewHero: React.FC = () => {
         transition={{ duration: 0.6 }}
         className="mb-8"
       >
-        <h2 className="text-5xl font-bold text-slate-800 mb-4">
+        <h2 className="font-headline text-display text-foreground mb-4 tracking-headline">
           Choose Your Interview Experience
         </h2>
-        <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+        <p className="font-body text-body-lg text-muted-foreground max-w-3xl mx-auto leading-body">
           Practice with our AI-powered interview system designed to help you succeed. 
           Get real-time feedback, personalized questions, and detailed performance analytics.
         </p>
@@ -50,13 +49,13 @@ const InterviewHero: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 + index * 0.1 }}
-            className="bg-white/60 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6 shadow-sm"
+            className="glass-card p-6"
           >
-            <div className={`w-12 h-12 bg-gradient-to-r ${feature.gradient} rounded-xl flex items-center justify-center mb-4 mx-auto`}>
+            <div className={`w-12 h-12 bg-gradient-to-r ${feature.gradient} rounded-xl flex items-center justify-center mb-4 mx-auto shadow-glow`}>
               <feature.icon className="h-6 w-6 text-white" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">{feature.title}</h3>
-            <p className="text-slate-600 text-sm">{feature.description}</p>
+            <h3 className="font-headline text-h3 font-semibold text-foreground mb-2">{feature.title}</h3>
+            <p className="font-body text-muted-foreground text-sm leading-body">{feature.description}</p>
           </motion.div>
         ))}
       </div>

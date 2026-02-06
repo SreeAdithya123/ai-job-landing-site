@@ -1,12 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* AI Neural Light Design System - Clean, Premium, Modern SaaS */
+/* AI Neural Light Design System - Premium Typography System */
+
+/* ================================
+   TYPOGRAPHY SYSTEM
+   ================================
+   Headlines & Branding: Sora
+   Body & UI: Inter
+   Metrics & Highlights: Space Grotesk
+   Resume Headings: Playfair Display, Merriweather
+   Resume Body: Lora, Source Serif 4
+   ================================ */
 
 @layer base {
   :root {
+    /* Font Family Variables */
+    --font-headline: 'Sora', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-metric: 'Space Grotesk', system-ui, sans-serif;
+    --font-resume-heading: 'Playfair Display', Georgia, serif;
+    --font-resume-heading-alt: 'Merriweather', Georgia, serif;
+    --font-resume-body: 'Lora', Georgia, serif;
+    --font-resume-body-alt: 'Source Serif 4', Georgia, serif;
+
     /* Background Colors */
     --background: 210 40% 98%;
     --foreground: 222 47% 11%;
@@ -104,13 +123,120 @@
     @apply border-border;
   }
 
+  html {
+    /* Micro-typography enhancements */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+  }
+
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
+    line-height: 1.65;
+  }
+
+  /* Headline Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-headline);
+    font-weight: 600;
+  }
+
+  h1 {
+    @apply text-4xl lg:text-5xl;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    @apply text-3xl lg:text-4xl;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    @apply text-2xl lg:text-3xl;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  h4 {
+    @apply text-xl lg:text-2xl;
+    line-height: 1.4;
+  }
+
+  /* Body text optimal line length */
+  p {
+    max-width: 75ch;
   }
 }
 
 @layer utilities {
+  /* Font Family Utilities */
+  .font-headline {
+    font-family: var(--font-headline);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .font-metric {
+    font-family: var(--font-metric);
+  }
+
+  .font-resume-heading {
+    font-family: var(--font-resume-heading);
+  }
+
+  .font-resume-heading-alt {
+    font-family: var(--font-resume-heading-alt);
+  }
+
+  .font-resume-body {
+    font-family: var(--font-resume-body);
+  }
+
+  .font-resume-body-alt {
+    font-family: var(--font-resume-body-alt);
+  }
+
+  /* Letter Spacing Utilities */
+  .tracking-headline {
+    letter-spacing: -0.02em;
+  }
+
+  .tracking-title {
+    letter-spacing: -0.01em;
+  }
+
+  .tracking-button {
+    letter-spacing: 0.02em;
+  }
+
+  .tracking-label {
+    letter-spacing: 0.03em;
+  }
+
+  /* Line Height Utilities */
+  .leading-headline {
+    line-height: 1.1;
+  }
+
+  .leading-title {
+    line-height: 1.2;
+  }
+
+  .leading-subheading {
+    line-height: 1.3;
+  }
+
+  .leading-body {
+    line-height: 1.65;
+  }
+
+  /* Existing Utilities */
   .hover-scale {
     @apply transition-transform duration-200 hover:scale-105;
   }
@@ -135,17 +261,44 @@
     @apply bg-primary text-primary-foreground font-medium rounded-xl px-6 py-3 
            shadow-soft hover:shadow-md transform transition-all duration-200 
            hover:-translate-y-0.5 hover:bg-primary/90;
+    font-family: var(--font-body);
+    letter-spacing: 0.02em;
   }
 
   .btn-secondary {
     @apply bg-transparent border border-secondary text-secondary font-medium rounded-xl px-6 py-3 
            hover:bg-secondary/10 transform transition-all duration-200 
            hover:-translate-y-0.5;
+    font-family: var(--font-body);
+    letter-spacing: 0.02em;
   }
 
   .input-field {
     @apply bg-card border border-border rounded-xl px-4 py-3 
            focus:border-primary focus:ring-2 focus:ring-primary/20 
            focus:shadow-glow transition-all duration-200;
+    font-family: var(--font-body);
+  }
+
+  /* Text Display Utilities for Hero Headlines */
+  .text-display {
+    font-family: var(--font-headline);
+    font-size: 3.5rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  @media (max-width: 768px) {
+    .text-display {
+      font-size: 2.25rem;
+    }
+  }
+
+  /* Metric text for scores and analytics */
+  .text-metric {
+    font-family: var(--font-metric);
+    font-weight: 600;
+    letter-spacing: -0.01em;
   }
 }
