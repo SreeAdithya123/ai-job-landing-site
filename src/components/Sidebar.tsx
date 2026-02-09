@@ -22,6 +22,7 @@ import {
   Brain
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import ThemeToggle from './ThemeToggle';
 
 interface SidebarProps {
   onClose?: () => void;
@@ -71,30 +72,31 @@ const Sidebar = ({ onClose }: SidebarProps) => {
   };
 
   const handleManageAccount = () => {
-    // Add account management logic here
     console.log('Manage Account clicked');
   };
 
-  // Extract user's name and email
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   const userEmail = user?.email || '';
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-card">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center shadow-glow">
-              <Code className="h-4 w-4 text-white" />
+              <Code className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-headline text-xl font-bold text-gray-900 whitespace-nowrap tracking-title">AI Interviewer</span>
+            <span className="font-headline text-xl font-bold text-foreground whitespace-nowrap tracking-title">AI Interviewer</span>
           </div>
-          {onClose && (
-            <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-100 rounded">
-              <X className="h-5 w-5" />
-            </button>
-          )}
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            {onClose && (
+              <button onClick={onClose} className="lg:hidden p-1 hover:bg-muted rounded">
+                <X className="h-5 w-5 text-foreground" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -102,7 +104,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       <nav className="flex-1 px-4 py-6 space-y-8 overflow-y-auto">
         {menuItems.map((section) => (
           <div key={section.section}>
-            <h3 className="font-headline px-2 text-xs font-semibold text-gray-500 uppercase tracking-label mb-3">
+            <h3 className="font-headline px-2 text-xs font-semibold text-muted-foreground uppercase tracking-label mb-3">
               {section.section}
             </h3>
             <div className="space-y-1">
@@ -114,7 +116,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
                     flex items-center px-2 py-2 font-body text-sm font-medium rounded-md transition-colors duration-200
                     ${isActive 
                       ? 'bg-primary/10 text-primary border-r-2 border-primary shadow-glow-accent' 
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                      : 'text-foreground/70 hover:bg-muted hover:text-foreground'
                     }
                   `}
                   onClick={onClose}
@@ -130,14 +132,14 @@ const Sidebar = ({ onClose }: SidebarProps) => {
 
       {/* User Profile & Account Management */}
       {user && (
-        <div className="p-4 border-t border-gray-200 space-y-3">
+        <div className="p-4 border-t border-border space-y-3">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
-              <User className="h-4 w-4 text-white" />
+              <User className="h-4 w-4 text-primary-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-body text-sm font-medium text-gray-900 truncate">{userName}</div>
-              <div className="font-body text-xs text-gray-500 truncate">{userEmail}</div>
+              <div className="font-body text-sm font-medium text-foreground truncate">{userName}</div>
+              <div className="font-body text-xs text-muted-foreground truncate">{userEmail}</div>
             </div>
           </div>
           
@@ -152,7 +154,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
             </button>
             <button 
               onClick={handleLogout}
-              className="w-full flex items-center justify-center px-3 py-2 font-body text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors tracking-button"
+              className="w-full flex items-center justify-center px-3 py-2 font-body text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded-md hover:bg-destructive/20 transition-colors tracking-button"
             >
               <LogOut className="h-3 w-3 mr-1" />
               <span className="whitespace-nowrap">Logout</span>
