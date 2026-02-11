@@ -53,20 +53,20 @@
    return (
      <div className="space-y-6">
        <div className="text-center mb-8">
-         <h2 className="text-2xl font-bold text-white mb-2">Skills</h2>
-         <p className="text-slate-400">Add your technical and soft skills</p>
+         <h2 className="text-2xl font-bold text-foreground mb-2">Skills</h2>
+         <p className="text-muted-foreground">Add your technical and soft skills</p>
        </div>
  
        <div className="space-y-6">
          {(Object.keys(categoryLabels) as Array<keyof SkillCategories>).map((category) => (
            <div key={category} className="space-y-2">
-             <Label className="text-white">{categoryLabels[category].label}</Label>
+             <Label className="text-foreground">{categoryLabels[category].label}</Label>
              <Input
                value={inputs[category]}
                onChange={(e) => setInputs(prev => ({ ...prev, [category]: e.target.value }))}
                onKeyDown={(e) => handleKeyDown(e, category)}
                placeholder={categoryLabels[category].placeholder}
-               className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+               className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
              />
              {data[category].length > 0 && (
                <div className="flex flex-wrap gap-2 mt-2">
@@ -91,7 +91,7 @@
          ))}
        </div>
  
-       <p className="text-sm text-slate-500 text-center">
+       <p className="text-sm text-muted-foreground text-center">
          Press Enter to add each skill. AI will categorize and optimize them for ATS.
        </p>
      </div>

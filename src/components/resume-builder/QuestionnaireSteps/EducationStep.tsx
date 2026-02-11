@@ -35,15 +35,15 @@
    return (
      <div className="space-y-6">
        <div className="text-center mb-8">
-         <h2 className="text-2xl font-bold text-white mb-2">Education</h2>
-         <p className="text-slate-400">Add your educational background</p>
+         <h2 className="text-2xl font-bold text-foreground mb-2">Education</h2>
+         <p className="text-muted-foreground">Add your educational background</p>
        </div>
  
        <div className="space-y-4">
          {data.map((edu, index) => (
-           <Card key={edu.id} className="bg-slate-800/50 border-slate-700 p-6">
+           <Card key={edu.id} className="bg-card border-border p-6">
              <div className="flex justify-between items-start mb-4">
-               <h3 className="text-lg font-semibold text-white">Education #{index + 1}</h3>
+               <h3 className="text-lg font-semibold text-foreground">Education #{index + 1}</h3>
                <Button
                  variant="ghost"
                  size="icon"
@@ -56,52 +56,52 @@
              
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <div className="space-y-2">
-                 <Label className="text-white">Degree *</Label>
+                 <Label className="text-foreground">Degree *</Label>
                  <Input
                    value={edu.degree}
                    onChange={(e) => updateEducation(edu.id, 'degree', e.target.value)}
                    placeholder="B.Tech in Computer Science"
-                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                   className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                  />
                </div>
  
                <div className="space-y-2">
-                 <Label className="text-white">Institution *</Label>
+                 <Label className="text-foreground">Institution *</Label>
                  <Input
                    value={edu.institution}
                    onChange={(e) => updateEducation(edu.id, 'institution', e.target.value)}
                    placeholder="IIT Delhi"
-                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                   className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                  />
                </div>
  
                <div className="space-y-2">
-                 <Label className="text-white">Graduation Year</Label>
+                 <Label className="text-foreground">Graduation Year</Label>
                  <Input
                    value={edu.graduationYear}
                    onChange={(e) => updateEducation(edu.id, 'graduationYear', e.target.value)}
                    placeholder="2024"
-                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                   className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                  />
                </div>
  
                <div className="space-y-2">
-                 <Label className="text-white">CGPA / Percentage</Label>
+                 <Label className="text-foreground">CGPA / Percentage</Label>
                  <Input
                    value={edu.cgpa || ''}
                    onChange={(e) => updateEducation(edu.id, 'cgpa', e.target.value)}
                    placeholder="8.5 CGPA or 85%"
-                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                   className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                  />
                </div>
  
                <div className="space-y-2 md:col-span-2">
-                 <Label className="text-white">Key Achievements</Label>
+                 <Label className="text-foreground">Key Achievements</Label>
                  <Input
                    value={edu.achievements || ''}
                    onChange={(e) => updateEducation(edu.id, 'achievements', e.target.value)}
                    placeholder="Dean's List, Academic Excellence Award"
-                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                   className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                  />
                </div>
              </div>
@@ -111,7 +111,7 @@
          <Button
            onClick={addEducation}
            variant="outline"
-           className="w-full border-dashed border-slate-600 text-slate-300 hover:bg-slate-800/50 hover:text-white"
+           className="w-full border-dashed border-border text-muted-foreground hover:bg-muted hover:text-foreground"
          >
            <Plus className="h-4 w-4 mr-2" />
            Add Education

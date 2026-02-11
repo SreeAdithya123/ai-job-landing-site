@@ -14,7 +14,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-background via-background to-slate-50 min-h-screen">
+    <div className="bg-background min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
         <div className="text-center">
           <motion.div 

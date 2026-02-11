@@ -39,16 +39,16 @@ const CareerCoach = () => {
     <ProtectedRoute>
       <Layout fullSize>
         {/* Full Screen Header */}
-        <div className="bg-slate-800/30 backdrop-blur-md border-b border-slate-700/50">
+        <div className="bg-card/80 backdrop-blur-md border-b border-border">
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <button 
                   onClick={() => navigate('/dashboard')} 
-                  className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-all duration-200 group"
+                  className="flex items-center space-x-2 px-4 py-2 bg-muted border border-border rounded-lg hover:bg-muted/80 transition-all duration-200 group"
                 >
-                  <ArrowLeft className="h-4 w-4 text-slate-300 group-hover:text-white transition-colors" />
-                  <span className="text-slate-300 group-hover:text-white font-medium transition-colors">Back</span>
+                  <ArrowLeft className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <span className="text-muted-foreground group-hover:text-foreground font-medium transition-colors">Back</span>
                 </button>
                 
                 <div className="flex items-center space-x-3">
@@ -56,16 +56,16 @@ const CareerCoach = () => {
                     <Star className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-white">AI Career Coach</h1>
-                    <p className="text-slate-400 text-sm">Personalized career guidance and growth</p>
+                    <h1 className="text-2xl font-bold text-foreground">AI Career Coach</h1>
+                    <p className="text-muted-foreground text-sm">Personalized career guidance and growth</p>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center space-x-3">
-                <button className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-all duration-200">
-                  <Settings className="h-4 w-4 text-slate-300" />
-                  <span className="text-slate-300 font-medium">Settings</span>
+                <button className="flex items-center space-x-2 px-4 py-2 bg-muted border border-border rounded-lg hover:bg-muted/80 transition-all duration-200">
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground font-medium">Settings</span>
                 </button>
                 <button 
                   onClick={() => navigate('/dashboard')}
@@ -90,18 +90,18 @@ const CareerCoach = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Features */}
             <div className="lg:col-span-1 space-y-6">
-              <h2 className="text-2xl font-semibold text-white mb-6">
+              <h2 className="text-2xl font-semibold text-foreground mb-6">
                 How I Can Help You
               </h2>
               {features.map((feature, index) => (
-                <div key={index} className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 shadow-lg">
+                <div key={index} className="bg-card border border-border rounded-xl p-6 shadow-lg">
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
                       <feature.icon className="h-5 w-5 text-white" />
                     </div>
-                    <h3 className="text-lg font-semibold text-white">{feature.title}</h3>
+                    <h3 className="text-lg font-semibold text-foreground">{feature.title}</h3>
                   </div>
-                  <p className="text-slate-400">{feature.description}</p>
+                  <p className="text-muted-foreground">{feature.description}</p>
                 </div>
               ))}
             </div>

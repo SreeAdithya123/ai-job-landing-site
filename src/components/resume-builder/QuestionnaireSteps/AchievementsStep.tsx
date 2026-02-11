@@ -51,17 +51,17 @@
    return (
      <div className="space-y-6">
        <div className="text-center mb-8">
-         <h2 className="text-2xl font-bold text-white mb-2">Achievements & Activities</h2>
-         <p className="text-slate-400">Highlight your accomplishments and leadership roles</p>
+         <h2 className="text-2xl font-bold text-foreground mb-2">Achievements & Activities</h2>
+         <p className="text-muted-foreground">Highlight your accomplishments and leadership roles</p>
        </div>
  
        <div className="space-y-4">
          {data.map((ach, index) => (
-           <Card key={ach.id} className="bg-slate-800/50 border-slate-700 p-6">
+           <Card key={ach.id} className="bg-card border-border p-6">
              <div className="flex justify-between items-start mb-4">
                <div className="flex items-center gap-2">
                  <span className="text-primary">{typeIcons[ach.type]}</span>
-                 <h3 className="text-lg font-semibold text-white">Achievement #{index + 1}</h3>
+                 <h3 className="text-lg font-semibold text-foreground">Achievement #{index + 1}</h3>
                </div>
                <Button
                  variant="ghost"
@@ -76,27 +76,27 @@
              <div className="space-y-4">
                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                  <div className="space-y-2 md:col-span-2">
-                   <Label className="text-white">Title *</Label>
+                   <Label className="text-foreground">Title *</Label>
                    <Input
                      value={ach.title}
                      onChange={(e) => updateAchievement(ach.id, 'title', e.target.value)}
                      placeholder="Winner - Smart India Hackathon 2024"
-                     className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                     className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                    />
                  </div>
  
                  <div className="space-y-2">
-                   <Label className="text-white">Type</Label>
+                   <Label className="text-foreground">Type</Label>
                    <Select
                      value={ach.type}
                      onValueChange={(value) => updateAchievement(ach.id, 'type', value)}
                    >
-                     <SelectTrigger className="bg-slate-900/50 border-slate-600 text-white">
+                     <SelectTrigger className="bg-muted/50 border-border text-foreground">
                        <SelectValue />
                      </SelectTrigger>
-                     <SelectContent className="bg-slate-800 border-slate-700">
+                     <SelectContent>
                        {(Object.keys(typeLabels) as Achievement['type'][]).map((type) => (
-                         <SelectItem key={type} value={type} className="text-white hover:bg-slate-700">
+                         <SelectItem key={type} value={type}>
                            <div className="flex items-center gap-2">
                              {typeIcons[type]}
                              {typeLabels[type]}
@@ -109,13 +109,13 @@
                </div>
  
                <div className="space-y-2">
-                 <Label className="text-white">Description</Label>
+                 <Label className="text-foreground">Description</Label>
                  <Textarea
                    value={ach.description}
                    onChange={(e) => updateAchievement(ach.id, 'description', e.target.value)}
                    placeholder="Brief description of your achievement..."
                    rows={2}
-                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500 resize-none"
+                   className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground resize-none"
                  />
                </div>
              </div>
@@ -125,7 +125,7 @@
          <Button
            onClick={addAchievement}
            variant="outline"
-           className="w-full border-dashed border-slate-600 text-slate-300 hover:bg-slate-800/50 hover:text-white"
+           className="w-full border-dashed border-border text-muted-foreground hover:bg-muted hover:text-foreground"
          >
            <Plus className="h-4 w-4 mr-2" />
            Add Achievement

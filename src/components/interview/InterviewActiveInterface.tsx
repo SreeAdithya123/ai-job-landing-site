@@ -56,18 +56,18 @@ const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
   const details = getInterviewDetails();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Full Screen Header */}
-      <div className="bg-slate-800/30 backdrop-blur-md border-b border-slate-700/50">
+      <div className="bg-card/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button 
                 onClick={onBack}
-                className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-all duration-200 group"
+                className="flex items-center space-x-2 px-4 py-2 bg-muted border border-border rounded-lg hover:bg-muted/80 transition-all duration-200 group"
               >
-                <ArrowLeft className="h-4 w-4 text-slate-300 group-hover:text-white transition-colors" />
-                <span className="text-slate-300 group-hover:text-white font-medium transition-colors">Back</span>
+                <ArrowLeft className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <span className="text-muted-foreground group-hover:text-foreground font-medium transition-colors">Back</span>
               </button>
               
               <div className="flex items-center space-x-3">
@@ -75,8 +75,8 @@ const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
                   <span className="text-2xl">{details.icon}</span>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white">{details.title}</h1>
-                  <p className="text-slate-400 text-sm">{details.subtitle}</p>
+                  <h1 className="text-2xl font-bold text-foreground">{details.title}</h1>
+                  <p className="text-muted-foreground text-sm">{details.subtitle}</p>
                 </div>
               </div>
             </div>
@@ -87,10 +87,10 @@ const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
               )}
               <div className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
                 connectionStatus === 'connected' 
-                  ? 'bg-green-900/50 text-green-300 border-green-700/50' 
+                  ? 'bg-green-500/10 text-green-600 border-green-500/30 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700/50' 
                   : connectionStatus === 'error'
-                  ? 'bg-red-900/50 text-red-300 border-red-700/50'
-                  : 'bg-slate-800/50 text-slate-300 border-slate-700/50'
+                  ? 'bg-red-500/10 text-red-600 border-red-500/30 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700/50'
+                  : 'bg-muted text-muted-foreground border-border'
               }`}>
                 {connectionStatus === 'connected' ? 'Connected' : 
                  connectionStatus === 'error' ? 'Error' :
@@ -99,7 +99,7 @@ const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
                  connectionStatus === 'fetching-config' ? 'Configuring...' : 'Ready'}
               </div>
               {userIsSpeaking && (
-                <div className="px-3 py-1.5 bg-purple-900/50 text-purple-300 border border-purple-700/50 rounded-full text-xs font-medium animate-pulse">
+                <div className="px-3 py-1.5 bg-purple-500/10 text-purple-600 border border-purple-500/30 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-700/50 rounded-full text-xs font-medium animate-pulse">
                   Speaking...
                 </div>
               )}

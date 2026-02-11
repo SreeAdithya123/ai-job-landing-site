@@ -39,35 +39,35 @@
    return (
      <div className="space-y-6">
        <div className="text-center mb-8">
-         <h2 className="text-2xl font-bold text-white mb-2">Career Goals</h2>
-         <p className="text-slate-400">Tell us about your career aspirations</p>
+         <h2 className="text-2xl font-bold text-foreground mb-2">Career Goals</h2>
+         <p className="text-muted-foreground">Tell us about your career aspirations</p>
        </div>
  
        <div className="space-y-6">
          <div className="space-y-2">
-           <Label htmlFor="targetRole" className="text-white">What role are you targeting? *</Label>
+           <Label htmlFor="targetRole" className="text-foreground">What role are you targeting? *</Label>
            <Input
              id="targetRole"
              value={data.targetRole}
              onChange={(e) => handleChange('targetRole', e.target.value)}
              placeholder="e.g., Software Engineer, Product Manager, Data Analyst"
-             className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+             className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
            />
          </div>
  
          <div className="space-y-2">
-           <Label htmlFor="experience" className="text-white">Years of Experience</Label>
+           <Label htmlFor="experience" className="text-foreground">Years of Experience</Label>
            <Input
              id="experience"
              value={data.yearsOfExperience}
              onChange={(e) => handleChange('yearsOfExperience', e.target.value)}
              placeholder="e.g., 2 years, Fresher, 5+ years"
-             className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+             className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
            />
          </div>
  
          <div className="space-y-2">
-           <Label htmlFor="strengths" className="text-white">Key Strengths</Label>
+           <Label htmlFor="strengths" className="text-foreground">Key Strengths</Label>
            <div className="flex gap-2">
              <Input
                id="strengths"
@@ -75,7 +75,7 @@
                onChange={(e) => setStrengthInput(e.target.value)}
                onKeyDown={handleKeyDown}
                placeholder="Type a strength and press Enter"
-               className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+               className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
              />
            </div>
            {data.keyStrengths.length > 0 && (
@@ -93,16 +93,16 @@
          </div>
  
          <div className="space-y-2">
-           <Label htmlFor="objective" className="text-white">Career Objective</Label>
+           <Label htmlFor="objective" className="text-foreground">Career Objective</Label>
            <Textarea
              id="objective"
              value={data.careerObjective}
              onChange={(e) => handleChange('careerObjective', e.target.value)}
              placeholder="Briefly describe your career goals and what you're looking for..."
              rows={4}
-             className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 resize-none"
+             className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground resize-none"
            />
-           <p className="text-xs text-slate-500">AI will enhance this into a professional summary</p>
+           <p className="text-xs text-muted-foreground">AI will enhance this into a professional summary</p>
          </div>
        </div>
      </div>

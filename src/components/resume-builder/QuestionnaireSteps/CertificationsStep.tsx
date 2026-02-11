@@ -33,15 +33,15 @@
    return (
      <div className="space-y-6">
        <div className="text-center mb-8">
-         <h2 className="text-2xl font-bold text-white mb-2">Certifications</h2>
-         <p className="text-slate-400">Add your professional certifications and courses</p>
+         <h2 className="text-2xl font-bold text-foreground mb-2">Certifications</h2>
+         <p className="text-muted-foreground">Add your professional certifications and courses</p>
        </div>
  
        <div className="space-y-4">
          {data.map((cert, index) => (
-           <Card key={cert.id} className="bg-slate-800/50 border-slate-700 p-6">
+           <Card key={cert.id} className="bg-card border-border p-6">
              <div className="flex justify-between items-start mb-4">
-               <h3 className="text-lg font-semibold text-white">Certification #{index + 1}</h3>
+               <h3 className="text-lg font-semibold text-foreground">Certification #{index + 1}</h3>
                <Button
                  variant="ghost"
                  size="icon"
@@ -54,32 +54,32 @@
              
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                <div className="space-y-2 md:col-span-2">
-                 <Label className="text-white">Certification Name *</Label>
+                 <Label className="text-foreground">Certification Name *</Label>
                  <Input
                    value={cert.name}
                    onChange={(e) => updateCertification(cert.id, 'name', e.target.value)}
                    placeholder="AWS Certified Solutions Architect"
-                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                   className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                  />
                </div>
  
                <div className="space-y-2">
-                 <Label className="text-white">Year</Label>
+                 <Label className="text-foreground">Year</Label>
                  <Input
                    value={cert.year}
                    onChange={(e) => updateCertification(cert.id, 'year', e.target.value)}
                    placeholder="2024"
-                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                   className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                  />
                </div>
  
                <div className="space-y-2 md:col-span-3">
-                 <Label className="text-white">Issuing Organization / Platform</Label>
+                 <Label className="text-foreground">Issuing Organization / Platform</Label>
                  <Input
                    value={cert.platform}
                    onChange={(e) => updateCertification(cert.id, 'platform', e.target.value)}
                    placeholder="Amazon Web Services, Coursera, Udemy"
-                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                   className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                  />
                </div>
              </div>
@@ -89,7 +89,7 @@
          <Button
            onClick={addCertification}
            variant="outline"
-           className="w-full border-dashed border-slate-600 text-slate-300 hover:bg-slate-800/50 hover:text-white"
+           className="w-full border-dashed border-border text-muted-foreground hover:bg-muted hover:text-foreground"
          >
            <Plus className="h-4 w-4 mr-2" />
            Add Certification

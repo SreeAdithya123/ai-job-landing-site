@@ -69,17 +69,17 @@ const Profile = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="min-h-screen bg-background">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
               <button 
                 onClick={() => navigate(-1)} 
-                className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 bg-muted border border-border rounded-lg hover:bg-muted/80 transition-colors"
               >
-                <ArrowLeft className="h-4 w-4 text-slate-300" />
-                <span className="text-slate-300 font-medium">Back</span>
+                <ArrowLeft className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground font-medium">Back</span>
               </button>
               
               <div className="flex items-center space-x-3">
@@ -87,8 +87,8 @@ const Profile = () => {
                   <User className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white">Candidate Profile</h1>
-                  <p className="text-slate-400 text-sm">{user?.email || 'Guest User'}</p>
+                  <h1 className="text-2xl font-bold text-foreground">Candidate Profile</h1>
+                  <p className="text-muted-foreground text-sm">{user?.email || 'Guest User'}</p>
                 </div>
               </div>
             </div>
@@ -97,21 +97,21 @@ const Profile = () => {
           {/* Profile Content */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Camera Section */}
-            <Card className="bg-slate-800/50 border-slate-700 p-6">
+            <Card className="bg-card border-border p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
                   <Camera className="h-5 w-5 text-primary" />
-                  <h2 className="text-lg font-semibold text-white">Camera Preview</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Camera Preview</h2>
                 </div>
                 {isCameraActive && (
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-slate-400">Live</span>
+                    <span className="text-sm text-muted-foreground">Live</span>
                   </div>
                 )}
               </div>
 
-              <div className="relative bg-slate-900 rounded-lg overflow-hidden aspect-video mb-4">
+              <div className="relative bg-muted rounded-lg overflow-hidden aspect-video mb-4">
                 <video
                   ref={videoRef}
                   className="w-full h-full object-cover"
@@ -121,10 +121,10 @@ const Profile = () => {
                 />
                 
                 {!isCameraActive && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80">
+                  <div className="absolute inset-0 flex items-center justify-center bg-muted/80">
                     <div className="text-center">
-                      <Camera className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                      <p className="text-slate-400 mb-4">Camera not active</p>
+                      <Camera className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground mb-4">Camera not active</p>
                       <Button onClick={startCamera} className="bg-primary hover:bg-primary/90">
                         Start Camera
                       </Button>
@@ -137,7 +137,7 @@ const Profile = () => {
                 <Button 
                   onClick={stopCamera} 
                   variant="outline"
-                  className="w-full border-slate-700 hover:bg-slate-700/50"
+                  className="w-full border-border hover:bg-muted"
                 >
                   Stop Camera
                 </Button>
@@ -145,32 +145,32 @@ const Profile = () => {
             </Card>
 
             {/* User Information */}
-            <Card className="bg-slate-800/50 border-slate-700 p-6">
+            <Card className="bg-card border-border p-6">
               <div className="flex items-center space-x-2 mb-4">
                 <User className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-white">User Information</h2>
+                <h2 className="text-lg font-semibold text-foreground">User Information</h2>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm text-slate-400">Email</label>
-                  <p className="text-white mt-1">{user?.email || 'Not available'}</p>
+                  <label className="text-sm text-muted-foreground">Email</label>
+                  <p className="text-foreground mt-1">{user?.email || 'Not available'}</p>
                 </div>
 
                 <div>
-                  <label className="text-sm text-slate-400">User ID</label>
-                  <p className="text-white mt-1 text-xs font-mono">{user?.id || 'Not available'}</p>
+                  <label className="text-sm text-muted-foreground">User ID</label>
+                  <p className="text-foreground mt-1 text-xs font-mono">{user?.id || 'Not available'}</p>
                 </div>
 
                 <div>
-                  <label className="text-sm text-slate-400">Account Status</label>
+                  <label className="text-sm text-muted-foreground">Account Status</label>
                   <div className="flex items-center space-x-2 mt-1">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-white">Active</span>
+                    <span className="text-foreground">Active</span>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-700">
+                <div className="pt-4 border-t border-border">
                   <Button 
                     onClick={() => navigate('/interview-copilot')}
                     className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
