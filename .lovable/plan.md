@@ -1,227 +1,145 @@
 
-# Dashboard Redesign - Complete Responsive Overhaul
 
-## Overview
-This plan completely redesigns the dashboard to be fully responsive, eliminating gaps, streamlining the layout, and applying the AI Neural Light design system consistently. The design will be clean, professional, and work seamlessly across all screen sizes.
+# Fix Dark/Light Theme UI Issues Across All Pages
 
----
+## Problem Summary
+Many components use hardcoded colors (`text-white`, `bg-slate-800`, `bg-gray-50`, `text-gray-900`, etc.) instead of semantic Tailwind CSS variables (`text-foreground`, `bg-background`, `bg-card`, `border-border`, `text-muted-foreground`). This causes terrible UI in dark mode on some pages and washed-out appearance on others.
 
-## Current Issues Identified
+## Affected Pages and Components
 
-| Issue | Description |
-|-------|-------------|
-| Duplicate headers | Two header sections with redundant navigation |
-| Excessive padding | `py-16` creates large gaps between sections |
-| Broken grid layouts | Aptitude card uses `col-span-2` incorrectly |
-| Misaligned sidebar content | Subscription + Progress cards 1/3 + 2/3 split breaks on mobile |
-| Inconsistent spacing | Various `mb-12`, `gap-8` creating uneven sections |
-| Non-responsive tables | Interview history table overflows on mobile |
-| Redundant buttons | Multiple "View History" buttons in different places |
+### High Priority (Broken in dark/light mode)
 
----
+| File | Issue |
+|------|-------|
+| `CareerCoach.tsx` | Hardcoded `text-white`, `bg-slate-800`, `border-slate-700` everywhere -- looks broken in light mode |
+| `ChatBot.tsx` | `bg-white`, `border-gray-200`, `bg-gray-100`, `text-gray-900` -- invisible text in dark mode |
+| `InterviewCopilot.tsx` | Main page uses `from-slate-50 via-white to-slate-100` -- invisible in dark mode |
+| `InterviewHeader.tsx` | `bg-white/80`, `text-slate-600`, `border-slate-200` -- broken in dark mode |
+| `InterviewTypeCard.tsx` | `bg-white/80`, `text-slate-800`, `border-slate-200` -- broken in dark mode |
+| `InterviewSessionsPanel.tsx` | `bg-white/80`, `text-slate-800`, `border-slate-200` -- broken in dark mode |
+| `InterviewActiveInterface.tsx` | Hardcoded `from-slate-900` dark bg -- broken in light mode |
+| `MockInterview.tsx` | `bg-gray-50`, `bg-white`, `text-gray-900` -- broken in dark mode |
+| `Profile.tsx` | Hardcoded `from-slate-900` dark bg -- broken in light mode |
+| `ResumeQuestionnaire.tsx` | `bg-slate-900/95`, `border-slate-800`, `text-slate-400` -- broken in light mode |
+| `PersonalInfoStep.tsx` | `text-white`, `bg-slate-800/50`, `border-slate-700` -- broken in light mode |
+| `ResumeBuilder.tsx` | `bg-slate-900/95`, `border-slate-800` header -- broken in light mode |
+| `Hero.tsx` | `to-slate-50` gradient -- slight issue in dark mode |
+| `Payments.tsx` | `from-slate-100 to-slate-200` icon bg -- minor issue in dark mode |
 
-## New Dashboard Architecture
+### Low Priority (Already mostly correct)
+- `Dashboard.tsx` -- uses semantic variables, mostly fine
+- `Sidebar.tsx` -- already fixed
+- `Footer.tsx` -- intentionally dark, acceptable
 
-### Layout Structure
+## Solution Strategy
 
-```text
-+--------------------------------------------------+
-| Compact Header (Sticky)                          |
-| Logo | Title + Subtitle | Quick Actions          |
-+--------------------------------------------------+
-| Main Content Area (Responsive Grid)              |
-|                                                  |
-| [Stats Row - 4 cards responsive]                 |
-|                                                  |
-| [Quick Actions Row]                              |
-| AI Interviewer | Virtual Interviewer             |
-|                                                  |
-| [Analytics Section - 2 col responsive]           |
-| Charts | Progress                                |
-|                                                  |
-| [Subscription + Skills - 2 col responsive]       |
-|                                                  |
-| [Interview History - Full width responsive]      |
-|                                                  |
-| [Recent Analyses - Grid responsive]              |
-+--------------------------------------------------+
-```
+Replace all hardcoded colors with semantic Tailwind CSS variables that automatically adapt to light/dark themes:
 
----
+| Hardcoded | Replace With |
+|-----------|-------------|
+| `text-white` / `text-gray-900` / `text-slate-800` | `text-foreground` |
+| `text-gray-600` / `text-slate-400` / `text-slate-600` | `text-muted-foreground` |
+| `bg-white` / `bg-gray-50` / `bg-slate-50` | `bg-background` or `bg-card` |
+| `bg-slate-800` / `bg-slate-900` | `bg-card` or `bg-muted` |
+| `border-gray-200` / `border-slate-200` / `border-slate-700` | `border-border` |
+| `bg-gray-100` / `bg-slate-100` | `bg-muted` |
+| `bg-white/80 backdrop-blur` | `bg-card/80 backdrop-blur` (glass effect) |
 
 ## Detailed Changes
 
-### 1. Dashboard.tsx - Complete Restructure
+### 1. CareerCoach.tsx
+- Header: `bg-slate-800/30` -> `bg-card/80 backdrop-blur-md border-b border-border`
+- Back button: `bg-slate-800/50 border-slate-700` -> `bg-muted border-border`
+- Text: `text-white` -> `text-foreground`, `text-slate-400` -> `text-muted-foreground`
+- Feature cards: `bg-slate-800/50 border-slate-700` -> `glass-card`
+- Settings/Dashboard buttons: use semantic colors
 
-**Header Simplification:**
-- Remove the duplicate text-center title section
-- Keep only one compact sticky header
-- Consolidate action buttons into a single row
-- Responsive navigation that collapses on mobile
+### 2. ChatBot.tsx
+- Container: `bg-white border-gray-200` -> `bg-card border-border`
+- Bot messages: `bg-gray-100 text-gray-900` -> `bg-muted text-foreground`
+- User avatar: `bg-gray-300` -> `bg-muted`
+- Loading: `text-gray-600` -> `text-muted-foreground`
+- Input border: `border-gray-200` -> `border-border`
 
-**Main Content Grid:**
-- Reduce padding from `py-16` to `py-6`
-- Use consistent `gap-6` instead of mixed `gap-8`, `mb-12`
-- Implement proper responsive breakpoints: `grid-cols-1 md:grid-cols-2 lg:grid-cols-4`
-- Remove redundant buttons and streamline CTAs
+### 3. InterviewCopilot.tsx
+- Main bg: `from-slate-50 via-white to-slate-100` -> `bg-background`
 
-**Section Organization:**
-```text
-1. Welcome/Progress Message (full width)
-2. Stats Cards (4 columns responsive → 2 columns tablet → 1 column mobile)
-3. Interview Quick Actions (2 columns responsive → 1 column mobile)
-4. Subscription + Skills Row (2 columns responsive)
-5. Charts Section (2 columns responsive → 1 column mobile)
-6. Interview History Table (full width, horizontally scrollable on mobile)
-7. Analytics Dashboard (full width)
-8. Recent Analyses (2 columns responsive → 1 column mobile)
-```
+### 4. InterviewHeader.tsx
+- Header bg: `bg-white/80` -> `bg-card/80 backdrop-blur-md border-b border-border`
+- Text: `text-slate-600`/`text-slate-700` -> `text-muted-foreground`/`text-foreground`
+- Buttons: `bg-white/60 border-slate-300` -> `bg-muted/60 border-border`
 
-### 2. ProgressTracking.tsx - Responsive Optimization
+### 5. InterviewTypeCard.tsx
+- Card: `bg-white/80` -> `bg-card/80`
+- Text: `text-slate-800` -> `text-foreground`, `text-slate-600` -> `text-muted-foreground`
+- Border: `border-slate-200` -> `border-border`
 
-**Current Issues:**
-- Stats grid has `lg:grid-cols-4` but content inside is cramped
-- Charts section uses inconsistent `lg:grid-cols-2`
-- No mobile-first design
+### 6. InterviewSessionsPanel.tsx
+- Container: `bg-white/80 border-slate-200` -> `bg-card/80 border-border`
+- Text: `text-slate-800` -> `text-foreground`, `text-slate-600` -> `text-muted-foreground`
+- Hover: `hover:bg-slate-50` -> `hover:bg-muted`
 
-**Changes:**
-- Extract stats cards to be used directly in Dashboard.tsx for better control
-- Simplify charts to stack properly on mobile
-- Reduce chart heights on mobile devices
-- Add proper touch-friendly spacing
+### 7. InterviewActiveInterface.tsx
+- Main bg: `from-slate-900 via-slate-800 to-slate-900` -> `bg-background`
+- Header: `bg-slate-800/30 border-slate-700` -> `bg-card/80 backdrop-blur-md border-border`
+- Buttons: `bg-slate-800/50 border-slate-700` -> `bg-muted border-border`
+- Text: `text-white` -> `text-foreground`, `text-slate-300`/`text-slate-400` -> `text-muted-foreground`
 
-### 3. SubscriptionCard.tsx - Compact Design
+### 8. MockInterview.tsx
+- Main bg: `bg-gray-50` -> `bg-background`
+- Cards: `bg-white border-gray-200` -> `bg-card border-border`
+- Text: `text-gray-900` -> `text-foreground`, `text-gray-600` -> `text-muted-foreground`
+- Active interview section: same dark-to-semantic conversion
 
-**Changes:**
-- Make card more compact with tighter padding
-- Responsive text sizes
-- Full-width on mobile, proper sizing on desktop
+### 9. Profile.tsx
+- Main bg: `from-slate-900 via-slate-800` -> `bg-background`
+- Cards: `bg-slate-800/50 border-slate-700` -> `glass-card`
+- Text: `text-white` -> `text-foreground`
 
-### 4. AptitudePerformanceCard.tsx - Fix Grid Issue
+### 10. ResumeQuestionnaire.tsx
+- Header/Footer: `bg-slate-900/95 border-slate-800` -> `bg-card/95 backdrop-blur-md border-border`
+- Text: `text-slate-400` -> `text-muted-foreground`
+- Buttons: `border-slate-700 text-slate-300 hover:bg-slate-800` -> `border-border text-muted-foreground hover:bg-muted`
 
-**Current Issue:**
-- Uses `col-span-2` but parent grid is `grid-cols-1 lg:grid-cols-2`
-- This causes overflow/misalignment
+### 11. PersonalInfoStep.tsx (and other questionnaire steps)
+- Headings: `text-white` -> `text-foreground`
+- Labels: `text-white` -> `text-foreground`
+- Inputs: `bg-slate-800/50 border-slate-700 text-white` -> `bg-muted/50 border-border text-foreground`
+- Descriptions: `text-slate-400` -> `text-muted-foreground`
 
-**Fix:**
-- Remove `col-span-2` from the card
-- Let it naturally fit the grid
-- OR adjust parent grid to accommodate
+### 12. ResumeBuilder.tsx
+- Header: `bg-slate-900/95 border-slate-800` -> `bg-card/95 backdrop-blur-md border-border`
+- Buttons: `text-slate-400 hover:text-white` -> `text-muted-foreground hover:text-foreground`
+- Title: `text-white` -> `text-foreground`
 
-### 5. InterviewHistoryTable.tsx - Mobile Optimization
+### 13. Hero.tsx
+- Background gradient: `to-slate-50` -> remove, use `bg-background`
 
-**Changes:**
-- Add horizontal scroll wrapper for mobile
-- Hide less important columns on small screens
-- Make table cells more compact
-- Responsive font sizes
+### 14. Payments.tsx
+- Icon backgrounds: `from-slate-100 to-slate-200 text-slate-600` -> `from-muted to-muted text-muted-foreground`
+- Background gradient: `via-slate-50/50` -> clean up
 
-### 6. ElevenLabsAnalyticsDashboard.tsx - Responsive Charts
+## Files to Modify (16 total)
 
-**Changes:**
-- Reduce chart heights on mobile (h-80 → h-64 on mobile)
-- Stack all charts vertically on mobile
-- Proper spacing between chart cards
-
-### 7. RecentInterviewAnalyses.tsx - Grid Fix
-
-**Current:** `grid-cols-1 lg:grid-cols-2`  
-**Change:** `grid-cols-1 md:grid-cols-2` for earlier tablet breakpoint
-
----
-
-## Technical Implementation
-
-### Files to Modify
-
-| File | Priority | Changes |
-|------|----------|---------|
-| `src/pages/Dashboard.tsx` | High | Complete restructure of layout, remove duplicate headers, fix spacing |
-| `src/components/ProgressTracking.tsx` | High | Responsive grid fixes, mobile chart heights |
-| `src/components/SubscriptionCard.tsx` | Medium | Compact styling |
-| `src/components/InterviewHistoryTable.tsx` | Medium | Mobile table optimization |
-| `src/components/dashboard/AptitudePerformanceCard.tsx` | Medium | Remove col-span-2, responsive stats |
-| `src/components/RecentInterviewAnalyses.tsx` | Low | Grid breakpoint adjustment |
-| `src/components/dashboard/ElevenLabsAnalyticsDashboard.tsx` | Low | Mobile chart heights |
-| `src/components/dashboard/FeedbackSummaryCharts.tsx` | Low | Mobile chart heights |
-| `src/components/dashboard/ScoreProgressChart.tsx` | Low | Mobile chart height |
-
----
-
-## New CSS Utilities to Add (src/index.css)
-
-```css
-/* Dashboard-specific responsive utilities */
-.dashboard-section {
-  @apply mb-6;
-}
-
-.dashboard-grid {
-  @apply grid gap-4 md:gap-6;
-}
-
-.stats-grid {
-  @apply grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4;
-}
-
-.chart-container {
-  @apply h-48 sm:h-64 lg:h-80;
-}
-```
-
----
-
-## Responsive Breakpoint Strategy
-
-| Breakpoint | Width | Layout |
-|------------|-------|--------|
-| Mobile | < 640px | Single column, stacked cards, compact stats |
-| Tablet | 640px - 1024px | 2 columns for most grids |
-| Desktop | 1024px+ | Full multi-column layouts |
-
----
-
-## Spacing System (Consistent)
-
-| Element | Spacing |
-|---------|---------|
-| Section gaps | `gap-6` (24px) |
-| Card padding | `p-4` mobile, `p-6` desktop |
-| Container padding | `px-4` mobile, `px-6` desktop |
-| Vertical rhythm | `space-y-6` between sections |
-
----
-
-## Key Design Decisions
-
-1. **Remove duplicate header** - Keep only the compact sticky header with essential actions
-2. **Consolidate CTAs** - Remove redundant "View History" buttons scattered throughout
-3. **Mobile-first grids** - All grids start with mobile layout and scale up
-4. **Consistent card styling** - All cards use `glass-card` utility with consistent rounded corners
-5. **Reduced vertical padding** - From `py-16` to `py-6` for tighter layout
-6. **Touch-friendly targets** - Minimum 44px tap targets on mobile
-7. **Horizontal scroll for tables** - Better than breaking layout on mobile
-
----
-
-## Implementation Order
-
-1. **Dashboard.tsx** - Main layout restructure (highest impact)
-2. **ProgressTracking.tsx** - Fix stats and charts grids
-3. **AptitudePerformanceCard.tsx** - Remove col-span issue
-4. **InterviewHistoryTable.tsx** - Mobile table optimization
-5. **Chart components** - Mobile height adjustments
-6. **RecentInterviewAnalyses.tsx** - Grid breakpoint fix
-7. **CSS utilities** - Add dashboard-specific classes
-
----
+1. `src/pages/CareerCoach.tsx`
+2. `src/components/ChatBot.tsx`
+3. `src/pages/InterviewCopilot.tsx`
+4. `src/components/interview/InterviewHeader.tsx`
+5. `src/components/interview/InterviewTypeCard.tsx`
+6. `src/components/interview/InterviewSessionsPanel.tsx`
+7. `src/components/interview/InterviewActiveInterface.tsx`
+8. `src/pages/MockInterview.tsx`
+9. `src/pages/Profile.tsx`
+10. `src/components/resume-builder/ResumeQuestionnaire.tsx`
+11. `src/components/resume-builder/QuestionnaireSteps/PersonalInfoStep.tsx`
+12. `src/pages/ResumeBuilder.tsx`
+13. `src/components/Hero.tsx`
+14. `src/pages/Payments.tsx`
+15. Other questionnaire steps (Education, Skills, Experience, etc.) -- same pattern as PersonalInfoStep
 
 ## Expected Outcome
+- All pages render correctly in both light and dark themes
+- No invisible text, no washed-out backgrounds
+- Consistent, polished look using the AI Neural Light design system
+- Smooth theme transitions across every page
 
-After implementation:
-- Zero layout gaps or overflow issues
-- Smooth responsive behavior from 320px to 1920px+
-- Consistent spacing and visual rhythm
-- Professional, clean SaaS dashboard appearance
-- Improved mobile usability with touch-friendly elements
-- Faster perceived performance with compact layout
