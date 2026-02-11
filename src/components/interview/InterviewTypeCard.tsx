@@ -27,10 +27,10 @@ const InterviewTypeCard: React.FC<InterviewTypeCardProps> = ({
 }) => {
   return (
     <motion.div
-      className={`relative p-8 bg-white/80 backdrop-blur-sm rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${
+      className={`relative p-8 bg-card/80 backdrop-blur-sm rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${
         isSelected 
           ? `border-transparent bg-gradient-to-br ${type.bgGradient} shadow-xl` 
-          : 'border-slate-200/50 hover:border-slate-300/50'
+          : 'border-border/50 hover:border-border'
       }`}
       onClick={() => onSelect(type.id)}
       initial={{ opacity: 0, y: 20 }}
@@ -41,8 +41,8 @@ const InterviewTypeCard: React.FC<InterviewTypeCardProps> = ({
       <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg bg-gradient-to-r ${type.gradient}`}>
         <type.icon className="h-8 w-8 text-white" />
       </div>
-      <h3 className="font-bold text-xl mb-3 text-slate-800 text-center">{type.name}</h3>
-      <p className="text-slate-600 text-center mb-6 leading-relaxed">{type.description}</p>
+      <h3 className="font-bold text-xl mb-3 text-foreground text-center">{type.name}</h3>
+      <p className="text-muted-foreground text-center mb-6 leading-relaxed">{type.description}</p>
       
       <button 
         onClick={(e) => {

@@ -230,7 +230,7 @@ const MockInterview = () => {
   if (showMockInterface) {
     return (
       <Layout>
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="min-h-screen bg-background">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
@@ -238,23 +238,23 @@ const MockInterview = () => {
                 <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
                   <Users className="h-5 w-5 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold text-white">
+                <h1 className="text-2xl font-bold text-foreground">
                   AI Mock Interview
                 </h1>
               </div>
               
-              <div className="px-4 py-2 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-lg">
-                <span className="text-slate-300 text-sm font-medium">AI Powered Interview</span>
+              <div className="px-4 py-2 bg-card border border-border rounded-lg">
+                <span className="text-muted-foreground text-sm font-medium">AI Powered Interview</span>
               </div>
             </div>
 
             {/* Debug Status Display */}
-            <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl p-4 mb-6">
+            <div className="bg-card border border-border rounded-xl p-4 mb-6">
               <div className="text-center">
-                <p className="text-white text-sm">
-                  Connection Status: <span className="bg-blue-700 px-2 py-1 rounded text-blue-300">{connectionStatus}</span>
+                <p className="text-foreground text-sm">
+                  Connection Status: <span className="bg-blue-500/10 text-blue-600 dark:text-blue-300 px-2 py-1 rounded">{connectionStatus}</span>
                 </p>
-                <p className="text-slate-400 text-xs mt-1">
+                <p className="text-muted-foreground text-xs mt-1">
                   Check browser console for detailed logs
                 </p>
               </div>
@@ -264,12 +264,12 @@ const MockInterview = () => {
 
             {/* Mock Interview Status */}
             {isInterviewActive && (
-              <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl p-6 mb-6">
+              <div className="bg-card border border-border rounded-xl p-6 mb-6">
                 <div className="text-center">
-                  <p className="text-white text-lg">
-                    Mock Interview is <span className="bg-orange-700 px-3 py-1 rounded-md text-orange-300">Active</span>
+                  <p className="text-foreground text-lg">
+                    Mock Interview is <span className="bg-orange-500/10 text-orange-600 dark:text-orange-300 px-3 py-1 rounded-md">Active</span>
                   </p>
-                  <p className="text-slate-400 text-sm mt-2">
+                  <p className="text-muted-foreground text-sm mt-2">
                     Answer questions naturally. The AI will provide feedback on your responses.
                   </p>
                 </div>
@@ -297,7 +297,7 @@ const MockInterview = () => {
                   className="flex items-center space-x-4"
                 >
                   <div className="text-center mb-6">
-                    <div className="inline-flex items-center space-x-2 px-4 py-2 bg-orange-900/50 text-orange-300 rounded-full border border-orange-700/50">
+                    <div className="inline-flex items-center space-x-2 px-4 py-2 bg-orange-500/10 text-orange-600 dark:text-orange-300 rounded-full border border-orange-500/30 dark:border-orange-700/50">
                       <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
                       <span className="text-sm font-medium">Mock Interview in Progress</span>
                     </div>
@@ -327,12 +327,12 @@ const MockInterview = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Mock Interview</h1>
-            <p className="text-gray-600">Practice interviews with AI-powered feedback and assessment</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">AI Mock Interview</h1>
+            <p className="text-muted-foreground">Practice interviews with AI-powered feedback and assessment</p>
           </div>
 
           {/* Action Buttons */}
@@ -340,7 +340,7 @@ const MockInterview = () => {
             {actionButtons.map((button, index) => (
               <motion.div
                 key={index}
-                className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                className="bg-card p-6 rounded-xl shadow-sm border border-border hover:shadow-lg transition-all duration-200 cursor-pointer group"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -351,17 +351,17 @@ const MockInterview = () => {
                   <button.icon className="h-6 w-6 text-white" />
                 </div>
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-lg text-gray-900">{button.title}</h3>
+                  <h3 className="font-semibold text-lg text-foreground">{button.title}</h3>
                   {button.badge && (
-                    <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                    <span className="px-2 py-1 text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-300 rounded-full">
                       {button.badge}
                     </span>
                   )}
                 </div>
-                <p className="text-gray-600 text-sm mb-4">{button.description}</p>
+                <p className="text-muted-foreground text-sm mb-4">{button.description}</p>
                 
                 {button.action && (
-                  <div className="flex items-center space-x-1 text-orange-600 text-sm font-medium">
+                  <div className="flex items-center space-x-1 text-orange-600 dark:text-orange-400 text-sm font-medium">
                     <span>Click to start</span>
                     <ExternalLink className="h-4 w-4" />
                   </div>
@@ -371,12 +371,12 @@ const MockInterview = () => {
           </div>
 
           {/* Sessions Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-900">Past Sessions</h2>
+          <div className="bg-card rounded-xl shadow-sm border border-border">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-foreground">Past Sessions</h2>
               <div className="flex items-center space-x-2">
-                <Filter className="h-4 w-4 text-gray-400" />
-                <select className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <select className="border border-border bg-card text-foreground rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
                   <option>All Status</option>
                   <option>Completed</option>
                   <option>In Progress</option>
@@ -386,16 +386,16 @@ const MockInterview = () => {
             </div>
             
             {completedInterviews.length > 0 ? (
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-border">
                 {completedInterviews.map((interview) => (
                   <div key={interview.id} className="px-6 py-4 flex items-center justify-between">
                     <div>
-                      <h3 className="font-medium text-gray-900">{interview.type}</h3>
-                      <p className="text-sm text-gray-500">
+                      <h3 className="font-medium text-foreground">{interview.type}</h3>
+                      <p className="text-sm text-muted-foreground">
                         {interview.date} • {interview.duration}
                       </p>
                     </div>
-                    <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                    <span className="px-2 py-1 text-xs font-medium bg-green-500/10 text-green-600 dark:text-green-300 rounded-full">
                       {interview.status}
                     </span>
                   </div>
@@ -403,13 +403,13 @@ const MockInterview = () => {
               </div>
             ) : (
               <div className="p-12 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-8 w-8 text-gray-400" />
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="text-lg font-medium text-foreground mb-2">
                   No mock interview sessions yet.
                 </h3>
-                <p className="text-gray-500 mb-6">
+                <p className="text-muted-foreground mb-6">
                   Start your first mock interview to practice and improve your skills.
                 </p>
                 <button 

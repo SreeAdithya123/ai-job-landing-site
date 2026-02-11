@@ -103,10 +103,10 @@
    return (
      <div className="min-h-screen flex flex-col">
        {/* Progress Header */}
-       <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-6 py-4">
+       <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-md border-b border-border px-6 py-4">
          <div className="max-w-3xl mx-auto">
            <div className="flex items-center justify-between mb-3">
-             <span className="text-sm text-slate-400">
+             <span className="text-sm text-muted-foreground">
                Step {currentIndex + 1} of {QUESTIONNAIRE_STEPS.length}
              </span>
              <span className="text-sm font-medium text-primary">
@@ -135,12 +135,12 @@
        </div>
  
        {/* Navigation Footer */}
-       <div className="sticky bottom-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-6 py-4">
+       <div className="sticky bottom-0 bg-card/95 backdrop-blur-md border-t border-border px-6 py-4">
          <div className="max-w-3xl mx-auto flex justify-between">
            <Button
              variant="outline"
              onClick={onPrevious}
-             className="border-slate-700 text-slate-300 hover:bg-slate-800"
+             className="border-border text-muted-foreground hover:bg-muted"
            >
              <ChevronLeft className="h-4 w-4 mr-2" />
              Previous

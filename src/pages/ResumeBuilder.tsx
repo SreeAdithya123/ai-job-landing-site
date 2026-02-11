@@ -111,23 +111,23 @@ const ResumeBuilder = () => {
       <Layout fullSize>
         {/* Header - show only during questionnaire and template gallery */}
         {showHeader && (
-          <div className="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-6 py-3">
+          <div className="bg-card/95 backdrop-blur-md border-b border-border px-6 py-3">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
               <Button
                 variant="ghost"
                 onClick={() => navigate('/dashboard')}
-                className="text-slate-400 hover:text-white"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard
               </Button>
               
-              <h1 className="text-lg font-semibold text-white">AI Resume Builder</h1>
+              <h1 className="text-lg font-semibold text-foreground">AI Resume Builder</h1>
               
               <Button
                 variant="outline"
                 onClick={() => navigate('/dashboard')}
-                className="border-slate-700 text-slate-300 hover:bg-slate-800"
+                className="border-border text-muted-foreground hover:bg-muted"
               >
                 <Home className="h-4 w-4 mr-2" />
                 Dashboard

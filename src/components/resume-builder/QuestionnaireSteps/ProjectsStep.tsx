@@ -60,15 +60,15 @@
    return (
      <div className="space-y-6">
        <div className="text-center mb-8">
-         <h2 className="text-2xl font-bold text-white mb-2">Projects</h2>
-         <p className="text-slate-400">Showcase your best work</p>
+         <h2 className="text-2xl font-bold text-foreground mb-2">Projects</h2>
+         <p className="text-muted-foreground">Showcase your best work</p>
        </div>
  
        <div className="space-y-4">
          {data.map((project, index) => (
-           <Card key={project.id} className="bg-slate-800/50 border-slate-700 p-6">
+           <Card key={project.id} className="bg-card border-border p-6">
              <div className="flex justify-between items-start mb-4">
-               <h3 className="text-lg font-semibold text-white">Project #{index + 1}</h3>
+               <h3 className="text-lg font-semibold text-foreground">Project #{index + 1}</h3>
                <Button
                  variant="ghost"
                  size="icon"
@@ -82,39 +82,39 @@
              <div className="space-y-4">
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div className="space-y-2">
-                   <Label className="text-white">Project Title *</Label>
+                   <Label className="text-foreground">Project Title *</Label>
                    <Input
                      value={project.title}
                      onChange={(e) => updateProject(project.id, 'title', e.target.value)}
                      placeholder="E-commerce Platform"
-                     className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                     className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                    />
                  </div>
  
                  <div className="space-y-2">
-                   <Label className="text-white">Your Role</Label>
+                   <Label className="text-foreground">Your Role</Label>
                    <Input
                      value={project.role}
                      onChange={(e) => updateProject(project.id, 'role', e.target.value)}
                      placeholder="Lead Developer"
-                     className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                     className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                    />
                  </div>
                </div>
  
                <div className="space-y-2">
-                 <Label className="text-white">Description</Label>
+                 <Label className="text-foreground">Description</Label>
                  <Textarea
                    value={project.description}
                    onChange={(e) => updateProject(project.id, 'description', e.target.value)}
                    placeholder="Describe what you built and the problem it solved..."
                    rows={3}
-                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500 resize-none"
+                   className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground resize-none"
                  />
                </div>
  
                <div className="space-y-2">
-                 <Label className="text-white">Technologies Used</Label>
+                 <Label className="text-foreground">Technologies Used</Label>
                  <Input
                    value={techInputs[project.id] || ''}
                    onChange={(e) => setTechInputs(prev => ({ ...prev, [project.id]: e.target.value }))}
@@ -125,7 +125,7 @@
                      }
                    }}
                    placeholder="Press Enter to add technologies"
-                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                   className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                  />
                  {project.technologies.length > 0 && (
                    <div className="flex flex-wrap gap-2 mt-2">
@@ -142,12 +142,12 @@
                </div>
  
                <div className="space-y-2">
-                 <Label className="text-white">Outcome / Impact</Label>
+                 <Label className="text-foreground">Outcome / Impact</Label>
                  <Input
                    value={project.outcome || ''}
                    onChange={(e) => updateProject(project.id, 'outcome', e.target.value)}
                    placeholder="e.g., Increased sales by 30%, Reduced load time by 50%"
-                   className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                   className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
                  />
                </div>
              </div>
@@ -157,14 +157,14 @@
          <Button
            onClick={addProject}
            variant="outline"
-           className="w-full border-dashed border-slate-600 text-slate-300 hover:bg-slate-800/50 hover:text-white"
+           className="w-full border-dashed border-border text-muted-foreground hover:bg-muted hover:text-foreground"
          >
            <Plus className="h-4 w-4 mr-2" />
            Add Project
          </Button>
        </div>
  
-       <p className="text-sm text-slate-500 text-center">
+       <p className="text-sm text-muted-foreground text-center">
          AI will enhance descriptions with action verbs and quantifiable results.
        </p>
      </div>

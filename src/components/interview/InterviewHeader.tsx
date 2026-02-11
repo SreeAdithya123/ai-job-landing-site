@@ -11,7 +11,7 @@ const InterviewHeader: React.FC<InterviewHeaderProps> = ({ onSignOut }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
+    <div className="bg-card/80 backdrop-blur-md border-b border-border shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
@@ -22,20 +22,20 @@ const InterviewHeader: React.FC<InterviewHeaderProps> = ({ onSignOut }) => {
               <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
                 AI Interview Studio
               </h1>
-              <p className="text-slate-600 text-lg mt-1">Master your interview skills with advanced AI technology</p>
+              <p className="text-muted-foreground text-lg mt-1">Master your interview skills with advanced AI technology</p>
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <button className="flex items-center space-x-2 px-6 py-3 bg-white/60 backdrop-blur-sm border border-slate-300/50 rounded-xl hover:bg-white/80 transition-all duration-200 shadow-sm">
-              <Settings className="h-5 w-5 text-slate-600" />
-              <span className="text-slate-700 font-medium">Settings</span>
+            <button className="flex items-center space-x-2 px-6 py-3 bg-muted/60 backdrop-blur-sm border border-border rounded-xl hover:bg-muted transition-all duration-200 shadow-sm">
+              <Settings className="h-5 w-5 text-muted-foreground" />
+              <span className="text-foreground font-medium">Settings</span>
             </button>
             <button 
               onClick={() => navigate('/dashboard')}
-              className="flex items-center space-x-2 px-6 py-3 bg-white/60 backdrop-blur-sm border border-slate-300/50 rounded-xl hover:bg-white/80 transition-all duration-200 shadow-sm"
+              className="flex items-center space-x-2 px-6 py-3 bg-muted/60 backdrop-blur-sm border border-border rounded-xl hover:bg-muted transition-all duration-200 shadow-sm"
             >
-              <LayoutDashboard className="h-5 w-5 text-slate-600" />
-              <span className="text-slate-700 font-medium">Dashboard</span>
+              <LayoutDashboard className="h-5 w-5 text-muted-foreground" />
+              <span className="text-foreground font-medium">Dashboard</span>
             </button>
             <button 
               onClick={onSignOut} 

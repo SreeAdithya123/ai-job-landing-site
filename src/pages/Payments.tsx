@@ -238,7 +238,7 @@ const Payments = () => {
   };
 
   const content = (
-    <div className="min-h-screen bg-gradient-to-b from-background via-slate-50/50 to-background">
+    <div className="min-h-screen bg-background">
       {/* Navigation */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Button 
@@ -324,7 +324,7 @@ const Payments = () => {
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                       plan.popular 
                         ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg' 
-                        : 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-600'
+                        : 'bg-muted text-muted-foreground'
                     }`}>
                       <plan.icon className="h-6 w-6" />
                     </div>

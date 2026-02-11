@@ -113,7 +113,7 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 h-[600px] flex flex-col">
+    <div className="bg-card rounded-xl shadow-lg border border-border h-[600px] flex flex-col">
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-accent text-white p-4 rounded-t-xl">
         <div className="flex items-center space-x-2">
@@ -142,7 +142,7 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
                 className={`max-w-[80%] p-3 rounded-lg ${
                   message.sender === 'user'
                     ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-900'
+                    : 'bg-muted text-foreground'
                 }`}
               >
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -151,8 +151,8 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
                 </span>
               </div>
               {message.sender === 'user' && (
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="h-4 w-4 text-gray-600" />
+                <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
+                  <User className="h-4 w-4 text-muted-foreground" />
                 </div>
               )}
             </div>
@@ -162,10 +162,10 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
               <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                 <Bot className="h-4 w-4 text-white" />
               </div>
-              <div className="bg-gray-100 p-3 rounded-lg">
+              <div className="bg-muted p-3 rounded-lg">
                 <div className="flex items-center space-x-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm text-gray-600">Thinking...</span>
+                  <span className="text-sm text-muted-foreground">Thinking...</span>
                 </div>
               </div>
             </div>
@@ -175,7 +175,7 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
       </ScrollArea>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-border">
         <div className="flex space-x-2">
           <Input
             value={inputValue}
