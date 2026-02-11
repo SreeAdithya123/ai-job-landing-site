@@ -80,11 +80,27 @@ export type {
  
    // Load draft from localStorage on mount
    useEffect(() => {
-     try {
-       const saved = localStorage.getItem(STORAGE_KEY);
-       if (saved) {
-         const parsed = JSON.parse(saved);
-         if (parsed.formData) setFormData(parsed.formData);
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.formData) {
+            // Merge with defaults to handle missing fields from older drafts
+            const merged: QuestionnaireFormData = {
+              ...initialFormData,
+              ...parsed.formData,
+              skills: {
+                ...initialSkills,
+                ...(parsed.formData.skills || {}),
+              },
+              careerInfo: {
+                ...initialCareerInfo,
+                ...(parsed.formData.careerInfo || {}),
+                keyStrengths: parsed.formData.careerInfo?.keyStrengths || [],
+              },
+            };
+            setFormData(merged);
+          }
          if (parsed.currentStep && parsed.currentStep !== 'landing') {
            // Don't auto-restore to generating or beyond
            const questionnaireSteps: ResumeBuilderStep[] = [
