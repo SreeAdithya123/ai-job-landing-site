@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { FileText, Sparkles, Target, Download, Palette, Shield } from 'lucide-react';
+import { FileText, Sparkles, Target, Download, Palette, Shield, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ResumeBuilderLandingProps {
   onStart: () => void;
@@ -41,8 +42,20 @@ const features = [
 ];
 
 export const ResumeBuilderLanding: React.FC<ResumeBuilderLandingProps> = ({ onStart }) => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Back Button */}
+      <div className="px-6 pt-6">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/dashboard')}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Dashboard
+        </Button>
+      </div>
       {/* Hero Section */}
       <motion.div
         className="flex-1 flex flex-col items-center justify-center px-6 py-16 text-center"
