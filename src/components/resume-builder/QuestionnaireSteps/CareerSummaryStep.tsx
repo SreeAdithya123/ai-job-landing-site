@@ -11,7 +11,14 @@
    onChange: (data: CareerInfo) => void;
  }
  
- export const CareerSummaryStep: React.FC<CareerSummaryStepProps> = ({ data, onChange }) => {
+export const CareerSummaryStep: React.FC<CareerSummaryStepProps> = ({ data: rawData, onChange }) => {
+  // Defensive defaults
+  const data: CareerInfo = {
+    targetRole: rawData?.targetRole ?? '',
+    yearsOfExperience: rawData?.yearsOfExperience ?? '',
+    keyStrengths: rawData?.keyStrengths ?? [],
+    careerObjective: rawData?.careerObjective ?? '',
+  };
    const [strengthInput, setStrengthInput] = React.useState('');
  
    const handleChange = (field: keyof CareerInfo, value: string | string[]) => {

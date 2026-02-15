@@ -17,7 +17,14 @@
    soft: { label: 'Soft Skills', placeholder: 'e.g., Leadership, Communication' }
  };
  
- export const SkillsStep: React.FC<SkillsStepProps> = ({ data, onChange }) => {
+export const SkillsStep: React.FC<SkillsStepProps> = ({ data: rawData, onChange }) => {
+  // Defensive defaults for potentially undefined skill arrays
+  const data: SkillCategories = {
+    core: rawData?.core ?? [],
+    tools: rawData?.tools ?? [],
+    technologies: rawData?.technologies ?? [],
+    soft: rawData?.soft ?? [],
+  };
    const [inputs, setInputs] = useState<Record<keyof SkillCategories, string>>({
      core: '',
      tools: '',

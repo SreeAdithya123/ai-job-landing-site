@@ -78,29 +78,39 @@ export type {
    const [error, setError] = useState<string | null>(null);
    const [savedResumeId, setSavedResumeId] = useState<string | null>(null);
  
-   // Load draft from localStorage on mount
-   useEffect(() => {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed.formData) {
-            // Merge with defaults to handle missing fields from older drafts
-            const merged: QuestionnaireFormData = {
-              ...initialFormData,
-              ...parsed.formData,
-              skills: {
-                ...initialSkills,
-                ...(parsed.formData.skills || {}),
-              },
-              careerInfo: {
-                ...initialCareerInfo,
-                ...(parsed.formData.careerInfo || {}),
-                keyStrengths: parsed.formData.careerInfo?.keyStrengths || [],
-              },
-            };
-            setFormData(merged);
-          }
+    // Load draft from localStorage on mount
+    useEffect(() => {
+       try {
+         const saved = localStorage.getItem(STORAGE_KEY);
+         if (saved) {
+           const parsed = JSON.parse(saved);
+           if (parsed.formData) {
+             // Merge with defaults to handle missing fields from older drafts
+             const skills = parsed.formData.skills || {};
+             const careerInfo = parsed.formData.careerInfo || {};
+             const merged: QuestionnaireFormData = {
+               ...initialFormData,
+               ...parsed.formData,
+               skills: {
+                 core: Array.isArray(skills.core) ? skills.core : [],
+                 tools: Array.isArray(skills.tools) ? skills.tools : [],
+                 technologies: Array.isArray(skills.technologies) ? skills.technologies : [],
+                 soft: Array.isArray(skills.soft) ? skills.soft : [],
+               },
+               careerInfo: {
+                 targetRole: careerInfo.targetRole || '',
+                 yearsOfExperience: careerInfo.yearsOfExperience || '',
+                 keyStrengths: Array.isArray(careerInfo.keyStrengths) ? careerInfo.keyStrengths : [],
+                 careerObjective: careerInfo.careerObjective || '',
+               },
+               education: Array.isArray(parsed.formData.education) ? parsed.formData.education : [],
+               projects: Array.isArray(parsed.formData.projects) ? parsed.formData.projects : [],
+               experience: Array.isArray(parsed.formData.experience) ? parsed.formData.experience : [],
+               certifications: Array.isArray(parsed.formData.certifications) ? parsed.formData.certifications : [],
+               achievements: Array.isArray(parsed.formData.achievements) ? parsed.formData.achievements : [],
+             };
+             setFormData(merged);
+           }
          if (parsed.currentStep && parsed.currentStep !== 'landing') {
            // Don't auto-restore to generating or beyond
            const questionnaireSteps: ResumeBuilderStep[] = [
