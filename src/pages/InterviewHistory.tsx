@@ -42,7 +42,7 @@ const InterviewHistory = () => {
     return (
       <ProtectedRoute>
         <Layout>
-          <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50 flex items-center justify-center">
+          <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
               <p className="text-muted-foreground">Loading your interview history...</p>
@@ -57,9 +57,9 @@ const InterviewHistory = () => {
     return (
       <ProtectedRoute>
         <Layout>
-          <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50 flex items-center justify-center">
+          <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="text-center">
-              <p className="text-red-600 mb-2">Error loading interview history</p>
+              <p className="text-destructive mb-2">Error loading interview history</p>
               <p className="text-sm text-muted-foreground">
                 {error instanceof Error ? error.message : 'Unknown error occurred'}
               </p>
@@ -73,17 +73,17 @@ const InterviewHistory = () => {
   return (
     <ProtectedRoute>
       <Layout>
-        <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50">
+        <div className="min-h-screen bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-4">
                 <button 
                   onClick={() => navigate('/dashboard')} 
-                  className="flex items-center space-x-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg hover:bg-white/90 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 clay-card hover:shadow-clay-pressed transition-all"
                 >
-                  <ArrowLeft className="h-4 w-4 text-gray-600" />
-                  <span className="text-gray-600 font-medium">Back to Dashboard</span>
+                  <ArrowLeft className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground font-medium">Back to Dashboard</span>
                 </button>
                 <div>
                   <h1 className="text-3xl font-bold text-foreground bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
@@ -99,21 +99,21 @@ const InterviewHistory = () => {
             {/* Filters and Search */}
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search interviews..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-xl bg-card focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
               <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="pl-10 pr-8 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
+                  className="pl-10 pr-8 py-2 border border-border rounded-xl bg-card focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 >
                   {interviewTypes.map(type => (
                     <option key={type} value={type}>
@@ -145,7 +145,7 @@ const InterviewHistory = () => {
                 {!searchTerm && filterType === 'all' && (
                   <button 
                     onClick={() => navigate('/interview-copilot')}
-                    className="px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                    className="px-6 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl hover:shadow-lg transition-all duration-200 font-medium"
                   >
                     Start Your First Interview
                   </button>
@@ -156,7 +156,7 @@ const InterviewHistory = () => {
                 {filteredAnalyses.map((analysis, index) => (
                   <motion.div
                     key={analysis.id}
-                    className="glass-card p-6 rounded-xl hover:shadow-xl transition-all duration-300 cursor-pointer"
+                    className="clay-card p-6 hover:shadow-lg transition-all duration-300 cursor-pointer"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -188,7 +188,6 @@ const InterviewHistory = () => {
                           )}
                         </div>
 
-                        {/* Score Breakdown */}
                         {(analysis.communication_score || analysis.technical_score || analysis.confidence_score) && (
                           <div className="flex space-x-4 mb-4">
                             {analysis.communication_score && (
@@ -212,14 +211,12 @@ const InterviewHistory = () => {
                           </div>
                         )}
 
-                        {/* Quick Preview */}
                         {analysis.feedback && (
                           <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
                             {analysis.feedback}
                           </p>
                         )}
 
-                        {/* Tags */}
                         <div className="flex flex-wrap gap-2">
                           {analysis.strengths && analysis.strengths.slice(0, 2).map((strength, idx) => (
                             <span key={idx} className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
@@ -235,8 +232,8 @@ const InterviewHistory = () => {
                       </div>
 
                       <div className="flex items-center space-x-2 ml-6">
-                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                          <Eye className="h-5 w-5 text-gray-500" />
+                        <button className="p-2 hover:bg-muted rounded-lg transition-colors">
+                          <Eye className="h-5 w-5 text-muted-foreground" />
                         </button>
                         <TrendingUp className="h-5 w-5 text-primary" />
                       </div>
@@ -248,7 +245,6 @@ const InterviewHistory = () => {
           </div>
         </div>
 
-        {/* Details Modal */}
         {selectedAnalysis && (
           <InterviewDetailsModal
             analysis={selectedAnalysis}

@@ -76,7 +76,7 @@ const Hero = () => {
               Start Practicing
               <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="secondary" size="lg" onClick={handleViewAIInterviewer} className="glass-card hover:bg-white/90 font-body tracking-button">
+            <Button variant="secondary" size="lg" onClick={handleViewAIInterviewer} className="clay-card hover:shadow-clay-pressed font-body tracking-button">
               Explore AI Interviewer
             </Button>
             <Button variant="outline" size="lg" onClick={() => navigate('/payments')} className="border-primary/30 hover:bg-primary/10 font-body tracking-button">

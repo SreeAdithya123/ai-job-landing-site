@@ -89,7 +89,7 @@ const Features = () => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
             >
-              <Card className="glass-card h-full hover:shadow-xl transition-all duration-300 border border-white/20 hover:-translate-y-1">
+              <Card className="clay-card h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                 <CardContent className="p-6 text-center">
                   <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center mb-4 mx-auto shadow-glow">
                     <feature.icon className="h-6 w-6 text-white" />

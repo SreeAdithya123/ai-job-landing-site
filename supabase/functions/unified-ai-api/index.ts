@@ -3,14 +3,9 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const openRouterApiKey = Deno.env.get('OPENROUTER_API_KEY');
-const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-const siteUrl = Deno.env.get('OPENROUTER_SITE_URL') || '';
-const siteName = Deno.env.get('OPENROUTER_SITE_NAME') || '';
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 interface RequestPayload {
@@ -45,17 +40,16 @@ interface InterviewAnalysisData {
 serve(async (req) => {
   console.log('Unified AI API function called');
   
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    if (!openRouterApiKey) {
-      throw new Error('OpenRouter API key not configured');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    if (!OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY is not configured');
     }
 
-    // Get the authorization header for authenticated requests
     const authHeader = req.headers.get('Authorization');
     
     const supabaseClient = createClient(
@@ -73,15 +67,12 @@ serve(async (req) => {
 
     let systemPrompt = '';
     let userMessage = '';
-    const chatModels = [
-      'z-ai/glm-4.5-air:free',
-      'google/gemma-3-27b-it:free',
-      'mistralai/mistral-small-3.1-24b-instruct:free'
-    ];
-    let model = chatModels[0];
+    // Use gpt-4o for analysis (higher quality), gpt-4o-mini for chat (faster/cheaper)
+    let model = 'gpt-4o-mini';
 
     switch (type) {
       case 'interview-analysis': {
+        model = 'gpt-4o';
         const analysisData = data as InterviewAnalysisData;
         const formattedTranscript = analysisData.transcript
           .map(entry => `${entry.speaker}: ${entry.text}`)
@@ -141,7 +132,7 @@ Please provide your analysis in this JSON format:
         const materialType = data.type || 'summary';
         const content = data.text || data.content || '';
         
-        const prompts = {
+        const prompts: Record<string, string> = {
           summary: `Create a comprehensive summary of the following text. Structure it with clear headings and bullet points:\n\n${content}`,
           notes: `Convert the following text into student-friendly bullet notes with clear sections and subsections:\n\n${content}`,
           flashcards: `Create Q&A flashcards from the following text. Format as "Q: [question]\nA: [answer]" pairs:\n\n${content}`,
@@ -149,7 +140,7 @@ Please provide your analysis in this JSON format:
         };
 
         systemPrompt = `You are an expert educational content creator. Generate well-structured, comprehensive study materials.`;
-        userMessage = prompts[materialType as keyof typeof prompts] || prompts.summary;
+        userMessage = prompts[materialType] || prompts.summary;
         break;
       }
 
@@ -172,51 +163,22 @@ Please provide your analysis in this JSON format:
     ];
     const maxTokens = type === 'interview-analysis' ? 1500 : 1000;
 
-    let response: Response | null = null;
+    console.log(`Calling OpenAI with model: ${model}`);
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ model, messages: messagesPayload, max_tokens: maxTokens, temperature: 0.7, stream: isStreamable })
+    });
 
-    // Try OpenRouter models first
-    for (const tryModel of chatModels) {
-      console.log(`Trying OpenRouter model: ${tryModel}`);
-      response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${openRouterApiKey}`,
-          "HTTP-Referer": siteUrl,
-          "X-Title": siteName,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ model: tryModel, messages: messagesPayload, max_tokens: maxTokens, temperature: 0.7, stream: isStreamable })
-      });
-      if (response.ok) { console.log(`Success with OpenRouter: ${tryModel}`); break; }
+    if (!response.ok) {
       const errText = await response.text();
-      console.warn(`OpenRouter ${tryModel} failed (${response.status}): ${errText}`);
-      if (response.status !== 429) throw new Error(`OpenRouter API error: ${response.status} - ${errText}`);
-      response = null;
-    }
-
-    // Fallback to Lovable AI Gateway if all OpenRouter models are rate-limited
-    if (!response && lovableApiKey) {
-      console.log('Falling back to Lovable AI Gateway...');
-      response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${lovableApiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: messagesPayload, max_tokens: maxTokens, temperature: 0.7, stream: isStreamable })
-      });
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error(`Lovable AI Gateway error (${response.status}): ${errText}`);
-        if (response.status === 429) throw new Error('AI service is temporarily busy. Please try again in a moment.');
-        if (response.status === 402) throw new Error('AI credits exhausted. Please add funds to continue.');
-        throw new Error(`AI Gateway error: ${response.status} - ${errText}`);
-      }
-      console.log('Success with Lovable AI Gateway');
-    }
-
-    if (!response || !response.ok) {
-      throw new Error('All AI models are currently unavailable. Please try again in a moment.');
+      console.error(`OpenAI error (${response.status}): ${errText}`);
+      if (response.status === 429) throw new Error('AI service is temporarily busy. Please try again in a moment.');
+      if (response.status === 402) throw new Error('OpenAI credits exhausted. Please check your API key billing.');
+      throw new Error(`OpenAI API error: ${response.status} - ${errText}`);
     }
 
     // For streamable types, pass through the SSE stream
@@ -231,12 +193,11 @@ Please provide your analysis in this JSON format:
       });
     }
 
-
     const responseData = await response.json();
-    console.log('Received response from OpenRouter API');
+    console.log('Received response from OpenAI');
 
     if (!responseData.choices || responseData.choices.length === 0) {
-      throw new Error('No response generated by OpenRouter API');
+      throw new Error('No response generated by OpenAI');
     }
 
     const generatedContent = responseData.choices[0].message.content;
@@ -246,7 +207,6 @@ Please provide your analysis in this JSON format:
       try {
         const analysisData = data as InterviewAnalysisData;
         
-        // Parse the analysis response
         let analysisResult;
         try {
           const jsonMatch = generatedContent.match(/\{[\s\S]*\}/);
@@ -257,7 +217,6 @@ Please provide your analysis in this JSON format:
           }
         } catch (parseError) {
           console.error('Failed to parse analysis response:', parseError);
-          // Fallback analysis
           analysisResult = {
             overall_score: 75,
             communication_score: 75,
@@ -271,7 +230,6 @@ Please provide your analysis in this JSON format:
           };
         }
 
-        // Get user from session
         const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
         
         if (userError) {
@@ -286,7 +244,6 @@ Please provide your analysis in this JSON format:
         
         console.log('User authenticated:', user.id);
 
-        // Save analysis to database
         const analysisRecord = {
           user_id: user.id,
           interview_type: analysisData.interviewType,
@@ -331,7 +288,6 @@ Please provide your analysis in this JSON format:
         );
       } catch (error) {
         console.error('Error handling interview analysis:', error);
-        // Still return the generated content even if saving fails
         return new Response(
           JSON.stringify({
             success: false,
@@ -346,7 +302,6 @@ Please provide your analysis in this JSON format:
       }
     }
 
-    // For other types, just return the generated content
     return new Response(
       JSON.stringify({
         success: true,

@@ -37,7 +37,7 @@ const Recruiters = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           {/* Header */}
           <div className="text-center mb-12">
@@ -61,10 +61,10 @@ const Recruiters = () => {
                 </h2>
                 <div className="space-y-4">
                   {benefits.map((benefit, index) => (
-                    <div key={index} className="bg-white rounded-lg p-4 shadow-lg border border-gray-100">
+                    <div key={index} className="clay-card p-4">
                       <div className="flex items-center space-x-3 mb-2">
                         <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
-                          <benefit.icon className="h-4 w-4 text-white" />
+                          <benefit.icon className="h-4 w-4 text-primary-foreground" />
                         </div>
                         <h3 className="font-semibold text-foreground">{benefit.title}</h3>
                       </div>
@@ -80,7 +80,7 @@ const Recruiters = () => {
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   {companies.map((company, index) => (
-                    <div key={index} className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 text-center">
+                    <div key={index} className="clay-card p-3 text-center">
                       <div className="text-2xl mb-1">{company.logo}</div>
                       <div className="text-sm font-medium text-foreground">{company.name}</div>
                       <div className="text-xs text-muted-foreground">{company.industry}</div>
