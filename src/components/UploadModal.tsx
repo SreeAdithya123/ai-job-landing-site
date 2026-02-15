@@ -59,34 +59,17 @@ const UploadModal: React.FC<UploadModalProps> = ({
     }
   };
 
-  const generateContent = async (text: string, type: string): Promise<string> => {
-    try {
-      const { data, error } = await supabase.functions.invoke('material-generator', {
-        body: { text, type }
-      });
-
-      if (error) throw error;
-
-      return data.content;
-    } catch (error) {
-      console.error('Error generating content:', error);
-      throw error;
-    }
-  };
-
-  const extractTextFromFile = async (file: File): Promise<string> => {
+  const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        if (text.length < 50) {
-          reject(new Error('File content is too short to process'));
-          return;
-        }
-        resolve(text);
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        // Remove the data URL prefix (e.g., "data:application/pdf;base64,")
+        const base64 = result.split(',')[1];
+        resolve(base64);
       };
       reader.onerror = () => reject(new Error('Failed to read file'));
-      reader.readAsText(file);
+      reader.readAsDataURL(file);
     });
   };
 
@@ -97,14 +80,24 @@ const UploadModal: React.FC<UploadModalProps> = ({
     setGenerationProgress('Reading file...');
     
     try {
-      const fileText = await extractTextFromFile(selectedFile);
+      const fileBase64 = await fileToBase64(selectedFile);
       
       setGenerationProgress('Generating content with AI...');
-      const generatedContent = await generateContent(fileText, outputType);
+      
+      const { data, error } = await supabase.functions.invoke('material-generator', {
+        body: { 
+          fileBase64, 
+          fileName: selectedFile.name, 
+          mimeType: selectedFile.type || 'application/octet-stream', 
+          type: outputType 
+        }
+      });
+
+      if (error) throw error;
       
       const outputLabel = outputTypes.find(t => t.value === outputType)?.label || 'Summary';
       
-      onGenerateComplete(selectedFile.name, outputLabel, generatedContent);
+      onGenerateComplete(selectedFile.name, outputLabel, data.content);
       
       toast({
         title: "Generation Complete",
