@@ -14,7 +14,7 @@ import InterviewTypeCard from '../components/interview/InterviewTypeCard';
 import InterviewSessionsPanel from '../components/interview/InterviewSessionsPanel';
 import InterviewActiveInterface from '../components/interview/InterviewActiveInterface';
 import CreditCheckModal from '../components/CreditCheckModal';
-import { Laptop, Code, Star, Users } from 'lucide-react';
+import { Laptop, Code } from 'lucide-react';
 
 export interface TranscriptEntry {
   speaker: 'AI' | 'User';
@@ -170,20 +170,6 @@ const InterviewCopilot = () => {
     description: 'Technical programming challenges and algorithms',
     gradient: 'from-green-500 to-green-600',
     bgGradient: 'from-green-500/10 to-green-600/10'
-  }, {
-    id: 'upsc',
-    name: 'UPSC Interviewer',
-    icon: Star,
-    description: 'Civil services interview preparation and mock tests',
-    gradient: 'from-purple-500 to-purple-600',
-    bgGradient: 'from-purple-500/10 to-purple-600/10'
-  }, {
-    id: 'friendly',
-    name: 'Friendly Interview',
-    icon: Users,
-    description: 'Casual conversation-style interview practice',
-    gradient: 'from-pink-500 to-pink-600',
-    bgGradient: 'from-pink-500/10 to-pink-600/10'
   }];
 
   const handleSelectInterview = async (type: string) => {
@@ -198,10 +184,6 @@ const InterviewCopilot = () => {
     } else if (type === 'general') {
       setSelectedType(type);
       setShowInterviewInterface(true);
-    } else if (type === 'upsc') {
-      navigate('/upsc-interviewer');
-    } else if (type === 'friendly') {
-      navigate('/friendly-interviewer');
     }
   };
 
