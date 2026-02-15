@@ -62,7 +62,7 @@ const CareersSection = () => {
                 transition={{ duration: 0.6, delay: 0.1 * index }}
                 viewport={{ once: true }}
               >
-                <Card className="glass-card h-full hover:shadow-xl transition-all duration-300 border border-white/20">
+                <Card className="clay-card h-full hover:shadow-xl transition-all duration-300">
                   <CardContent className="p-6 text-center">
                     <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center mb-4 mx-auto">
                       <value.icon className="h-6 w-6 text-white" />
@@ -84,7 +84,7 @@ const CareersSection = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
           viewport={{ once: true }}
         >
-          <div className="glass-card p-8 lg:p-12">
+          <div className="clay-card p-8 lg:p-12">
             <h3 className="font-headline text-h2 text-foreground mb-6 text-center">Our Mission</h3>
             <p className="font-body text-body-lg text-muted-foreground leading-body mb-6">
               If you are driven by a desire to create tools that make a real difference in people's lives, and if you thrive in environments where rigor meets creative freedom, Vyoman might be the right place for you.
@@ -104,7 +104,7 @@ const CareersSection = () => {
           viewport={{ once: true }}
         >
           {/* Careers Card */}
-          <Card className="glass-card hover:shadow-xl transition-all duration-300">
+          <Card className="clay-card hover:shadow-xl transition-all duration-300">
             <CardContent className="p-8 text-center">
               <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mb-6 mx-auto">
                 <Heart className="h-8 w-8 text-white" />
@@ -123,7 +123,7 @@ const CareersSection = () => {
           </Card>
 
           {/* Contact Card */}
-          <Card className="glass-card hover:shadow-xl transition-all duration-300">
+          <Card className="clay-card hover:shadow-xl transition-all duration-300">
             <CardContent className="p-8 text-center">
               <div className="w-16 h-16 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mb-6 mx-auto">
                 <Mail className="h-8 w-8 text-white" />
@@ -132,7 +132,7 @@ const CareersSection = () => {
               <p className="font-body text-body text-muted-foreground mb-6 leading-body">
                 Have questions about our products, partnerships, or want to say hello? We would love to hear from you.
               </p>
-              <Button variant="secondary" size="lg" className="glass-card hover:bg-white/90 mb-4 font-body tracking-button">
+              <Button variant="secondary" size="lg" className="clay-card hover:bg-secondary/80 mb-4 font-body tracking-button">
                 Contact Us
               </Button>
               <p className="font-body text-sm text-muted-foreground">

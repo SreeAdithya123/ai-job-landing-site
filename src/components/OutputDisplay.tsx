@@ -69,7 +69,7 @@ const OutputDisplay: React.FC<OutputDisplayProps> = ({ fileName, type, content, 
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-card rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+      className="clay-card rounded-xl shadow-lg border border-border overflow-hidden"
     >
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-accent text-white p-4">
@@ -112,7 +112,7 @@ const OutputDisplay: React.FC<OutputDisplayProps> = ({ fileName, type, content, 
       <div className="p-6">
         <div className={`${isExpanded ? '' : 'max-h-64 overflow-hidden'} transition-all duration-300`}>
           <div className="prose max-w-none">
-            <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans leading-relaxed">
+            <pre className="whitespace-pre-wrap text-sm text-foreground font-sans leading-relaxed">
               {content}
             </pre>
           </div>

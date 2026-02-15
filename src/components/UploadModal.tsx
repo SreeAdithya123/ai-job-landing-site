@@ -111,7 +111,6 @@ const UploadModal: React.FC<UploadModalProps> = ({
         description: `Successfully generated ${outputLabel.toLowerCase()} from ${selectedFile.name}`,
       });
       
-      // Reset form
       setSelectedFile(null);
       setOutputType('summary');
       setGenerationProgress('');
@@ -150,7 +149,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
         
         {/* Modal */}
         <motion.div
-          className="relative w-full max-w-lg glass-card rounded-2xl p-6 shadow-2xl border border-white/20"
+          className="relative w-full max-w-lg clay-card rounded-2xl p-6 shadow-2xl"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
@@ -161,9 +160,9 @@ const UploadModal: React.FC<UploadModalProps> = ({
             <h2 className="text-xl font-semibold text-foreground">Upload Material</h2>
             <button
               onClick={handleClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
             >
-              <X className="h-5 w-5 text-gray-500" />
+              <X className="h-5 w-5 text-muted-foreground" />
             </button>
           </div>
 
@@ -173,8 +172,8 @@ const UploadModal: React.FC<UploadModalProps> = ({
               dragActive
                 ? 'border-primary bg-primary/5'
                 : selectedFile
-                ? 'border-green-300 bg-green-50'
-                : 'border-gray-300 hover:border-primary/50'
+                ? 'border-primary/30 bg-primary/5'
+                : 'border-border hover:border-primary/50'
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -183,26 +182,26 @@ const UploadModal: React.FC<UploadModalProps> = ({
           >
             {selectedFile ? (
               <div className="flex items-center justify-center space-x-3">
-                <FileText className="h-8 w-8 text-green-600" />
+                <FileText className="h-8 w-8 text-primary" />
                 <div>
-                  <p className="font-medium text-green-800">{selectedFile.name}</p>
-                  <p className="text-sm text-green-600">
+                  <p className="font-medium text-foreground">{selectedFile.name}</p>
+                  <p className="text-sm text-muted-foreground">
                     {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                   </p>
                 </div>
               </div>
             ) : (
               <>
-                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-lg font-medium text-gray-700 mb-2">
+                <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-lg font-medium text-foreground mb-2">
                   Drop your file here
                 </p>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   or click to browse
                 </p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 font-medium"
+                  className="px-4 py-2 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg hover:shadow-glow transition-all duration-200 font-medium"
                 >
                   Choose File
                 </button>
@@ -220,20 +219,20 @@ const UploadModal: React.FC<UploadModalProps> = ({
 
           {/* Output Type Selector */}
           <div className="mt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Output Type
             </label>
             <div className="relative">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                className="w-full flex items-center justify-between px-4 py-3 bg-card border border-border rounded-lg hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
               >
                 <span>{outputTypes.find(t => t.value === outputType)?.label}</span>
-                <ChevronDown className="h-4 w-4 text-gray-400" />
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </button>
               
               {showDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg z-10">
                   {outputTypes.map((type) => (
                     <button
                       key={type.value}
@@ -241,7 +240,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
                         setOutputType(type.value);
                         setShowDropdown(false);
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg transition-colors"
+                      className="w-full text-left px-4 py-2 hover:bg-muted first:rounded-t-lg last:rounded-b-lg transition-colors"
                     >
                       {type.label}
                     </button>
@@ -253,12 +252,12 @@ const UploadModal: React.FC<UploadModalProps> = ({
 
           {/* Generation Progress */}
           {isGenerating && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
               <div className="flex items-center space-x-3">
-                <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+                <Loader2 className="h-5 w-5 text-primary animate-spin" />
                 <div>
-                  <p className="text-sm font-medium text-blue-900">Generating Material</p>
-                  <p className="text-xs text-blue-700">{generationProgress}</p>
+                  <p className="text-sm font-medium text-foreground">Generating Material</p>
+                  <p className="text-xs text-muted-foreground">{generationProgress}</p>
                 </div>
               </div>
             </div>
@@ -268,7 +267,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
           <div className="flex space-x-3 mt-6">
             <button
               onClick={handleClose}
-              className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="flex-1 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-colors font-medium"
               disabled={isGenerating}
             >
               Cancel
@@ -276,7 +275,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
             <button
               onClick={handleGenerate}
               disabled={!selectedFile || isGenerating}
-              className="flex-1 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-glow transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg hover:shadow-glow transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isGenerating ? 'Generating...' : 'Generate Material'}
             </button>

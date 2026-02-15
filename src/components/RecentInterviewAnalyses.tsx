@@ -33,7 +33,7 @@ const RecentInterviewAnalyses = () => {
   if (isLoading) {
     return (
       <motion.div
-        className="glass-card p-4 sm:p-6 rounded-xl"
+        className="clay-card p-4 sm:p-6 rounded-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -53,7 +53,7 @@ const RecentInterviewAnalyses = () => {
   if (error) {
     return (
       <motion.div
-        className="glass-card p-4 sm:p-6 rounded-xl"
+        className="clay-card p-4 sm:p-6 rounded-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -71,7 +71,7 @@ const RecentInterviewAnalyses = () => {
   if (!analyses || analyses.length === 0) {
     return (
       <motion.div
-        className="glass-card p-4 sm:p-6 rounded-xl"
+        className="clay-card p-4 sm:p-6 rounded-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}

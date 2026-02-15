@@ -49,7 +49,7 @@ const InterviewHero: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 + index * 0.1 }}
-            className="glass-card p-6"
+            className="clay-card p-6"
           >
             <div className={`w-12 h-12 bg-gradient-to-r ${feature.gradient} rounded-xl flex items-center justify-center mb-4 mx-auto shadow-glow`}>
               <feature.icon className="h-6 w-6 text-white" />
