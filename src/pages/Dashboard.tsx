@@ -455,13 +455,14 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Subscription + Progress Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              <div className="lg:col-span-1">
-                <SubscriptionCard />
-              </div>
-              <div className="lg:col-span-2">
-                <ProgressTracking />
+            {/* Your Plan */}
+            <SubscriptionCard />
+
+            {/* Skill Progress & Recent Activities */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <ProgressTracking />
+              <div data-interview-analyses>
+                <RecentInterviewAnalyses />
               </div>
             </div>
 
@@ -473,11 +474,6 @@ const Dashboard = () => {
 
             {/* Interview History Table */}
             <InterviewHistoryTable />
-
-            {/* Recent Interview Analyses */}
-            <div data-interview-analyses>
-              <RecentInterviewAnalyses />
-            </div>
           </div>
         </div>
       </Layout>
