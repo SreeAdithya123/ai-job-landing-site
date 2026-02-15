@@ -45,8 +45,8 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       items: [
         { name: 'Aptitude Test', href: '/aptitude-test', icon: Brain },
         { name: 'AI Material Generator', href: '/material-generator', icon: Zap },
-        { name: 'AI Career Coach', href: '/career-coach', icon: Star },
-        { name: 'Speak with Recruiters', href: '/recruiters', icon: Users },
+        { name: 'CareerBot', href: '/career-coach', icon: Star },
+        { name: 'Talk to Recruiters', href: '/recruiters', icon: Users },
         { name: 'Interview Question Bank', href: '/question-bank', icon: HelpCircle },
       ]
     },

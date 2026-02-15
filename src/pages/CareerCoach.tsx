@@ -56,7 +56,7 @@ const CareerCoach = () => {
                     <Star className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-foreground">AI Career Coach</h1>
+                    <h1 className="text-2xl font-bold text-foreground">CareerBot</h1>
                     <p className="text-muted-foreground text-sm">Personalized career guidance and growth</p>
                   </div>
                 </div>
@@ -109,9 +109,9 @@ const CareerCoach = () => {
             {/* Chatbot */}
             <div className="lg:col-span-2">
               <ChatBot
-                title="Your Personal Career Coach"
+                title="CareerBot"
                 placeholder="Ask me anything about your career..."
-                initialMessage="Hello! I'm your personal AI Career Coach. I'm here to help you navigate your career journey, whether you need advice on skill development, interview preparation, resume optimization, or career planning. What would you like to discuss today?"
+                initialMessage="Hey there! I'm CareerBot. I'm here to help you with your career, whether it's skill development, interview prep, resume tips, or career planning. What's on your mind?"
                 context="career"
               />
             </div>

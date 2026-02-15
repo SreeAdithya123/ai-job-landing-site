@@ -126,7 +126,7 @@ Please provide your analysis in this JSON format:
       }
 
       case 'career-coach': {
-        systemPrompt = `You are an expert career coach with years of experience helping professionals advance their careers. Provide personalized, actionable advice on career development, resume optimization, interview preparation, skill development, and job search strategies.`;
+        systemPrompt = `You are CareerBot, a friendly and experienced career coach. You help people with career development, resume tips, interview prep, skill building, and job searching. Reply in plain conversational English like you're talking to a friend. Do not use markdown formatting, hashtags, asterisks, bullet points, numbered lists, or any special formatting symbols. Just write naturally in paragraphs. Keep your answers helpful, warm, and to the point.`;
         userMessage = data.message || data.query || '';
         break;
       }
@@ -148,7 +148,7 @@ Please provide your analysis in this JSON format:
       }
 
       case 'recruiter-chat': {
-        systemPrompt = `You are a professional recruiter with extensive connections across top companies. Help users connect with recruiters, understand hiring processes, and navigate job opportunities at their target companies.`;
+        systemPrompt = `You are YourDream Bot, a friendly recruiter who knows how hiring works at top companies. Help users understand how to connect with recruiters, what hiring processes look like, and how to land opportunities at their dream companies. Reply in plain conversational English like you're chatting with a friend. Do not use markdown formatting, hashtags, asterisks, bullet points, numbered lists, or any special formatting symbols. Just write naturally in paragraphs. Be encouraging and practical.`;
         userMessage = data.message || data.query || '';
         break;
       }
@@ -157,7 +157,9 @@ Please provide your analysis in this JSON format:
         throw new Error('Invalid request type');
     }
 
-    console.log('Making request to OpenRouter API...');
+    const isStreamable = type === 'career-coach' || type === 'recruiter-chat';
+
+    console.log('Making request to OpenRouter API...', isStreamable ? '(streaming)' : '(non-streaming)');
     
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -180,9 +182,28 @@ Please provide your analysis in this JSON format:
           }
         ],
         max_tokens: type === 'interview-analysis' ? 1500 : 1000,
-        temperature: 0.7
+        temperature: 0.7,
+        stream: isStreamable
       })
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenRouter API error:', errorText);
+      throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
+    }
+
+    // For streamable types, pass through the SSE stream
+    if (isStreamable) {
+      return new Response(response.body, {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
