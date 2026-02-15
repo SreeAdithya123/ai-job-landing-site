@@ -63,10 +63,10 @@
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}
          >
-           <h1 className="text-3xl font-bold text-white mb-2">
-             Choose Your Template
-           </h1>
-           <p className="text-slate-400">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Choose Your Template
+            </h1>
+            <p className="text-muted-foreground">
              Select a design that best represents your professional style
            </p>
          </motion.div>
@@ -82,8 +82,8 @@
                <Card
                  className={`relative cursor-pointer overflow-hidden transition-all duration-300 ${
                    selectedTemplate === template.id
-                     ? 'ring-2 ring-primary border-primary'
-                     : 'border-slate-700 hover:border-slate-600'
+                  ? 'ring-2 ring-primary border-primary'
+                      : 'border-border hover:border-muted-foreground'
                  }`}
                  onClick={() => onSelectTemplate(template.id)}
                >
@@ -106,9 +106,9 @@
                  </div>
  
                  {/* Template Info */}
-                 <div className="p-4 bg-slate-800">
-                   <h3 className="font-semibold text-white mb-1">{template.name}</h3>
-                   <p className="text-sm text-slate-400">{template.description}</p>
+                  <div className="p-4 bg-card">
+                    <h3 className="font-semibold text-foreground mb-1">{template.name}</h3>
+                    <p className="text-sm text-muted-foreground">{template.description}</p>
                  </div>
  
                  {/* Selected Badge */}
