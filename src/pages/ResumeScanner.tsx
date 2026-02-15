@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { Scan, Loader2, AlertTriangle, CheckCircle, Info, ArrowUp, Sparkles, Target } from 'lucide-react';
+import { Scan, Loader2, AlertTriangle, CheckCircle, Info, ArrowUp, Sparkles, Target, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -45,6 +46,7 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 const ResumeScanner = () => {
+  const navigate = useNavigate();
   const [resumeText, setResumeText] = useState('');
   const [targetRole, setTargetRole] = useState('');
   const [isScanning, setIsScanning] = useState(false);
@@ -195,6 +197,16 @@ const ResumeScanner = () => {
                   </div>
                 </Card>
               )}
+
+              {/* Generate New Resume CTA */}
+              <Card className="p-8 bg-card border-border text-center space-y-4">
+                <FileText className="h-10 w-10 text-primary mx-auto" />
+                <h3 className="text-xl font-semibold text-foreground">Ready to improve your resume?</h3>
+                <p className="text-muted-foreground text-sm max-w-md mx-auto">Use our AI Resume Builder to create a new ATS-optimized resume incorporating these suggestions.</p>
+                <Button onClick={() => navigate('/resume-builder')} size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground">
+                  <FileText className="h-4 w-4 mr-2" />Generate New Resume
+                </Button>
+              </Card>
             </motion.div>
           )}
         </div>
