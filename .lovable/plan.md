@@ -1,53 +1,62 @@
 
+# Chat Memory + Hide Sidebar Pages
 
-# Rename CareerBot and Talk to Recruiters + Fix Response Tone
+## Overview
 
-## What Changes
+Two changes: (1) give CareerBot and YourDream Bot conversation memory so the AI knows what was said earlier, and (2) hide "Interview Question Bank", "Get Started", "Our Team", and "Careers" from the sidebar.
 
-1. **Rename "AI Career Coach" to "CareerBot"** across all pages (sidebar, header, pricing, payments, chatbot title/messages).
+## Changes
 
-2. **Rename "Speak with Recruiters" to "Talk to Recruiters"** across all pages (sidebar, page header, chatbot title/messages). Also rename "Recruiter Bot" references in pricing/payments to "YourDream Bot".
+### 1. Chat Memory -- `src/components/ChatBot.tsx`
 
-3. **Fix markdown formatting in responses** -- the AI currently returns responses with `#`, `*`, and other markdown symbols. The system prompts in the edge function will be updated to instruct the model to reply in plain, conversational text without any markdown formatting.
+Currently, only the latest user message is sent to the edge function (line 84: `data: { message: currentInput }`). The fix is to build and send a `conversationHistory` array of all previous messages alongside the current message.
 
-4. **Enable streaming (real-time) responses** -- currently the chatbot waits for the full AI response before displaying it. This will be changed to stream tokens as they arrive, so the user sees text appear in real time.
+- Build the history from the `messages` state (excluding the initial bot greeting), mapping each message to `{ role: 'user' | 'assistant', content: string }`
+- Send `{ message: currentInput, conversationHistory: [...] }` in the request body
 
-## Files to Change
+### 2. Use Conversation History in Edge Function -- `supabase/functions/unified-ai-api/index.ts`
 
-### 1. `src/components/Sidebar.tsx`
-- Line 48: "AI Career Coach" -> "CareerBot"
-- Line 49: "Speak with Recruiters" -> "Talk to Recruiters"
+Currently, the edge function sends only two messages to OpenRouter: system prompt + single user message (lines 174-182). The fix:
 
-### 2. `src/pages/CareerCoach.tsx`
-- Line 59: Header title "AI Career Coach" -> "CareerBot"
-- Line 112: ChatBot title "Your Personal Career Coach" -> "CareerBot"
-- Line 114: Initial message updated to use "CareerBot" name
+- For `career-coach` and `recruiter-chat` types, check if `data.conversationHistory` exists
+- If it does, build the messages array as: `[system prompt, ...conversationHistory, latest user message]`
+- This gives the AI full context of the conversation
 
-### 3. `src/pages/Recruiters.tsx`
-- Line 47: Page heading "Speak with Recruiters" -> "Talk to Recruiters"
-- Line 97: Sub-heading updated
-- Line 101: ChatBot title "Recruiter Connection Assistant" -> "YourDream Bot"
-- Line 103: Initial message updated with new name
+### 3. Hide Sidebar Items -- `src/components/Sidebar.tsx`
 
-### 4. `src/components/Pricing.tsx`
-- Lines 30, 50, 71: "AI Career Coach" -> "CareerBot"
-- Line 51: "Recruiter Bot" -> "YourDream Bot"
+Remove these items from the `menuItems` array:
+- "Interview Question Bank" (line 50)
+- "Get Started" (line 56)
+- "Our Team" (line 57)
+- "Careers" (line 58)
 
-### 5. `src/pages/Payments.tsx`
-- Lines 41, 62, 84, 110: "AI Career Coach" -> "CareerBot"
-- Lines 63, 85, 111: "Recruiter Bot" -> "YourDream Bot"
+This also removes the entire "Company" section since all its items will be gone.
 
-### 6. `supabase/functions/unified-ai-api/index.ts` (fix tone + streaming)
-- Line 129: Career coach system prompt -- add instruction: "Reply in plain conversational English. Do not use markdown, hashtags, asterisks, bullet points, or any special formatting. Write as if you're talking to a friend."
-- Line 151: Recruiter chat system prompt -- same plain-text instruction added.
+## Technical Details
 
-### 7. `src/components/ChatBot.tsx` (enable real-time streaming)
-- Replace the current non-streaming `askCareerCoach` / `chatWithRecruiter` calls with a streaming fetch to the `unified-ai-api` edge function.
-- Parse SSE tokens line-by-line and update the assistant message progressively as tokens arrive.
-- Show text appearing in real time instead of waiting for the full response.
+**ChatBot.tsx** -- in `handleSendMessage`, before the fetch call, build:
+```
+const conversationHistory = messages
+  .filter(m => m.id !== '1') // exclude initial greeting
+  .map(m => ({
+    role: m.sender === 'user' ? 'user' : 'assistant',
+    content: m.content
+  }));
+```
+Then send `{ message: currentInput, conversationHistory }` in the body.
 
-### 8. `supabase/functions/unified-ai-api/index.ts` (enable streaming)
-- For `career-coach` and `recruiter-chat` types, set `stream: true` in the OpenRouter request.
-- Return the response body stream directly to the client with `Content-Type: text/event-stream`.
-- Keep non-streaming behavior for `interview-analysis` and `material-generator` (which need full JSON parsing).
+**unified-ai-api/index.ts** -- in the `career-coach` and `recruiter-chat` cases, after setting `userMessage`, also extract `data.conversationHistory`. Then when building the OpenRouter request body, replace the hardcoded two-message array with:
+```
+messages: [
+  { role: "system", content: systemPrompt },
+  ...(conversationHistory || []),
+  { role: "user", content: userMessage }
+]
+```
 
+**Sidebar.tsx** -- remove "Interview Question Bank" from the Tools section and remove the entire "Company" section.
+
+## Files Modified
+- `src/components/ChatBot.tsx`
+- `supabase/functions/unified-ai-api/index.ts`
+- `src/components/Sidebar.tsx`
