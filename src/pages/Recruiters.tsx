@@ -43,8 +43,8 @@ const Recruiters = () => {
           <div className="text-center mb-12">
             <div className="flex items-center justify-center space-x-2 mb-6">
               <Users className="h-8 w-8 text-primary" />
-              <h1 className="text-4xl font-bold text-foreground bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
-                Speak with Recruiters
+               <h1 className="text-4xl font-bold text-foreground bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
+                Talk to Recruiters
               </h1>
             </div>
             <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
@@ -98,9 +98,9 @@ const Recruiters = () => {
                 </h2>
               </div>
               <ChatBot
-                title="Recruiter Connection Assistant"
+                title="YourDream Bot"
                 placeholder="Tell me about your dream job..."
-                initialMessage="Welcome! I'm here to help you connect with recruiters from top companies. Whether you're looking for your next role at a tech giant, startup, or Fortune 500 company, I can help facilitate those connections. What type of role and company are you interested in?"
+                initialMessage="Hey! I'm YourDream Bot. I can help you connect with recruiters from top companies, whether you're eyeing a tech giant, a startup, or a Fortune 500. What kind of role are you looking for?"
                 context="recruiter"
               />
             </div>

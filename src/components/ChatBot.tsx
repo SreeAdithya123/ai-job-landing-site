@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { askCareerCoach, chatWithRecruiter } from '@/services/unifiedAiService';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   id: string;
@@ -30,14 +30,12 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
 
   useEffect(() => {
     if (initialMessage) {
-      setMessages([
-        {
-          id: '1',
-          content: initialMessage,
-          sender: 'bot',
-          timestamp: new Date()
-        }
-      ]);
+      setMessages([{
+        id: '1',
+        content: initialMessage,
+        sender: 'bot',
+        timestamp: new Date()
+      }]);
     }
   }, [initialMessage]);
 
@@ -64,37 +62,99 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
     setInputValue('');
     setIsLoading(true);
 
+    const botMessageId = (Date.now() + 1).toString();
+
     try {
-      console.log('Processing message with context:', context);
-      console.log('User input:', currentInput);
-      
-      let response;
-      if (context === 'career') {
-        response = await askCareerCoach(currentInput);
-      } else if (context === 'recruiter') {
-        response = await chatWithRecruiter(currentInput);
-      } else {
-        // Default fallback
-        response = await askCareerCoach(currentInput);
+      const requestType = context === 'recruiter' ? 'recruiter-chat' : 'career-coach';
+
+      // Get session for auth header
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/unified-ai-api`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {}),
+          },
+          body: JSON.stringify({
+            type: requestType,
+            data: { message: currentInput }
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
       }
 
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: response.content || "I'm here to help! Please try asking your question again.",
+      // Add empty bot message that we'll stream into
+      setMessages(prev => [...prev, {
+        id: botMessageId,
+        content: '',
         sender: 'bot',
         timestamp: new Date()
-      };
-      setMessages(prev => [...prev, botMessage]);
+      }]);
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No response stream');
+
+      const decoder = new TextDecoder();
+      let accumulated = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(data);
+              const token = parsed.choices?.[0]?.delta?.content;
+              if (token) {
+                accumulated += token;
+                const current = accumulated;
+                setMessages(prev => prev.map(m =>
+                  m.id === botMessageId ? { ...m, content: current } : m
+                ));
+              }
+            } catch {
+              // skip unparseable lines
+            }
+          }
+        }
+      }
+
+      // If no content was streamed, set a fallback
+      if (!accumulated) {
+        setMessages(prev => prev.map(m =>
+          m.id === botMessageId ? { ...m, content: "I'm here to help! Please try asking your question again." } : m
+        ));
+      }
     } catch (error) {
       console.error('Error processing message:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: "I'm sorry, I encountered an error processing your message. Please try again.",
-        sender: 'bot',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      
+      setMessages(prev => {
+        const hasBot = prev.some(m => m.id === botMessageId);
+        if (hasBot) {
+          return prev.map(m =>
+            m.id === botMessageId ? { ...m, content: "I'm sorry, I encountered an error. Please try again." } : m
+          );
+        }
+        return [...prev, {
+          id: botMessageId,
+          content: "I'm sorry, I encountered an error. Please try again.",
+          sender: 'bot' as const,
+          timestamp: new Date()
+        }];
+      });
+
       toast({
         title: "Error",
         description: "Failed to process your message. Please try again.",
@@ -114,8 +174,7 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
 
   return (
     <div className="bg-card rounded-xl shadow-lg border border-border h-[600px] flex flex-col">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-accent text-white p-4 rounded-t-xl">
+      <div className="bg-gradient-to-r from-primary to-accent text-primary-foreground p-4 rounded-t-xl">
         <div className="flex items-center space-x-2">
           <Bot className="h-6 w-6" />
           <h3 className="text-lg font-semibold">{title}</h3>
@@ -123,7 +182,6 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
         </div>
       </div>
 
-      {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
           {messages.map((message) => (
@@ -135,13 +193,13 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
             >
               {message.sender === 'bot' && (
                 <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="h-4 w-4 text-white" />
+                  <Bot className="h-4 w-4 text-primary-foreground" />
                 </div>
               )}
               <div
                 className={`max-w-[80%] p-3 rounded-lg ${
                   message.sender === 'user'
-                    ? 'bg-primary text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-foreground'
                 }`}
               >
@@ -157,10 +215,10 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
               )}
             </div>
           ))}
-          {isLoading && (
+          {isLoading && !messages.some(m => m.sender === 'bot' && m.content === '' && m.id !== '1') && (
             <div className="flex items-start space-x-3">
               <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <Bot className="h-4 w-4 text-white" />
+                <Bot className="h-4 w-4 text-primary-foreground" />
               </div>
               <div className="bg-muted p-3 rounded-lg">
                 <div className="flex items-center space-x-2">
@@ -174,7 +232,6 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
         </div>
       </ScrollArea>
 
-      {/* Input */}
       <div className="p-4 border-t border-border">
         <div className="flex space-x-2">
           <Input
