@@ -11,9 +11,23 @@ interface OutputDisplayProps {
   onClose: () => void;
 }
 
+const cleanOutput = (text: string): string => {
+  return text
+    .replace(/```[\s\S]*?```/g, '')       // Remove code blocks
+    .replace(/^#{1,6}\s+/gm, '')          // Remove # headings
+    .replace(/\*\*([^*]+)\*\*/g, '$1')    // Remove **bold**
+    .replace(/\*([^*]+)\*/g, '$1')        // Remove *italic*
+    .replace(/__([^_]+)__/g, '$1')        // Remove __bold__
+    .replace(/_([^_]+)_/g, '$1')          // Remove _italic_
+    .replace(/`([^`]+)`/g, '$1')          // Remove inline code
+    .replace(/\n{3,}/g, '\n\n')           // Normalize whitespace
+    .trim();
+};
+
 const OutputDisplay: React.FC<OutputDisplayProps> = ({ fileName, type, content, onClose }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
+  const cleanedContent = cleanOutput(content);
 
   const getIcon = () => {
     switch (type.toLowerCase()) {
@@ -34,7 +48,7 @@ const OutputDisplay: React.FC<OutputDisplayProps> = ({ fileName, type, content, 
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(content);
+      await navigator.clipboard.writeText(cleanedContent);
       toast({
         title: "Copied to clipboard",
         description: "The generated content has been copied to your clipboard.",
@@ -49,7 +63,7 @@ const OutputDisplay: React.FC<OutputDisplayProps> = ({ fileName, type, content, 
   };
 
   const handleDownload = () => {
-    const blob = new Blob([content], { type: 'text/plain' });
+    const blob = new Blob([cleanedContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -113,7 +127,7 @@ const OutputDisplay: React.FC<OutputDisplayProps> = ({ fileName, type, content, 
         <div className={`${isExpanded ? '' : 'max-h-64 overflow-hidden'} transition-all duration-300`}>
           <div className="prose max-w-none">
             <pre className="whitespace-pre-wrap text-sm text-foreground font-sans leading-relaxed">
-              {content}
+              {cleanedContent}
             </pre>
           </div>
         </div>
