@@ -30,24 +30,12 @@
      description: 'Bold layout for creative professionals',
      color: 'from-purple-500 to-pink-500'
    },
-   {
-     id: 'technical-engineer',
-     name: 'Technical Engineer',
-     description: 'Structured format for tech roles',
-     color: 'from-green-500 to-emerald-600'
-   },
-   {
-     id: 'academic-overleaf',
-     name: 'Academic Overleaf',
-     description: 'LaTeX-inspired scholarly style',
-     color: 'from-amber-500 to-orange-600'
-   },
-   {
-     id: 'executive-resume',
-     name: 'Executive Resume',
-     description: 'Premium design for senior positions',
-     color: 'from-slate-600 to-slate-800'
-   }
+    {
+      id: 'academic-overleaf',
+      name: 'Academic Overleaf',
+      description: 'LaTeX-inspired scholarly style',
+      color: 'from-amber-500 to-orange-600'
+    }
  ];
  
  export const TemplateGallery: React.FC<TemplateGalleryProps> = ({

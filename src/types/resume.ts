@@ -87,13 +87,11 @@
    fontStyle: 'inter' | 'roboto' | 'helvetica' | 'sora';
  }
  
- export type TemplateId = 
-   | 'modern-corporate'
-   | 'minimal-professional'
-   | 'creative-designer'
-   | 'technical-engineer'
-   | 'academic-overleaf'
-   | 'executive-resume';
+export type TemplateId = 
+  | 'modern-corporate'
+  | 'minimal-professional'
+  | 'creative-designer'
+  | 'academic-overleaf';
  
  export interface Resume {
    id: string;

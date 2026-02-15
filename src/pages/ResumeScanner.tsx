@@ -1,167 +1,202 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { Scan, ExternalLink, CheckCircle, BarChart, TrendingUp, Settings, Home, ArrowLeft } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Scan, Loader2, AlertTriangle, CheckCircle, Info, ArrowUp, Sparkles, Target } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
+import { scanResume, type ScanResult } from '@/services/resumeScannerService';
+
+const ScoreGauge = ({ score }: { score: number }) => {
+  const radius = 70;
+  const circumference = 2 * Math.PI * radius;
+  const progress = (score / 100) * circumference;
+  const color = score >= 75 ? 'hsl(var(--chart-2))' : score >= 50 ? 'hsl(45, 93%, 47%)' : 'hsl(var(--destructive))';
+
+  return (
+    <div className="relative w-44 h-44 mx-auto">
+      <svg className="w-full h-full -rotate-90" viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth="10" />
+        <circle cx="80" cy="80" r={radius} fill="none" stroke={color} strokeWidth="10"
+          strokeDasharray={circumference} strokeDashoffset={circumference - progress}
+          strokeLinecap="round" className="transition-all duration-1000" />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-4xl font-bold text-foreground">{score}</span>
+        <span className="text-xs text-muted-foreground">ATS Score</span>
+      </div>
+    </div>
+  );
+};
+
+const SECTION_LABELS: Record<string, string> = {
+  contactInfo: 'Contact Info',
+  summary: 'Summary',
+  experience: 'Experience',
+  skills: 'Skills',
+  education: 'Education',
+  keywords: 'Keywords',
+  formatting: 'Formatting',
+};
 
 const ResumeScanner = () => {
-  const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const [resumeText, setResumeText] = useState('');
+  const [targetRole, setTargetRole] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
+  const [result, setResult] = useState<ScanResult | null>(null);
 
-  const handleOpenResumeScanner = () => {
-    window.open('https://resume-analyst.netlify.app/', '_blank');
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-  };
-
-  const features = [
-    {
-      icon: Scan,
-      title: 'AI-Powered Analysis',
-      description: 'Get instant feedback on your resume with advanced AI scanning technology'
-    },
-    {
-      icon: BarChart,
-      title: 'Detailed Scoring',
-      description: 'Receive comprehensive scores across multiple resume criteria'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Improvement Suggestions',
-      description: 'Get actionable recommendations to boost your resume effectiveness'
+  const handleScan = async () => {
+    if (resumeText.trim().length < 50) {
+      toast({ title: 'Too Short', description: 'Please paste at least 50 characters of resume content.', variant: 'destructive' });
+      return;
     }
-  ];
+    setIsScanning(true);
+    setResult(null);
+    try {
+      const data = await scanResume(resumeText, targetRole || undefined);
+      setResult(data);
+      toast({ title: 'Scan Complete!', description: `Your ATS score is ${data.overallScore}/100` });
+    } catch (err: any) {
+      toast({ title: 'Scan Failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  const priorityIcon = (p: string) => {
+    if (p === 'high') return <AlertTriangle className="h-4 w-4 text-destructive" />;
+    if (p === 'medium') return <Info className="h-4 w-4 text-yellow-500" />;
+    return <ArrowUp className="h-4 w-4 text-muted-foreground" />;
+  };
 
   return (
     <ProtectedRoute>
-      <Layout fullSize>
-        {/* Full Screen Header */}
-        <div className="bg-slate-800/30 backdrop-blur-md border-b border-slate-700/50">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <button 
-                  onClick={() => navigate('/dashboard')} 
-                  className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-all duration-200 group"
-                >
-                  <ArrowLeft className="h-4 w-4 text-slate-300 group-hover:text-white transition-colors" />
-                  <span className="text-slate-300 group-hover:text-white font-medium transition-colors">Back</span>
-                </button>
-                
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-xl flex items-center justify-center shadow-lg">
-                    <Scan className="h-6 w-6 text-white" />
-                  </div>
+      <Layout>
+        <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+          {/* Header */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+            <div className="w-14 h-14 bg-gradient-to-r from-primary to-accent rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Scan className="h-7 w-7 text-primary-foreground" />
+            </div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">AI Resume Scanner</h1>
+            <p className="text-muted-foreground">Paste your resume content below to get an instant ATS compatibility score and improvement suggestions.</p>
+          </motion.div>
+
+          {/* Input Section */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <Card className="p-6 bg-card border-border space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2">
+                  <label className="text-sm font-medium text-foreground mb-1 block">Resume Content *</label>
+                  <Textarea
+                    value={resumeText}
+                    onChange={(e) => setResumeText(e.target.value)}
+                    placeholder="Paste your full resume text here..."
+                    className="min-h-[200px] bg-muted border-border text-foreground"
+                  />
+                </div>
+                <div className="space-y-4">
                   <div>
-                    <h1 className="text-2xl font-bold text-white">AI Resume Scanner</h1>
-                    <p className="text-slate-400 text-sm">Scan and analyze your resume with AI</p>
+                    <label className="text-sm font-medium text-foreground mb-1 block">
+                      <Target className="h-3.5 w-3.5 inline mr-1" />Target Role (optional)
+                    </label>
+                    <Input
+                      value={targetRole}
+                      onChange={(e) => setTargetRole(e.target.value)}
+                      placeholder="e.g. Software Engineer"
+                      className="bg-muted border-border text-foreground"
+                    />
                   </div>
+                  <Button onClick={handleScan} disabled={isScanning || resumeText.trim().length < 50} className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground">
+                    {isScanning ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Scanning...</> : <><Scan className="h-4 w-4 mr-2" />Scan Resume</>}
+                  </Button>
                 </div>
               </div>
-
-              <div className="flex items-center space-x-3">
-                <button className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-all duration-200">
-                  <Settings className="h-4 w-4 text-slate-300" />
-                  <span className="text-slate-300 font-medium">Settings</span>
-                </button>
-                <button 
-                  onClick={() => navigate('/dashboard')}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
-                >
-                  <Home className="h-4 w-4" />
-                  <span>Dashboard</span>
-                </button>
-                <button 
-                  onClick={handleSignOut} 
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
-                >
-                  <span>Sign Out</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 max-w-7xl mx-auto w-full px-6 py-12">
-          {/* Main CTA Section */}
-          <motion.div
-            className="bg-gradient-to-r from-primary via-primary-light to-accent p-8 rounded-xl text-white mb-12 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Scan className="h-8 w-8 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold mb-4">Scan Your Resume and See Your Score</h2>
-            <p className="text-white/90 mb-8 max-w-2xl mx-auto">
-              Upload your resume and get instant AI-powered analysis with detailed scoring and personalized recommendations to improve your chances of landing your dream job.
-            </p>
-            <button
-              onClick={handleOpenResumeScanner}
-              className="inline-flex items-center space-x-2 bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors transform hover:scale-105 duration-200"
-            >
-              <span>Start Scanning Your Resume</span>
-              <ExternalLink className="h-5 w-5" />
-            </button>
+            </Card>
           </motion.div>
 
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -4 }}
-              >
-                <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center mb-4">
-                  <feature.icon className="h-6 w-6 text-white" />
+          {/* Results */}
+          {result && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+              {/* Score + Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="p-6 bg-card border-border flex flex-col items-center justify-center">
+                  <ScoreGauge score={result.overallScore} />
+                </Card>
+                <Card className="md:col-span-2 p-6 bg-card border-border space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" />Summary</h3>
+                  <p className="text-muted-foreground text-sm">{result.summary_text}</p>
+                  {result.strengths?.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-foreground mb-2">Strengths</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {result.strengths.map((s, i) => (
+                          <Badge key={i} variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                            <CheckCircle className="h-3 w-3 mr-1" />{s}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              </div>
+
+              {/* Section Breakdown */}
+              <Card className="p-6 bg-card border-border">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Section Breakdown</h3>
+                <div className="space-y-4">
+                  {Object.entries(result.sections).map(([key, section]) => (
+                    <div key={key}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="font-medium text-foreground">{SECTION_LABELS[key] || key}</span>
+                        <span className="text-muted-foreground">{section.score}/100</span>
+                      </div>
+                      <Progress value={section.score} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">{section.feedback}</p>
+                    </div>
+                  ))}
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-white">{feature.title}</h3>
-                <p className="text-slate-400 text-sm">{feature.description}</p>
-              </motion.div>
-            ))}
-          </div>
+              </Card>
 
-          {/* Tips Section */}
-          <motion.div
-            className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl shadow-lg p-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <h3 className="text-xl font-semibold mb-6 text-white">Resume Scanning Tips</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-medium text-primary mb-2">📊 What Gets Analyzed</h4>
-                <ul className="text-sm text-slate-400 space-y-1">
-                  <li>• Keywords and skill matching</li>
-                  <li>• Resume format and structure</li>
-                  <li>• Content quality and relevance</li>
-                  <li>• ATS compatibility score</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-medium text-accent mb-2">🎯 Improvement Areas</h4>
-                <ul className="text-sm text-slate-400 space-y-1">
-                  <li>• Industry-specific recommendations</li>
-                  <li>• Missing skills identification</li>
-                  <li>• Content optimization suggestions</li>
-                  <li>• Format enhancement tips</li>
-                </ul>
-              </div>
-            </div>
-          </motion.div>
+              {/* Suggestions */}
+              {result.suggestions?.length > 0 && (
+                <Card className="p-6 bg-card border-border">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Improvement Suggestions</h3>
+                  <div className="space-y-3">
+                    {result.suggestions.map((s, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                        {priorityIcon(s.priority)}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="text-xs border-border">{s.category}</Badge>
+                            <Badge variant={s.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">{s.priority}</Badge>
+                          </div>
+                          <p className="text-sm text-foreground">{s.text}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* Missing Keywords */}
+              {result.missingKeywords?.length > 0 && (
+                <Card className="p-6 bg-card border-border">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Missing Keywords</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {result.missingKeywords.map((kw, i) => (
+                      <Badge key={i} variant="outline" className="border-destructive/30 text-destructive">{kw}</Badge>
+                    ))}
+                  </div>
+                </Card>
+              )}
+            </motion.div>
+          )}
         </div>
       </Layout>
     </ProtectedRoute>

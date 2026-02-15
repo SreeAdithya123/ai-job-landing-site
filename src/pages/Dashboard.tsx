@@ -431,7 +431,7 @@ const Dashboard = () => {
             </div>
 
             {/* Quick Actions - Interview Options */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6">
               {/* AI Interviewer */}
               <div className="glass-card p-4 sm:p-6 rounded-xl hover:shadow-lg transition-shadow">
                 <div className="flex items-start gap-4">
@@ -451,28 +451,6 @@ const Dashboard = () => {
                 >
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Start AI Interview
-                </Button>
-              </div>
-
-              {/* Virtual Interviewer */}
-              <div className="glass-card p-4 sm:p-6 rounded-xl hover:shadow-lg transition-shadow">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-secondary to-primary rounded-xl flex items-center justify-center shadow-md shrink-0">
-                    <Video className="h-6 w-6 text-secondary-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold font-headline text-foreground">Virtual Interviewer</h3>
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                      Experience immersive video interviews with body language analysis.
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => navigate('/virtual-interviewer')}
-                  className="w-full mt-4 bg-gradient-to-r from-secondary to-primary text-secondary-foreground"
-                >
-                  <Video className="h-4 w-4 mr-2" />
-                  Start Virtual Interview
                 </Button>
               </div>
             </div>
