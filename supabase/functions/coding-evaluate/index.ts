@@ -14,41 +14,96 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get('authorization');
-    console.log('🔑 Auth header present:', !!authHeader);
-    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: authHeader ? { Authorization: authHeader } : {},
-        },
-      }
+      { global: { headers: authHeader ? { Authorization: authHeader } : {} } }
     );
 
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    
     if (authError || !user) {
-      console.error('❌ Authentication failed:', authError);
       throw new Error('User not authenticated');
     }
 
-    const { code, language, output, problem, executionTime, isCorrect } = await req.json();
-
-    console.log('🧠 Evaluating code submission:', {
-      language,
-      problemTitle: problem.title,
-      codeLength: code.length,
-      isCorrect
-    });
-
-    // Call OpenRouter API for AI evaluation
-    const openRouterApiKey = Deno.env.get('OPENROUTER_API_KEY');
-    if (!openRouterApiKey) {
-      throw new Error('OpenRouter API key not configured');
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key not configured');
     }
 
-    const evaluationPrompt = `You are an expert coding interviewer evaluating a candidate's solution.
+    const { code, language, problem, mode } = await req.json();
+
+    console.log('🧠 Mode:', mode, '| Problem:', problem.title, '| Language:', language);
+
+    if (mode === 'run') {
+      // Quick AI trace: analyze code against test cases
+      const runPrompt = `You are an expert code evaluator. Mentally trace through this code and determine what it would output when run against the given test cases.
+
+Problem: ${problem.title}
+Description: ${problem.description}
+
+Code (${language}):
+\`\`\`${language}
+${code}
+\`\`\`
+
+Test Cases:
+${(problem.testCases || []).map((tc: any, i: number) => `Test ${i + 1}: Input: ${tc.input} | Expected Output: ${tc.output}`).join('\n')}
+
+Trace through the code logic step by step for each test case. Determine:
+1. What the code would actually output for each test case
+2. Whether each test case passes or fails
+3. Overall correctness
+
+Return JSON:
+{
+  "output": "A human-readable summary of execution results for each test case",
+  "testResults": [{"input": "...", "expected": "...", "actual": "...", "passed": true/false}],
+  "isCorrect": true/false,
+  "analysis": "Brief explanation of code behavior"
+}`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: 'You are a precise code evaluator. Always return valid JSON.' },
+            { role: 'user', content: runPrompt }
+          ],
+          response_format: { type: 'json_object' },
+          temperature: 0.1,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ OpenAI API error:', response.status, errorText);
+        throw new Error(`OpenAI API failed: ${response.status}`);
+      }
+
+      const aiData = await response.json();
+      const result = JSON.parse(aiData.choices[0].message.content);
+
+      console.log('✅ Run complete. Correct:', result.isCorrect);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          output: result.output,
+          isCorrect: result.isCorrect,
+          testResults: result.testResults,
+          analysis: result.analysis,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // mode === 'evaluate' (full evaluation + save to DB)
+    const evaluationPrompt = `You are an expert coding interviewer evaluating a candidate's solution with 100% accuracy.
 
 Problem: ${problem.title}
 Difficulty: ${problem.difficulty}
@@ -57,83 +112,54 @@ Language: ${language}
 Problem Description:
 ${problem.description}
 
+Test Cases:
+${(problem.testCases || []).map((tc: any, i: number) => `Test ${i + 1}: Input: ${tc.input} | Expected Output: ${tc.output}`).join('\n')}
+
 Candidate's Code:
 \`\`\`${language}
 ${code}
 \`\`\`
 
-Execution Output:
-${output}
+IMPORTANT: Do NOT rely on any client-provided correctness. You must independently trace through the code against ALL test cases to determine correctness.
 
-Execution Time: ${executionTime || 'N/A'}
-Result: ${isCorrect ? 'Correct' : 'Incorrect'}
-
-Provide a comprehensive evaluation including:
-1. Correctness assessment (is the solution correct?)
-2. Code quality and readability
-3. Time complexity analysis (use Big O notation)
-4. Space complexity analysis (use Big O notation)
-5. Specific suggestions for improvement
-6. Overall score out of 10
-
-Format your response as JSON with the following structure:
+Provide a comprehensive evaluation as JSON:
 {
-  "feedback": "detailed feedback text",
-  "timeComplexity": "O(n) explanation",
-  "spaceComplexity": "O(1) explanation",
+  "feedback": "detailed feedback text covering correctness, logic, edge cases",
+  "timeComplexity": "O(n) with explanation",
+  "spaceComplexity": "O(1) with explanation",
   "score": 8,
+  "isCorrect": true,
   "strengths": ["point 1", "point 2"],
   "improvements": ["suggestion 1", "suggestion 2"]
 }`;
 
-    console.log('📡 Calling OpenRouter API for evaluation...');
-    
-    const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openRouterApiKey}`,
+        'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://vyoman.ai',
-        'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'Vyoman AI Interviewer',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-4o-mini',
+        model: 'gpt-4o',
         messages: [
-          { role: 'system', content: 'You are an expert coding interviewer. Provide detailed, constructive feedback in JSON format.' },
+          { role: 'system', content: 'You are an expert coding interviewer. Return valid JSON only.' },
           { role: 'user', content: evaluationPrompt }
         ],
+        response_format: { type: 'json_object' },
+        temperature: 0.2,
       }),
     });
 
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('❌ OpenRouter API error:', aiResponse.status, errorText);
-      throw new Error(`AI evaluation failed: ${errorText}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ OpenAI API error:', response.status, errorText);
+      throw new Error(`OpenAI API failed: ${response.status}`);
     }
 
-    const aiData = await aiResponse.json();
-    console.log('✅ AI evaluation received');
+    const aiData = await response.json();
+    const evaluation = JSON.parse(aiData.choices[0].message.content);
 
-    let evaluation;
-    try {
-      const aiContent = aiData.choices[0].message.content;
-      // Try to extract JSON from markdown code blocks
-      const jsonMatch = aiContent.match(/```json\n([\s\S]*?)\n```/) || 
-                       aiContent.match(/```\n([\s\S]*?)\n```/);
-      const jsonText = jsonMatch ? jsonMatch[1] : aiContent;
-      evaluation = JSON.parse(jsonText);
-    } catch (parseError) {
-      console.error('❌ Failed to parse AI response:', parseError);
-      // Fallback evaluation
-      evaluation = {
-        feedback: aiData.choices[0].message.content,
-        timeComplexity: 'Analysis pending',
-        spaceComplexity: 'Analysis pending',
-        score: isCorrect ? 7 : 4,
-        strengths: ['Solution attempted'],
-        improvements: ['See detailed feedback']
-      };
-    }
+    console.log('✅ Evaluation complete. Score:', evaluation.score);
 
     // Save to database
     const { data: savedResult, error: saveError } = await supabaseClient
@@ -146,9 +172,8 @@ Format your response as JSON with the following structure:
         difficulty: problem.difficulty,
         language,
         user_code: code,
-        code_output: output,
-        execution_time: executionTime,
-        is_correct: isCorrect,
+        code_output: evaluation.feedback,
+        is_correct: evaluation.isCorrect,
         ai_feedback: evaluation.feedback,
         score: evaluation.score,
         time_complexity: evaluation.timeComplexity,
@@ -161,8 +186,6 @@ Format your response as JSON with the following structure:
       console.error('❌ Error saving result:', saveError);
       throw saveError;
     }
-
-    console.log('✅ Evaluation completed and saved');
 
     return new Response(
       JSON.stringify({

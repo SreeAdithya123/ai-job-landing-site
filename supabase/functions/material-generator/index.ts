@@ -12,16 +12,13 @@ const corsHeaders = {
 serve(async (req) => {
   console.log('Material generator function called');
   
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Verify authentication
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
-      console.error('❌ No authorization header provided');
       return new Response(
         JSON.stringify({ error: 'Authorization required' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -31,24 +28,17 @@ serve(async (req) => {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-      }
+      { global: { headers: { Authorization: authHeader } } }
     );
 
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     
     if (authError || !user) {
-      console.error('❌ Authentication failed:', authError);
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    console.log('✅ Authenticated user:', user.id);
 
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
@@ -58,10 +48,10 @@ serve(async (req) => {
     console.log('Received text length:', text.length, 'Type:', type);
 
     const prompts = {
-      summary: `Create a comprehensive summary of the following text. Structure it with clear headings and bullet points:\n\n${text}`,
-      notes: `Convert the following text into student-friendly bullet notes with clear sections and subsections:\n\n${text}`,
-      flashcards: `Create Q&A flashcards from the following text. Format as "Q: [question]\nA: [answer]" pairs:\n\n${text}`,
-      qa: `Extract important questions and answers from the following text. Format as structured Q&A:\n\n${text}`
+      summary: `Write a clear, readable summary of the following text in plain paragraphs. Use numbered sections like "1.", "2." instead of any special formatting. Do not use any symbols like #, *, **, or markdown. Write naturally as a human would explain it to a student:\n\n${text}`,
+      notes: `Convert the following text into student-friendly bullet notes. Use dashes (-) for bullet points. Use numbered labels like "Section 1:" for sections. Do not use any markdown symbols like #, *, **, or code blocks. Write in a clear, natural human tone:\n\n${text}`,
+      flashcards: `Create Q&A flashcards from the following text. Format each as:\n\nQ: [question]\nA: [answer]\n\nKeep answers concise and clear. Do not use any markdown formatting like #, *, **, or code blocks:\n\n${text}`,
+      qa: `Extract important questions and answers from the following text. Format as numbered pairs:\n\n1. Question: [question]\n   Answer: [answer]\n\nDo not use any markdown formatting like #, *, **, or code blocks. Write in a clear, natural tone:\n\n${text}`
     };
 
     const prompt = prompts[type as keyof typeof prompts] || prompts.summary;
@@ -77,7 +67,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert educational content creator. Generate well-structured, comprehensive study materials.'
+            content: 'You are an expert educational content creator. Write in plain text only. Do not use any markdown formatting whatsoever - no hash symbols (#), no asterisks (*), no bold (**), no code blocks (```), no underscores for emphasis. Use natural language with clear paragraph breaks, dashes for bullets, and numbered lists. Write as a friendly, knowledgeable human tutor would.'
           },
           {
             role: 'user',
@@ -95,8 +85,6 @@ serve(async (req) => {
 
     const data = await response.json();
     const generatedContent = data.choices[0].message.content;
-
-    console.log('Generated content for user:', user.id);
 
     return new Response(JSON.stringify({ content: generatedContent }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

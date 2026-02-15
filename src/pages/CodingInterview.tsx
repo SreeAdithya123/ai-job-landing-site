@@ -117,20 +117,50 @@ const CodingInterview = () => {
     }
   };
 
-  const handleRunCode = () => {
+  const handleRunCode = async () => {
+    if (!problem || !code.trim()) {
+      toast({
+        title: "No Code",
+        description: "Please write some code before running",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsRunning(true);
+    setOutput('Analyzing your code against test cases...');
+    setIsCorrect(null);
     setExecutionTime(null);
-    
-    const startTime = Date.now();
-    
-    setTimeout(() => {
-      const endTime = Date.now();
-      const execTime = (endTime - startTime) / 1000;
-      setExecutionTime(execTime);
-      setOutput(`Code executed successfully!\nExecution time: ${execTime.toFixed(3)}s\n\nNote: This is a simulated execution.`);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const { data, error } = await supabase.functions.invoke('coding-evaluate', {
+        body: { code, language, problem, mode: 'run' },
+        headers: session?.access_token ? {
+          Authorization: `Bearer ${session.access_token}`
+        } : {}
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        setOutput(data.output || data.analysis || 'Code analysis complete.');
+        setIsCorrect(data.isCorrect);
+      } else {
+        throw new Error(data.error || 'Run failed');
+      }
+    } catch (error: any) {
+      console.error('Error running code:', error);
+      setOutput(`Error: ${error.message || 'Failed to analyze code'}`);
+      toast({
+        title: "Run Error",
+        description: "Failed to analyze your code",
+        variant: "destructive"
+      });
+    } finally {
       setIsRunning(false);
-      setIsCorrect(Math.random() > 0.3);
-    }, 1500);
+    }
   };
 
   const handleSubmit = async () => {
@@ -156,14 +186,7 @@ const CodingInterview = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       const { data, error } = await supabase.functions.invoke('coding-evaluate', {
-        body: {
-          code,
-          language,
-          output: output || 'No output generated',
-          problem,
-          executionTime,
-          isCorrect: isCorrect ?? false
-        },
+        body: { code, language, problem, mode: 'evaluate' },
         headers: session?.access_token ? {
           Authorization: `Bearer ${session.access_token}`
         } : {}
@@ -173,8 +196,8 @@ const CodingInterview = () => {
 
       if (data.success) {
         setEvaluation(data.evaluation);
+        setIsCorrect(data.evaluation.isCorrect ?? null);
         refetchHistory();
-        // Deduct credit on successful submission
         deductCredit({ interviewType: 'coding' });
         toast({
           title: "Evaluation Complete",
@@ -213,23 +236,23 @@ const CodingInterview = () => {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="border-b border-white/10 bg-black/20 backdrop-blur-md">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background">
+        <div className="border-b border-border bg-card/80 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/interview-copilot')}
-                className="text-white hover:bg-white/10"
+                className="text-foreground hover:bg-muted"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
-              <Separator orientation="vertical" className="h-6 bg-white/20" />
+              <Separator orientation="vertical" className="h-6" />
               <div className="flex items-center gap-2">
                 <Code2 className="w-5 h-5 text-primary" />
-                <h1 className="text-xl font-bold text-white">Coding Interview</h1>
+                <h1 className="text-xl font-bold text-foreground">Coding Interview</h1>
               </div>
             </div>
             <div className="flex gap-2">
@@ -237,7 +260,6 @@ const CodingInterview = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowHistory(!showHistory)}
-                className="border-white/20 text-white hover:bg-white/10"
               >
                 <History className="w-4 h-4 mr-2" />
                 {showHistory ? 'Hide' : 'Show'} History
@@ -246,7 +268,6 @@ const CodingInterview = () => {
                 variant="outline"
                 size="sm"
                 onClick={loadRandomProblem}
-                className="border-white/20 text-white hover:bg-white/10"
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
                 New Problem
@@ -257,30 +278,30 @@ const CodingInterview = () => {
 
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold text-white mb-3 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold text-foreground mb-3 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               Real-time Coding Challenges
             </h2>
-            <p className="text-slate-300 text-lg">
+            <p className="text-muted-foreground text-lg">
               Practice with AI-powered feedback • 35 problems across all difficulty levels
             </p>
           </div>
 
           {showHistory ? (
-            <Card className="bg-slate-800/50 border-purple-500/20 backdrop-blur-md">
+            <Card className="clay-card">
               <CardHeader>
-                <CardTitle className="text-white">Submission History</CardTitle>
+                <CardTitle className="text-foreground">Submission History</CardTitle>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[600px]">
                   {history && history.length > 0 ? (
                     <div className="space-y-4">
                       {history.map((item) => (
-                        <Card key={item.id} className="bg-slate-700/50">
+                        <Card key={item.id} className="clay-card">
                           <CardHeader>
                             <div className="flex items-center justify-between">
                               <div>
-                                <CardTitle className="text-lg text-white">{item.problem_title}</CardTitle>
-                                <p className="text-sm text-slate-400">
+                                <CardTitle className="text-lg text-foreground">{item.problem_title}</CardTitle>
+                                <p className="text-sm text-muted-foreground">
                                   {new Date(item.created_at).toLocaleString()}
                                 </p>
                               </div>
@@ -289,7 +310,7 @@ const CodingInterview = () => {
                                   {item.difficulty}
                                 </Badge>
                                 {item.score && (
-                                  <Badge variant="outline" className="text-white">
+                                  <Badge variant="outline">
                                     Score: {item.score}/10
                                   </Badge>
                                 )}
@@ -299,25 +320,19 @@ const CodingInterview = () => {
                           <CardContent>
                             <div className="space-y-2 text-sm">
                               <div className="flex gap-4">
-                                <span className="text-slate-400">Language:</span>
-                                <span className="font-mono text-white">{item.language}</span>
+                                <span className="text-muted-foreground">Language:</span>
+                                <span className="font-mono text-foreground">{item.language}</span>
                               </div>
-                              {item.execution_time && (
-                                <div className="flex gap-4">
-                                  <span className="text-slate-400">Execution Time:</span>
-                                  <span className="text-white">{item.execution_time}ms</span>
-                                </div>
-                              )}
                               {item.time_complexity && (
                                 <div className="flex gap-4">
-                                  <span className="text-slate-400">Time Complexity:</span>
-                                  <span className="font-mono text-white">{item.time_complexity}</span>
+                                  <span className="text-muted-foreground">Time Complexity:</span>
+                                  <span className="font-mono text-foreground">{item.time_complexity}</span>
                                 </div>
                               )}
                               {item.space_complexity && (
                                 <div className="flex gap-4">
-                                  <span className="text-slate-400">Space Complexity:</span>
-                                  <span className="font-mono text-white">{item.space_complexity}</span>
+                                  <span className="text-muted-foreground">Space Complexity:</span>
+                                  <span className="font-mono text-foreground">{item.space_complexity}</span>
                                 </div>
                               )}
                             </div>
@@ -326,17 +341,17 @@ const CodingInterview = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-slate-400 text-center py-8">No submissions yet</p>
+                    <p className="text-muted-foreground text-center py-8">No submissions yet</p>
                   )}
                 </ScrollArea>
               </CardContent>
             </Card>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-1 bg-slate-800/50 border-purple-500/20 backdrop-blur-md">
+              <Card className="lg:col-span-1 clay-card">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-white">Problem</CardTitle>
+                    <CardTitle className="text-foreground">Problem</CardTitle>
                     {problem && (
                       <Badge className={`${difficultyColors[problem.difficulty as keyof typeof difficultyColors]} border`}>
                         {problem.difficulty}
@@ -344,7 +359,7 @@ const CodingInterview = () => {
                     )}
                   </div>
                   {problem && (
-                    <CardDescription className="text-slate-300 text-lg font-semibold">
+                    <CardDescription className="text-foreground/80 text-lg font-semibold">
                       {problem.title}
                     </CardDescription>
                   )}
@@ -354,14 +369,14 @@ const CodingInterview = () => {
                     {problem ? (
                       <div className="space-y-4">
                         <div>
-                          <h3 className="text-white font-semibold mb-2">Description</h3>
-                          <p className="text-slate-300 text-sm whitespace-pre-wrap">{problem.description}</p>
+                          <h3 className="text-foreground font-semibold mb-2">Description</h3>
+                          <p className="text-muted-foreground text-sm whitespace-pre-wrap">{problem.description}</p>
                         </div>
 
                         {problem.constraints && problem.constraints.length > 0 && (
                           <div>
-                            <h3 className="text-white font-semibold mb-2">Constraints</h3>
-                            <ul className="list-disc list-inside space-y-1 text-sm text-slate-300">
+                            <h3 className="text-foreground font-semibold mb-2">Constraints</h3>
+                            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                               {problem.constraints.map((constraint, idx) => (
                                 <li key={idx}>{constraint}</li>
                               ))}
@@ -371,14 +386,14 @@ const CodingInterview = () => {
 
                         {problem.testCases && problem.testCases.length > 0 && (
                           <div>
-                            <h3 className="text-white font-semibold mb-2">Test Cases</h3>
+                            <h3 className="text-foreground font-semibold mb-2">Test Cases</h3>
                             <div className="space-y-3">
                               {problem.testCases.map((testCase, idx) => (
-                                <div key={idx} className="bg-slate-700/50 p-3 rounded-lg">
-                                  <p className="text-sm text-slate-300"><strong>Input:</strong> {testCase.input}</p>
-                                  <p className="text-sm text-slate-300"><strong>Output:</strong> {testCase.output}</p>
+                                <div key={idx} className="bg-muted/50 p-3 rounded-lg">
+                                  <p className="text-sm text-muted-foreground"><strong>Input:</strong> {testCase.input}</p>
+                                  <p className="text-sm text-muted-foreground"><strong>Output:</strong> {testCase.output}</p>
                                   {testCase.explanation && (
-                                    <p className="text-sm text-slate-400 mt-1">
+                                    <p className="text-sm text-muted-foreground/70 mt-1">
                                       <strong>Explanation:</strong> {testCase.explanation}
                                     </p>
                                   )}
@@ -389,23 +404,23 @@ const CodingInterview = () => {
                         )}
                       </div>
                     ) : (
-                      <div className="text-slate-400 text-center py-8">Loading problem...</div>
+                      <div className="text-muted-foreground text-center py-8">Loading problem...</div>
                     )}
                   </ScrollArea>
                 </CardContent>
               </Card>
 
               <div className="lg:col-span-2 space-y-6">
-                <Card className="bg-slate-800/50 border-purple-500/20 backdrop-blur-md">
+                <Card className="clay-card">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-white flex items-center gap-2">
+                      <CardTitle className="text-foreground flex items-center gap-2">
                         <Code2 className="w-5 h-5 text-primary" />
                         Code Editor
                       </CardTitle>
                       <div className="flex items-center gap-3">
                         <Select value={language} onValueChange={setLanguage}>
-                          <SelectTrigger className="w-40 bg-slate-700 border-slate-600 text-white">
+                          <SelectTrigger className="w-40">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -420,7 +435,6 @@ const CodingInterview = () => {
                           onClick={handleReset}
                           variant="outline"
                           size="sm"
-                          className="border-slate-600 text-slate-300 hover:bg-slate-700"
                         >
                           <RotateCcw className="w-4 h-4 mr-2" />
                           Reset
@@ -429,7 +443,7 @@ const CodingInterview = () => {
                     </div>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <div className="border-t border-slate-700">
+                    <div className="border-t border-border">
                       <CodeEditor
                         language={language}
                         value={code}
@@ -437,19 +451,19 @@ const CodingInterview = () => {
                         height="400px"
                       />
                     </div>
-                    <div className="flex gap-3 p-4 border-t border-slate-700">
+                    <div className="flex gap-3 p-4 border-t border-border">
                       <Button
                         onClick={handleRunCode}
                         disabled={isRunning}
                         className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
                       >
                         <Play className="w-4 h-4 mr-2" />
-                        {isRunning ? 'Running...' : 'Run Code'}
+                        {isRunning ? 'Analyzing...' : 'Run Code'}
                       </Button>
                       <Button
                         onClick={handleSubmit}
                         disabled={isEvaluating || !code.trim()}
-                        className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
+                        className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white"
                       >
                         <Send className="w-4 h-4 mr-2" />
                         {isEvaluating ? 'Evaluating...' : 'Submit Solution'}
@@ -458,7 +472,6 @@ const CodingInterview = () => {
                         <Button
                           onClick={handleNextProblem}
                           variant="outline"
-                          className="border-slate-600 text-white hover:bg-slate-700"
                         >
                           <ArrowRight className="w-4 h-4 mr-2" />
                           Next Problem
@@ -469,13 +482,13 @@ const CodingInterview = () => {
                 </Card>
 
                 {output && (
-                  <Card className="bg-slate-800/50 border-purple-500/20 backdrop-blur-md">
+                  <Card className="clay-card">
                     <CardHeader>
-                      <CardTitle className="text-white flex items-center gap-2">
+                      <CardTitle className="text-foreground flex items-center gap-2">
                         <Timer className="w-5 h-5 text-accent" />
                         Output
                         {isCorrect !== null && (
-                          <Badge className={isCorrect ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}>
+                          <Badge className={isCorrect ? 'bg-green-500/10 text-green-500 border-green-500/30' : 'bg-red-500/10 text-red-500 border-red-500/30'}>
                             {isCorrect ? (
                               <>
                                 <CheckCircle className="w-3 h-3 mr-1" />
@@ -492,7 +505,7 @@ const CodingInterview = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <pre className="bg-slate-900 p-4 rounded-lg text-sm text-slate-300 font-mono whitespace-pre-wrap">
+                      <pre className="bg-muted p-4 rounded-lg text-sm text-foreground font-mono whitespace-pre-wrap">
                         {output}
                       </pre>
                     </CardContent>
@@ -500,40 +513,40 @@ const CodingInterview = () => {
                 )}
 
                 {evaluation && (
-                  <Card className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 border-purple-500/30 backdrop-blur-md">
+                  <Card className="clay-card border-primary/20">
                     <CardHeader>
-                      <CardTitle className="text-white flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-yellow-400" />
+                      <CardTitle className="text-foreground flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-yellow-500" />
                         AI Evaluation
-                        <Badge className="bg-white/20 text-white ml-auto text-lg">
+                        <Badge className="bg-primary/10 text-primary ml-auto text-lg">
                           Score: {evaluation.score}/10
                         </Badge>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
-                        <h4 className="text-white font-semibold mb-2">Feedback</h4>
-                        <p className="text-slate-300 text-sm leading-relaxed">{evaluation.feedback}</p>
+                        <h4 className="text-foreground font-semibold mb-2">Feedback</h4>
+                        <p className="text-muted-foreground text-sm leading-relaxed">{evaluation.feedback}</p>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-slate-800/50 p-3 rounded-lg">
-                          <h5 className="text-slate-400 text-xs mb-1">Time Complexity</h5>
-                          <p className="text-white font-mono">{evaluation.timeComplexity}</p>
+                        <div className="bg-muted/50 p-3 rounded-lg">
+                          <h5 className="text-muted-foreground text-xs mb-1">Time Complexity</h5>
+                          <p className="text-foreground font-mono">{evaluation.timeComplexity}</p>
                         </div>
-                        <div className="bg-slate-800/50 p-3 rounded-lg">
-                          <h5 className="text-slate-400 text-xs mb-1">Space Complexity</h5>
-                          <p className="text-white font-mono">{evaluation.spaceComplexity}</p>
+                        <div className="bg-muted/50 p-3 rounded-lg">
+                          <h5 className="text-muted-foreground text-xs mb-1">Space Complexity</h5>
+                          <p className="text-foreground font-mono">{evaluation.spaceComplexity}</p>
                         </div>
                       </div>
 
                       {evaluation.strengths.length > 0 && (
                         <div>
-                          <h4 className="text-green-400 font-semibold mb-2 flex items-center gap-2">
+                          <h4 className="text-green-500 font-semibold mb-2 flex items-center gap-2">
                             <CheckCircle className="w-4 h-4" />
                             Strengths
                           </h4>
-                          <ul className="list-disc list-inside text-slate-300 text-sm space-y-1">
+                          <ul className="list-disc list-inside text-muted-foreground text-sm space-y-1">
                             {evaluation.strengths.map((strength, idx) => (
                               <li key={idx}>{strength}</li>
                             ))}
@@ -543,11 +556,11 @@ const CodingInterview = () => {
 
                       {evaluation.improvements.length > 0 && (
                         <div>
-                          <h4 className="text-yellow-400 font-semibold mb-2 flex items-center gap-2">
+                          <h4 className="text-yellow-500 font-semibold mb-2 flex items-center gap-2">
                             <Sparkles className="w-4 h-4" />
                             Improvements
                           </h4>
-                          <ul className="list-disc list-inside text-slate-300 text-sm space-y-1">
+                          <ul className="list-disc list-inside text-muted-foreground text-sm space-y-1">
                             {evaluation.improvements.map((improvement, idx) => (
                               <li key={idx}>{improvement}</li>
                             ))}
@@ -562,7 +575,6 @@ const CodingInterview = () => {
           )}
         </div>
 
-        {/* Credit Check Modal */}
         <CreditCheckModal open={showCreditModal} onOpenChange={setShowCreditModal} />
       </div>
     </ProtectedRoute>

@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.resume-scanner]
 verify_jwt = false
+
+[functions.material-generator]
+verify_jwt = false
