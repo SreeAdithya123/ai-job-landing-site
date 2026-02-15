@@ -47,15 +47,6 @@ const Sidebar = ({ onClose }: SidebarProps) => {
         { name: 'AI Material Generator', href: '/material-generator', icon: Zap },
         { name: 'CareerBot', href: '/career-coach', icon: Star },
         { name: 'Talk to Recruiters', href: '/recruiters', icon: Users },
-        { name: 'Interview Question Bank', href: '/question-bank', icon: HelpCircle },
-      ]
-    },
-    {
-      section: 'Company',
-      items: [
-        { name: 'Get Started', href: '/', icon: Star },
-        { name: 'Our Team', href: '/teams', icon: Users },
-        { name: 'Careers', href: '/careers', icon: Briefcase },
       ]
     }
   ];

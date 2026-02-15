@@ -172,14 +172,9 @@ Please provide your analysis in this JSON format:
       body: JSON.stringify({
         model: model,
         messages: [
-          {
-            role: "system",
-            content: systemPrompt
-          },
-          {
-            role: "user",
-            content: userMessage
-          }
+          { role: "system", content: systemPrompt },
+          ...(data.conversationHistory || []),
+          { role: "user", content: userMessage }
         ],
         max_tokens: type === 'interview-analysis' ? 1500 : 1000,
         temperature: 0.7,

@@ -81,7 +81,15 @@ const ChatBot = ({ title, placeholder = "Type your message...", initialMessage, 
           },
           body: JSON.stringify({
             type: requestType,
-            data: { message: currentInput }
+            data: {
+              message: currentInput,
+              conversationHistory: messages
+                .filter(m => m.id !== '1')
+                .map(m => ({
+                  role: m.sender === 'user' ? 'user' : 'assistant',
+                  content: m.content
+                }))
+            }
           })
         }
       );
