@@ -11,13 +11,20 @@ serve(async (req) => {
   }
 
   try {
-    const { resumeText, targetRole } = await req.json();
+    let { resumeText, targetRole } = await req.json();
 
     if (!resumeText || resumeText.trim().length < 50) {
       return new Response(JSON.stringify({ error: 'Resume text must be at least 50 characters' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Truncate resume text to ~100k characters (~25k tokens) to stay within API limits
+    const MAX_CHARS = 100000;
+    if (resumeText.length > MAX_CHARS) {
+      console.warn(`Resume text truncated from ${resumeText.length} to ${MAX_CHARS} characters`);
+      resumeText = resumeText.substring(0, MAX_CHARS);
     }
 
     const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
