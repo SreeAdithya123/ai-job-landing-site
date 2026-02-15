@@ -14,10 +14,7 @@ import ResumeBuilder from "./pages/ResumeBuilder";
 import ResumeScanner from "./pages/ResumeScanner";
 import MaterialGenerator from "./pages/MaterialGenerator";
 import CareerCoach from "./pages/CareerCoach";
-import FriendlyInterviewer from "./pages/FriendlyInterviewer";
 import VirtualInterviewer from "./pages/VirtualInterviewer";
-import VirtualPractice from "./pages/VirtualPractice";
-import UPSCInterviewer from "./pages/UPSCInterviewer";
 import PracticeInterview from "./pages/PracticeInterview";
 import Recruiters from "./pages/Recruiters";
 import CodingInterview from "./pages/CodingInterview";
@@ -54,11 +51,8 @@ function App() {
               <Route path="/resume-scanner" element={<ResumeScanner />} />
               <Route path="/material-generator" element={<MaterialGenerator />} />
               <Route path="/career-coach" element={<CareerCoach />} />
-              <Route path="/friendly-interviewer" element={<FriendlyInterviewer />} />
               <Route path="/virtual-interviewer" element={<VirtualInterviewer />} />
-              <Route path="/virtual-practice" element={<VirtualPractice />} />
               <Route path="/practice-interview" element={<PracticeInterview />} />
-              <Route path="/upsc-interviewer" element={<UPSCInterviewer />} />
               <Route path="/recruiters" element={<Recruiters />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/payments" element={<Payments />} />
