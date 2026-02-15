@@ -72,7 +72,12 @@ serve(async (req) => {
 
     let systemPrompt = '';
     let userMessage = '';
-    let model = 'z-ai/glm-4.5-air:free';
+    const chatModels = [
+      'z-ai/glm-4.5-air:free',
+      'google/gemma-3-27b-it:free',
+      'mistralai/mistral-small-3.1-24b-instruct:free'
+    ];
+    let model = chatModels[0];
 
     switch (type) {
       case 'interview-analysis': {
@@ -159,33 +164,47 @@ Please provide your analysis in this JSON format:
 
     const isStreamable = type === 'career-coach' || type === 'recruiter-chat';
 
-    console.log('Making request to OpenRouter API...', isStreamable ? '(streaming)' : '(non-streaming)');
+    let response: Response | null = null;
     
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${openRouterApiKey}`,
-        "HTTP-Referer": siteUrl,
-        "X-Title": siteName,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...(data.conversationHistory || []),
-          { role: "user", content: userMessage }
-        ],
-        max_tokens: type === 'interview-analysis' ? 1500 : 1000,
-        temperature: 0.7,
-        stream: isStreamable
-      })
-    });
+    for (const tryModel of chatModels) {
+      console.log(`Trying model: ${tryModel}`, isStreamable ? '(streaming)' : '(non-streaming)');
+      
+      response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${openRouterApiKey}`,
+          "HTTP-Referer": siteUrl,
+          "X-Title": siteName,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: tryModel,
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...(data.conversationHistory || []),
+            { role: "user", content: userMessage }
+          ],
+          max_tokens: type === 'interview-analysis' ? 1500 : 1000,
+          temperature: 0.7,
+          stream: isStreamable
+        })
+      });
 
-    if (!response.ok) {
+      if (response.ok) {
+        console.log(`Success with model: ${tryModel}`);
+        break;
+      }
+      
       const errorText = await response.text();
-      console.error('OpenRouter API error:', errorText);
-      throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
+      console.warn(`Model ${tryModel} failed (${response.status}): ${errorText}`);
+      
+      if (response.status !== 429) {
+        throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
+      }
+    }
+
+    if (!response || !response.ok) {
+      throw new Error('All AI models are currently rate-limited. Please try again in a moment.');
     }
 
     // For streamable types, pass through the SSE stream
@@ -200,11 +219,6 @@ Please provide your analysis in this JSON format:
       });
     }
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenRouter API error:', errorText);
-      throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
-    }
 
     const responseData = await response.json();
     console.log('Received response from OpenRouter API');
