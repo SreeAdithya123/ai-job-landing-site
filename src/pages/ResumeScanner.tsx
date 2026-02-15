@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { Scan, Loader2, AlertTriangle, CheckCircle, Info, ArrowUp, Sparkles, Target, FileText } from 'lucide-react';
+import { Scan, Loader2, AlertTriangle, CheckCircle, Info, ArrowUp, Sparkles, Target, FileText, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -51,6 +51,43 @@ const ResumeScanner = () => {
   const [targetRole, setTargetRole] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
+    else if (e.type === 'dragleave') setDragActive(false);
+  };
+
+  const handleFilePicked = (file: File) => {
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      if (text) setResumeText(text);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files?.[0]) handleFilePicked(e.dataTransfer.files[0]);
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) handleFilePicked(e.target.files[0]);
+  };
+
+  const clearFile = () => {
+    setSelectedFile(null);
+    setResumeText('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   const handleScan = async () => {
     if (resumeText.trim().length < 50) {
@@ -92,16 +129,45 @@ const ResumeScanner = () => {
           {/* Input Section */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Card className="p-6 bg-card border-border space-y-4">
+              {/* File Upload Zone */}
+              <div
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition-all duration-200 cursor-pointer ${
+                  dragActive ? 'border-primary bg-primary/5' : selectedFile ? 'border-primary/40 bg-primary/5' : 'border-border hover:border-primary/50'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                onClick={() => !selectedFile && fileInputRef.current?.click()}
+              >
+                {selectedFile ? (
+                  <div className="flex items-center justify-center gap-3">
+                    <FileText className="h-6 w-6 text-primary" />
+                    <div className="text-left">
+                      <p className="font-medium text-foreground text-sm">{selectedFile.name}</p>
+                      <p className="text-xs text-muted-foreground">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                    </div>
+                    <button onClick={(e) => { e.stopPropagation(); clearFile(); }} className="p-1 rounded-full hover:bg-muted">
+                      <X className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm font-medium text-foreground">Drop your resume here or click to browse</p>
+                    <p className="text-xs text-muted-foreground mt-1">Supports .txt, .pdf, .doc, .docx</p>
+                  </>
+                )}
+              </div>
+              <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,.doc,.docx,.txt" onChange={handleFileInput} />
+
+              <div className="relative flex items-center gap-3">
+                <div className="flex-1 border-t border-border" />
+                <span className="text-xs text-muted-foreground">or paste text below</span>
+                <div className="flex-1 border-t border-border" />
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-2">
-                  <label className="text-sm font-medium text-foreground mb-1 block">Resume Content *</label>
-                  <Textarea
-                    value={resumeText}
-                    onChange={(e) => setResumeText(e.target.value)}
-                    placeholder="Paste your full resume text here..."
-                    className="min-h-[200px] bg-muted border-border text-foreground"
-                  />
-                </div>
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-foreground mb-1 block">
