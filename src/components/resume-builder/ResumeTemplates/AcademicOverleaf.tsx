@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ResumeData, TemplateSettings } from '@/types/resume';
+import { getBodyFont, safeData } from './fontMapping';
 
 interface AcademicOverleafProps {
   data: ResumeData;
@@ -16,62 +17,44 @@ const colorThemes = {
 
 export const AcademicOverleaf: React.FC<AcademicOverleafProps> = ({ data, settings }) => {
   const theme = colorThemes[settings.colorTheme];
-  // Academic/LaTeX-inspired serif typography
   const headingFont = "'Merriweather', Georgia, serif";
-  const bodyFont = "'Source Serif 4', Georgia, serif";
+  const bodyFont = getBodyFont(settings.fontStyle);
+  const d = safeData(data);
 
   return (
     <div 
       className="bg-white min-h-[1122px] w-[794px] mx-auto shadow-xl print:shadow-none p-12"
       style={{ fontFamily: bodyFont }}
     >
-      {/* Academic Header */}
       <header className="text-center border-b-2 pb-4 mb-6" style={{ borderColor: theme.primary }}>
-        <h1 
-          className="text-3xl font-bold tracking-wide" 
-          style={{ color: theme.primary, fontFamily: headingFont }}
-        >
-          {data.personalInfo.fullName?.toUpperCase() || 'YOUR NAME'}
+        <h1 className="text-3xl font-bold tracking-wide" style={{ color: theme.primary, fontFamily: headingFont }}>
+          {d.personalInfo.fullName?.toUpperCase() || 'YOUR NAME'}
         </h1>
         <div className="flex justify-center flex-wrap gap-3 mt-3 text-sm text-gray-600">
-          {data.personalInfo.email && <span>{data.personalInfo.email}</span>}
-          {data.personalInfo.phone && <span>| {data.personalInfo.phone}</span>}
-          {data.personalInfo.location && <span>| {data.personalInfo.location}</span>}
+          {d.personalInfo.email && <span>{d.personalInfo.email}</span>}
+          {d.personalInfo.phone && <span>| {d.personalInfo.phone}</span>}
+          {d.personalInfo.location && <span>| {d.personalInfo.location}</span>}
         </div>
         <div className="flex justify-center gap-3 mt-1 text-sm">
-          {data.personalInfo.linkedin && (
-            <span style={{ color: theme.accent }}>{data.personalInfo.linkedin}</span>
-          )}
-          {data.personalInfo.portfolio && (
-            <span style={{ color: theme.accent }}>| {data.personalInfo.portfolio}</span>
-          )}
+          {d.personalInfo.linkedin && <span style={{ color: theme.accent }}>{d.personalInfo.linkedin}</span>}
+          {d.personalInfo.portfolio && <span style={{ color: theme.accent }}>| {d.personalInfo.portfolio}</span>}
         </div>
       </header>
 
-      {/* Summary */}
-      {data.careerSummary && (
+      {d.careerSummary && (
         <section className="mb-5">
-          <h2 
-            className="text-sm font-bold uppercase tracking-widest border-b mb-2 pb-1"
-            style={{ color: theme.primary, borderColor: theme.primary, fontFamily: headingFont }}
-          >
+          <h2 className="text-sm font-bold uppercase tracking-widest border-b mb-2 pb-1" style={{ color: theme.primary, borderColor: theme.primary, fontFamily: headingFont }}>
             Research Interests / Objective
           </h2>
-          <p className="text-sm text-gray-700 leading-relaxed text-justify">{data.careerSummary}</p>
+          <p className="text-sm text-gray-700 leading-relaxed text-justify">{d.careerSummary}</p>
         </section>
       )}
 
-      {/* Education - Primary for Academic */}
-      {data.education.length > 0 && (
+      {d.education.length > 0 && (
         <section className="mb-5">
-          <h2 
-            className="text-sm font-bold uppercase tracking-widest border-b mb-2 pb-1"
-            style={{ color: theme.primary, borderColor: theme.primary, fontFamily: headingFont }}
-          >
-            Education
-          </h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest border-b mb-2 pb-1" style={{ color: theme.primary, borderColor: theme.primary, fontFamily: headingFont }}>Education</h2>
           <div className="space-y-3">
-            {data.education.map((edu) => (
+            {d.education.map((edu) => (
               <div key={edu.id}>
                 <div className="flex justify-between">
                   <div>
@@ -83,26 +66,20 @@ export const AcademicOverleaf: React.FC<AcademicOverleafProps> = ({ data, settin
                     {edu.cgpa && <p>GPA: {edu.cgpa}</p>}
                   </div>
                 </div>
-                {edu.achievements && (
-                  <p className="text-sm text-gray-600 mt-1 italic">{edu.achievements}</p>
-                )}
+                {edu.achievements && <p className="text-sm text-gray-600 mt-1 italic">{edu.achievements}</p>}
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* Experience */}
-      {data.experience.length > 0 && (
+      {d.experience.length > 0 && (
         <section className="mb-5">
-          <h2 
-            className="text-sm font-bold uppercase tracking-widest border-b mb-2 pb-1"
-            style={{ color: theme.primary, borderColor: theme.primary, fontFamily: headingFont }}
-          >
+          <h2 className="text-sm font-bold uppercase tracking-widest border-b mb-2 pb-1" style={{ color: theme.primary, borderColor: theme.primary, fontFamily: headingFont }}>
             Research & Professional Experience
           </h2>
           <div className="space-y-3">
-            {data.experience.map((exp) => (
+            {d.experience.map((exp) => (
               <div key={exp.id}>
                 <div className="flex justify-between">
                   <div>
@@ -111,12 +88,10 @@ export const AcademicOverleaf: React.FC<AcademicOverleafProps> = ({ data, settin
                   </div>
                   <span className="text-sm text-gray-500">{exp.duration}</span>
                 </div>
-                {exp.responsibilities.length > 0 && (
+                {Array.isArray(exp.responsibilities) && exp.responsibilities.length > 0 && (
                   <ul className="mt-1 space-y-0.5">
                     {exp.responsibilities.map((resp, i) => (
-                      <li key={i} className="text-sm text-gray-700 pl-4 relative before:content-['•'] before:absolute before:left-0">
-                        {resp}
-                      </li>
+                      <li key={i} className="text-sm text-gray-700 pl-4 relative before:content-['•'] before:absolute before:left-0">{resp}</li>
                     ))}
                   </ul>
                 )}
@@ -126,21 +101,17 @@ export const AcademicOverleaf: React.FC<AcademicOverleafProps> = ({ data, settin
         </section>
       )}
 
-      {/* Projects / Publications */}
-      {data.projects.length > 0 && (
+      {d.projects.length > 0 && (
         <section className="mb-5">
-          <h2 
-            className="text-sm font-bold uppercase tracking-widest border-b mb-2 pb-1"
-            style={{ color: theme.primary, borderColor: theme.primary, fontFamily: headingFont }}
-          >
+          <h2 className="text-sm font-bold uppercase tracking-widest border-b mb-2 pb-1" style={{ color: theme.primary, borderColor: theme.primary, fontFamily: headingFont }}>
             Projects & Publications
           </h2>
           <div className="space-y-2">
-            {data.projects.map((project) => (
+            {d.projects.map((project) => (
               <div key={project.id}>
                 <p className="font-semibold text-sm" style={{ fontFamily: headingFont }}>
                   {project.title}
-                  {project.technologies.length > 0 && (
+                  {Array.isArray(project.technologies) && project.technologies.length > 0 && (
                     <span className="font-normal text-gray-500"> [{project.technologies.join(', ')}]</span>
                   )}
                 </p>
@@ -151,46 +122,28 @@ export const AcademicOverleaf: React.FC<AcademicOverleafProps> = ({ data, settin
         </section>
       )}
 
-      {/* Skills */}
-      {(data.skills.core.length > 0 || data.skills.technologies.length > 0) && (
+      {(d.skills.core.length > 0 || d.skills.technologies.length > 0) && (
         <section className="mb-5">
-          <h2 
-            className="text-sm font-bold uppercase tracking-widest border-b mb-2 pb-1"
-            style={{ color: theme.primary, borderColor: theme.primary, fontFamily: headingFont }}
-          >
-            Technical Skills
-          </h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest border-b mb-2 pb-1" style={{ color: theme.primary, borderColor: theme.primary, fontFamily: headingFont }}>Technical Skills</h2>
           <div className="text-sm space-y-1">
-            {data.skills.technologies.length > 0 && (
-              <p><strong>Programming:</strong> {data.skills.technologies.join(', ')}</p>
-            )}
-            {data.skills.tools.length > 0 && (
-              <p><strong>Tools & Frameworks:</strong> {data.skills.tools.join(', ')}</p>
-            )}
-            {data.skills.core.length > 0 && (
-              <p><strong>Core Competencies:</strong> {data.skills.core.join(', ')}</p>
-            )}
+            {d.skills.technologies.length > 0 && <p><strong>Programming:</strong> {d.skills.technologies.join(', ')}</p>}
+            {d.skills.tools.length > 0 && <p><strong>Tools & Frameworks:</strong> {d.skills.tools.join(', ')}</p>}
+            {d.skills.core.length > 0 && <p><strong>Core Competencies:</strong> {d.skills.core.join(', ')}</p>}
           </div>
         </section>
       )}
 
-      {/* Awards & Achievements */}
-      {(data.achievements.length > 0 || data.certifications.length > 0) && (
+      {(d.achievements.length > 0 || d.certifications.length > 0) && (
         <section>
-          <h2 
-            className="text-sm font-bold uppercase tracking-widest border-b mb-2 pb-1"
-            style={{ color: theme.primary, borderColor: theme.primary, fontFamily: headingFont }}
-          >
-            Honors & Awards
-          </h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest border-b mb-2 pb-1" style={{ color: theme.primary, borderColor: theme.primary, fontFamily: headingFont }}>Honors & Awards</h2>
           <ul className="text-sm space-y-1">
-            {data.achievements.map((ach) => (
+            {d.achievements.map((ach) => (
               <li key={ach.id} className="pl-4 relative before:content-['•'] before:absolute before:left-0">
                 <strong style={{ fontFamily: headingFont }}>{ach.title}</strong>
                 {ach.description && <span className="text-gray-600"> — {ach.description}</span>}
               </li>
             ))}
-            {data.certifications.map((cert) => (
+            {d.certifications.map((cert) => (
               <li key={cert.id} className="pl-4 relative before:content-['•'] before:absolute before:left-0">
                 {cert.name}, {cert.platform} ({cert.year})
               </li>

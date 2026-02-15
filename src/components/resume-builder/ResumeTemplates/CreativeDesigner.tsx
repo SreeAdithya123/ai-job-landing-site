@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ResumeData, TemplateSettings } from '@/types/resume';
 import { Mail, Phone, MapPin, Linkedin, Globe } from 'lucide-react';
+import { getBodyFont, safeData } from './fontMapping';
 
 interface CreativeDesignerProps {
   data: ResumeData;
@@ -18,8 +19,9 @@ const colorThemes = {
 export const CreativeDesigner: React.FC<CreativeDesignerProps> = ({ data, settings }) => {
   const theme = colorThemes[settings.colorTheme];
   const headingFont = "'Sora', sans-serif";
-  const bodyFont = "'Inter', sans-serif";
+  const bodyFont = getBodyFont(settings.fontStyle);
   const metricFont = "'Space Grotesk', sans-serif";
+  const d = safeData(data);
 
   return (
     <div 
@@ -28,69 +30,39 @@ export const CreativeDesigner: React.FC<CreativeDesignerProps> = ({ data, settin
     >
       {/* Left Sidebar */}
       <aside className="w-[280px] text-white p-6" style={{ backgroundColor: theme.primary }}>
-        {/* Profile Section */}
         <div className="text-center mb-8">
           <div className="w-24 h-24 rounded-full bg-white/20 mx-auto mb-4 flex items-center justify-center">
             <span className="text-3xl font-bold" style={{ fontFamily: headingFont }}>
-              {data.personalInfo.fullName?.split(' ').map(n => n[0]).join('') || 'YN'}
+              {d.personalInfo.fullName?.split(' ').map(n => n[0]).join('') || 'YN'}
             </span>
           </div>
           <h1 className="text-xl font-bold" style={{ fontFamily: headingFont }}>
-            {data.personalInfo.fullName || 'Your Name'}
+            {d.personalInfo.fullName || 'Your Name'}
           </h1>
-          {data.careerInfo?.targetRole && (
-            <p className="text-sm opacity-80 mt-1">{data.careerInfo.targetRole}</p>
+          {d.careerInfo?.targetRole && (
+            <p className="text-sm opacity-80 mt-1">{d.careerInfo.targetRole}</p>
           )}
         </div>
 
-        {/* Contact */}
         <section className="mb-6">
-          <h2 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70" style={{ fontFamily: headingFont }}>
-            Contact
-          </h2>
+          <h2 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70" style={{ fontFamily: headingFont }}>Contact</h2>
           <div className="space-y-2 text-sm">
-            {data.personalInfo.email && (
-              <div className="flex items-center gap-2 opacity-90">
-                <Mail className="h-3 w-3" /> <span className="text-xs">{data.personalInfo.email}</span>
-              </div>
-            )}
-            {data.personalInfo.phone && (
-              <div className="flex items-center gap-2 opacity-90">
-                <Phone className="h-3 w-3" /> <span className="text-xs">{data.personalInfo.phone}</span>
-              </div>
-            )}
-            {data.personalInfo.location && (
-              <div className="flex items-center gap-2 opacity-90">
-                <MapPin className="h-3 w-3" /> <span className="text-xs">{data.personalInfo.location}</span>
-              </div>
-            )}
-            {data.personalInfo.linkedin && (
-              <div className="flex items-center gap-2 opacity-90">
-                <Linkedin className="h-3 w-3" /> <span className="text-xs">{data.personalInfo.linkedin}</span>
-              </div>
-            )}
-            {data.personalInfo.portfolio && (
-              <div className="flex items-center gap-2 opacity-90">
-                <Globe className="h-3 w-3" /> <span className="text-xs">{data.personalInfo.portfolio}</span>
-              </div>
-            )}
+            {d.personalInfo.email && <div className="flex items-center gap-2 opacity-90"><Mail className="h-3 w-3" /> <span className="text-xs">{d.personalInfo.email}</span></div>}
+            {d.personalInfo.phone && <div className="flex items-center gap-2 opacity-90"><Phone className="h-3 w-3" /> <span className="text-xs">{d.personalInfo.phone}</span></div>}
+            {d.personalInfo.location && <div className="flex items-center gap-2 opacity-90"><MapPin className="h-3 w-3" /> <span className="text-xs">{d.personalInfo.location}</span></div>}
+            {d.personalInfo.linkedin && <div className="flex items-center gap-2 opacity-90"><Linkedin className="h-3 w-3" /> <span className="text-xs">{d.personalInfo.linkedin}</span></div>}
+            {d.personalInfo.portfolio && <div className="flex items-center gap-2 opacity-90"><Globe className="h-3 w-3" /> <span className="text-xs">{d.personalInfo.portfolio}</span></div>}
           </div>
         </section>
 
-        {/* Skills */}
-        {(data.skills.core.length > 0 || data.skills.technologies.length > 0) && (
+        {(d.skills.core.length > 0 || d.skills.technologies.length > 0) && (
           <section className="mb-6">
-            <h2 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70" style={{ fontFamily: headingFont }}>
-              Skills
-            </h2>
+            <h2 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70" style={{ fontFamily: headingFont }}>Skills</h2>
             <div className="space-y-2">
-              {[...data.skills.core, ...data.skills.technologies].slice(0, 8).map((skill, i) => (
+              {[...d.skills.core, ...d.skills.technologies].slice(0, 8).map((skill, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-white rounded-full" 
-                      style={{ width: `${85 - i * 5}%` }}
-                    />
+                    <div className="h-full bg-white rounded-full" style={{ width: `${85 - i * 5}%` }} />
                   </div>
                   <span className="text-xs w-20" style={{ fontFamily: metricFont }}>{skill}</span>
                 </div>
@@ -99,14 +71,11 @@ export const CreativeDesigner: React.FC<CreativeDesignerProps> = ({ data, settin
           </section>
         )}
 
-        {/* Education */}
-        {data.education.length > 0 && (
+        {d.education.length > 0 && (
           <section className="mb-6">
-            <h2 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70" style={{ fontFamily: headingFont }}>
-              Education
-            </h2>
+            <h2 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70" style={{ fontFamily: headingFont }}>Education</h2>
             <div className="space-y-3">
-              {data.education.map((edu) => (
+              {d.education.map((edu) => (
                 <div key={edu.id}>
                   <p className="text-sm font-medium" style={{ fontFamily: headingFont }}>{edu.degree}</p>
                   <p className="text-xs opacity-80">{edu.institution}</p>
@@ -117,14 +86,11 @@ export const CreativeDesigner: React.FC<CreativeDesignerProps> = ({ data, settin
           </section>
         )}
 
-        {/* Certifications */}
-        {data.certifications.length > 0 && (
+        {d.certifications.length > 0 && (
           <section>
-            <h2 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70" style={{ fontFamily: headingFont }}>
-              Certifications
-            </h2>
+            <h2 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70" style={{ fontFamily: headingFont }}>Certifications</h2>
             <ul className="space-y-1">
-              {data.certifications.map((cert) => (
+              {d.certifications.map((cert) => (
                 <li key={cert.id} className="text-xs opacity-90">• {cert.name}</li>
               ))}
             </ul>
@@ -134,24 +100,18 @@ export const CreativeDesigner: React.FC<CreativeDesignerProps> = ({ data, settin
 
       {/* Main Content */}
       <main className="flex-1 p-8" style={{ backgroundColor: theme.bg }}>
-        {/* Summary */}
-        {data.careerSummary && (
+        {d.careerSummary && (
           <section className="mb-6 p-4 rounded-lg bg-white shadow-sm">
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-2" style={{ color: theme.secondary, fontFamily: headingFont }}>
-              About Me
-            </h2>
-            <p className="text-sm text-gray-600 leading-relaxed">{data.careerSummary}</p>
+            <h2 className="text-sm font-bold uppercase tracking-wider mb-2" style={{ color: theme.secondary, fontFamily: headingFont }}>About Me</h2>
+            <p className="text-sm text-gray-600 leading-relaxed">{d.careerSummary}</p>
           </section>
         )}
 
-        {/* Experience */}
-        {data.experience.length > 0 && (
+        {d.experience.length > 0 && (
           <section className="mb-6">
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: theme.secondary, fontFamily: headingFont }}>
-              Experience
-            </h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: theme.secondary, fontFamily: headingFont }}>Experience</h2>
             <div className="space-y-4">
-              {data.experience.map((exp) => (
+              {d.experience.map((exp) => (
                 <div key={exp.id} className="bg-white p-4 rounded-lg shadow-sm">
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -160,7 +120,7 @@ export const CreativeDesigner: React.FC<CreativeDesignerProps> = ({ data, settin
                     </div>
                     <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded" style={{ fontFamily: metricFont }}>{exp.duration}</span>
                   </div>
-                  {exp.responsibilities.length > 0 && (
+                  {Array.isArray(exp.responsibilities) && exp.responsibilities.length > 0 && (
                     <ul className="space-y-1">
                       {exp.responsibilities.map((resp, i) => (
                         <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
@@ -175,27 +135,18 @@ export const CreativeDesigner: React.FC<CreativeDesignerProps> = ({ data, settin
           </section>
         )}
 
-        {/* Projects */}
-        {data.projects.length > 0 && (
+        {d.projects.length > 0 && (
           <section className="mb-6">
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: theme.secondary, fontFamily: headingFont }}>
-              Projects
-            </h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: theme.secondary, fontFamily: headingFont }}>Projects</h2>
             <div className="grid grid-cols-2 gap-3">
-              {data.projects.map((project) => (
+              {d.projects.map((project) => (
                 <div key={project.id} className="bg-white p-3 rounded-lg shadow-sm">
                   <h3 className="font-medium text-sm text-gray-800" style={{ fontFamily: headingFont }}>{project.title}</h3>
                   <p className="text-xs text-gray-500 mt-1 line-clamp-2">{project.description}</p>
-                  {project.technologies.length > 0 && (
+                  {Array.isArray(project.technologies) && project.technologies.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {project.technologies.slice(0, 3).map((tech, i) => (
-                        <span 
-                          key={i} 
-                          className="text-xs px-2 py-0.5 rounded"
-                          style={{ backgroundColor: `${theme.primary}20`, color: theme.secondary, fontFamily: metricFont }}
-                        >
-                          {tech}
-                        </span>
+                        <span key={i} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: `${theme.primary}20`, color: theme.secondary, fontFamily: metricFont }}>{tech}</span>
                       ))}
                     </div>
                   )}
@@ -205,21 +156,12 @@ export const CreativeDesigner: React.FC<CreativeDesignerProps> = ({ data, settin
           </section>
         )}
 
-        {/* Achievements */}
-        {data.achievements.length > 0 && (
+        {d.achievements.length > 0 && (
           <section>
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-3" style={{ color: theme.secondary, fontFamily: headingFont }}>
-              Achievements
-            </h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider mb-3" style={{ color: theme.secondary, fontFamily: headingFont }}>Achievements</h2>
             <div className="flex flex-wrap gap-2">
-              {data.achievements.map((ach) => (
-                <span 
-                  key={ach.id} 
-                  className="text-xs px-3 py-1.5 rounded-full bg-white shadow-sm"
-                  style={{ color: theme.secondary }}
-                >
-                  🏆 {ach.title}
-                </span>
+              {d.achievements.map((ach) => (
+                <span key={ach.id} className="text-xs px-3 py-1.5 rounded-full bg-white shadow-sm" style={{ color: theme.secondary }}>🏆 {ach.title}</span>
               ))}
             </div>
           </section>

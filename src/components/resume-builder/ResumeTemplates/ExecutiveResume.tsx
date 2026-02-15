@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ResumeData, TemplateSettings } from '@/types/resume';
 import { Award, Briefcase, GraduationCap, Star, Wrench } from 'lucide-react';
+import { getBodyFont, safeData } from './fontMapping';
 
 interface ExecutiveResumeProps {
   data: ResumeData;
@@ -18,92 +19,68 @@ const colorThemes = {
 export const ExecutiveResume: React.FC<ExecutiveResumeProps> = ({ data, settings }) => {
   const theme = colorThemes[settings.colorTheme];
   const headingFont = "'Playfair Display', Georgia, serif";
-  const bodyFont = "'Merriweather', Georgia, serif";
+  const bodyFont = getBodyFont(settings.fontStyle);
   const metricFont = "'Space Grotesk', sans-serif";
+  const d = safeData(data);
 
   return (
     <div 
       className="min-h-[1122px] w-[794px] mx-auto shadow-xl print:shadow-none"
       style={{ fontFamily: bodyFont, backgroundColor: theme.light }}
     >
-      {/* Executive Header */}
       <header className="text-white p-8 relative overflow-hidden" style={{ backgroundColor: theme.primary }}>
         <div className="absolute top-0 right-0 w-64 h-64 opacity-10">
           <div className="w-full h-full border-8 rounded-full" style={{ borderColor: theme.accent }} />
         </div>
         <div className="relative z-10">
           <h1 className="text-4xl font-bold tracking-tight" style={{ fontFamily: headingFont }}>
-            {data.personalInfo.fullName || 'Your Name'}
+            {d.personalInfo.fullName || 'Your Name'}
           </h1>
-          {data.careerInfo?.targetRole && (
-            <p className="text-lg mt-1 font-light" style={{ color: theme.accent, fontFamily: headingFont }}>
-              {data.careerInfo.targetRole}
-            </p>
+          {d.careerInfo?.targetRole && (
+            <p className="text-lg mt-1 font-light" style={{ color: theme.accent, fontFamily: headingFont }}>{d.careerInfo.targetRole}</p>
           )}
           <div className="flex flex-wrap gap-4 mt-4 text-sm opacity-90">
-            {data.personalInfo.email && <span>✉ {data.personalInfo.email}</span>}
-            {data.personalInfo.phone && <span>☎ {data.personalInfo.phone}</span>}
-            {data.personalInfo.location && <span>📍 {data.personalInfo.location}</span>}
+            {d.personalInfo.email && <span>✉ {d.personalInfo.email}</span>}
+            {d.personalInfo.phone && <span>☎ {d.personalInfo.phone}</span>}
+            {d.personalInfo.location && <span>📍 {d.personalInfo.location}</span>}
           </div>
           <div className="flex gap-4 mt-2 text-sm">
-            {data.personalInfo.linkedin && (
-              <span style={{ color: theme.accent }}>LinkedIn: {data.personalInfo.linkedin}</span>
-            )}
-            {data.personalInfo.portfolio && (
-              <span style={{ color: theme.accent }}>Portfolio: {data.personalInfo.portfolio}</span>
-            )}
+            {d.personalInfo.linkedin && <span style={{ color: theme.accent }}>LinkedIn: {d.personalInfo.linkedin}</span>}
+            {d.personalInfo.portfolio && <span style={{ color: theme.accent }}>Portfolio: {d.personalInfo.portfolio}</span>}
           </div>
         </div>
       </header>
 
       <main className="p-8">
-        {/* Executive Summary */}
-        {data.careerSummary && (
+        {d.careerSummary && (
           <section className="mb-6 p-4 border-l-4 bg-white" style={{ borderColor: theme.accent }}>
-            <h2 
-              className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-2" 
-              style={{ color: theme.primary, fontFamily: headingFont }}
-            >
+            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-2" style={{ color: theme.primary, fontFamily: headingFont }}>
               <Star className="h-4 w-4" style={{ color: theme.accent }} /> Executive Summary
             </h2>
-            <p className="text-gray-700 leading-relaxed">{data.careerSummary}</p>
+            <p className="text-gray-700 leading-relaxed">{d.careerSummary}</p>
           </section>
         )}
 
-        {/* Core Competencies */}
-        {(data.skills.core.length > 0 || data.skills.technologies.length > 0) && (
+        {(d.skills.core.length > 0 || d.skills.technologies.length > 0) && (
           <section className="mb-6">
-            <h2 
-              className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-3" 
-              style={{ color: theme.primary, fontFamily: headingFont }}
-            >
+            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-3" style={{ color: theme.primary, fontFamily: headingFont }}>
               <Wrench className="h-4 w-4" style={{ color: theme.accent }} /> Core Competencies
             </h2>
             <div className="grid grid-cols-4 gap-2">
-              {[...data.skills.core, ...data.skills.technologies, ...data.skills.tools].slice(0, 12).map((skill, i) => (
-                <div 
-                  key={i}
-                  className="text-center py-2 px-3 text-sm bg-white rounded shadow-sm"
-                  style={{ borderBottom: `2px solid ${theme.accent}`, fontFamily: metricFont }}
-                >
-                  {skill}
-                </div>
+              {[...d.skills.core, ...d.skills.technologies, ...d.skills.tools].slice(0, 12).map((skill, i) => (
+                <div key={i} className="text-center py-2 px-3 text-sm bg-white rounded shadow-sm" style={{ borderBottom: `2px solid ${theme.accent}`, fontFamily: metricFont }}>{skill}</div>
               ))}
             </div>
           </section>
         )}
 
-        {/* Professional Experience */}
-        {data.experience.length > 0 && (
+        {d.experience.length > 0 && (
           <section className="mb-6">
-            <h2 
-              className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-4" 
-              style={{ color: theme.primary, fontFamily: headingFont }}
-            >
+            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-4" style={{ color: theme.primary, fontFamily: headingFont }}>
               <Briefcase className="h-4 w-4" style={{ color: theme.accent }} /> Professional Experience
             </h2>
             <div className="space-y-5">
-              {data.experience.map((exp) => (
+              {d.experience.map((exp) => (
                 <div key={exp.id} className="bg-white p-4 rounded shadow-sm">
                   <div className="flex justify-between items-start border-b pb-2 mb-3" style={{ borderColor: theme.accent }}>
                     <div>
@@ -112,7 +89,7 @@ export const ExecutiveResume: React.FC<ExecutiveResumeProps> = ({ data, settings
                     </div>
                     <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded" style={{ fontFamily: metricFont }}>{exp.duration}</span>
                   </div>
-                  {exp.responsibilities.length > 0 && (
+                  {Array.isArray(exp.responsibilities) && exp.responsibilities.length > 0 && (
                     <ul className="space-y-2">
                       {exp.responsibilities.map((resp, i) => (
                         <li key={i} className="text-sm text-gray-700 flex items-start gap-2">
@@ -128,30 +105,18 @@ export const ExecutiveResume: React.FC<ExecutiveResumeProps> = ({ data, settings
           </section>
         )}
 
-        {/* Projects */}
-        {data.projects.length > 0 && (
+        {d.projects.length > 0 && (
           <section className="mb-6">
-            <h2 
-              className="text-sm font-bold uppercase tracking-wider mb-3" 
-              style={{ color: theme.primary, fontFamily: headingFont }}
-            >
-              Key Projects & Initiatives
-            </h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider mb-3" style={{ color: theme.primary, fontFamily: headingFont }}>Key Projects & Initiatives</h2>
             <div className="grid grid-cols-2 gap-3">
-              {data.projects.map((project) => (
+              {d.projects.map((project) => (
                 <div key={project.id} className="bg-white p-3 rounded shadow-sm">
                   <h3 className="font-semibold" style={{ color: theme.primary, fontFamily: headingFont }}>{project.title}</h3>
                   <p className="text-sm text-gray-600 mt-1">{project.description}</p>
-                  {project.technologies.length > 0 && (
+                  {Array.isArray(project.technologies) && project.technologies.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {project.technologies.map((tech, i) => (
-                        <span 
-                          key={i} 
-                          className="text-xs px-2 py-0.5 rounded"
-                          style={{ backgroundColor: `${theme.accent}30`, color: theme.primary, fontFamily: metricFont }}
-                        >
-                          {tech}
-                        </span>
+                        <span key={i} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: `${theme.accent}30`, color: theme.primary, fontFamily: metricFont }}>{tech}</span>
                       ))}
                     </div>
                   )}
@@ -161,18 +126,14 @@ export const ExecutiveResume: React.FC<ExecutiveResumeProps> = ({ data, settings
           </section>
         )}
 
-        {/* Education & Certifications */}
         <div className="grid grid-cols-2 gap-6">
-          {data.education.length > 0 && (
+          {d.education.length > 0 && (
             <section>
-              <h2 
-                className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-3" 
-                style={{ color: theme.primary, fontFamily: headingFont }}
-              >
+              <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-3" style={{ color: theme.primary, fontFamily: headingFont }}>
                 <GraduationCap className="h-4 w-4" style={{ color: theme.accent }} /> Education
               </h2>
               <div className="bg-white p-3 rounded shadow-sm space-y-2">
-                {data.education.map((edu) => (
+                {d.education.map((edu) => (
                   <div key={edu.id}>
                     <p className="font-semibold text-sm" style={{ color: theme.primary, fontFamily: headingFont }}>{edu.degree}</p>
                     <p className="text-xs text-gray-500">{edu.institution} • {edu.graduationYear}</p>
@@ -182,24 +143,17 @@ export const ExecutiveResume: React.FC<ExecutiveResumeProps> = ({ data, settings
             </section>
           )}
 
-          {(data.achievements.length > 0 || data.certifications.length > 0) && (
+          {(d.achievements.length > 0 || d.certifications.length > 0) && (
             <section>
-              <h2 
-                className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-3" 
-                style={{ color: theme.primary, fontFamily: headingFont }}
-              >
+              <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-3" style={{ color: theme.primary, fontFamily: headingFont }}>
                 <Award className="h-4 w-4" style={{ color: theme.accent }} /> Awards & Certifications
               </h2>
               <div className="bg-white p-3 rounded shadow-sm space-y-2">
-                {data.achievements.map((ach) => (
-                  <p key={ach.id} className="text-sm">
-                    <span className="font-medium" style={{ color: theme.accent }}>★</span> {ach.title}
-                  </p>
+                {d.achievements.map((ach) => (
+                  <p key={ach.id} className="text-sm"><span className="font-medium" style={{ color: theme.accent }}>★</span> {ach.title}</p>
                 ))}
-                {data.certifications.map((cert) => (
-                  <p key={cert.id} className="text-sm text-gray-600">
-                    {cert.name} ({cert.year})
-                  </p>
+                {d.certifications.map((cert) => (
+                  <p key={cert.id} className="text-sm text-gray-600">{cert.name} ({cert.year})</p>
                 ))}
               </div>
             </section>

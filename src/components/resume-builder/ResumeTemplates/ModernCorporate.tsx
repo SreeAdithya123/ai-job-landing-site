@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ResumeData, TemplateSettings } from '@/types/resume';
 import { Mail, Phone, MapPin, Linkedin, Globe } from 'lucide-react';
+import { getBodyFont, safeData } from './fontMapping';
 
 interface ModernCorporateProps {
   data: ResumeData;
@@ -18,7 +19,8 @@ const colorThemes = {
 export const ModernCorporate: React.FC<ModernCorporateProps> = ({ data, settings }) => {
   const theme = colorThemes[settings.colorTheme];
   const headingFont = "'Playfair Display', Georgia, serif";
-  const bodyFont = "'Lora', Georgia, serif";
+  const bodyFont = getBodyFont(settings.fontStyle);
+  const d = safeData(data);
 
   return (
     <div 
@@ -31,99 +33,61 @@ export const ModernCorporate: React.FC<ModernCorporateProps> = ({ data, settings
           className="text-3xl font-bold mb-1" 
           style={{ color: theme.primary, fontFamily: headingFont }}
         >
-          {data.personalInfo.fullName || 'Your Name'}
+          {d.personalInfo.fullName || 'Your Name'}
         </h1>
         <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-          {data.personalInfo.email && (
-            <span className="flex items-center gap-1">
-              <Mail className="h-3 w-3" /> {data.personalInfo.email}
-            </span>
+          {d.personalInfo.email && (
+            <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {d.personalInfo.email}</span>
           )}
-          {data.personalInfo.phone && (
-            <span className="flex items-center gap-1">
-              <Phone className="h-3 w-3" /> {data.personalInfo.phone}
-            </span>
+          {d.personalInfo.phone && (
+            <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {d.personalInfo.phone}</span>
           )}
-          {data.personalInfo.location && (
-            <span className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" /> {data.personalInfo.location}
-            </span>
+          {d.personalInfo.location && (
+            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {d.personalInfo.location}</span>
           )}
-          {data.personalInfo.linkedin && (
-            <span className="flex items-center gap-1">
-              <Linkedin className="h-3 w-3" /> {data.personalInfo.linkedin}
-            </span>
+          {d.personalInfo.linkedin && (
+            <span className="flex items-center gap-1"><Linkedin className="h-3 w-3" /> {d.personalInfo.linkedin}</span>
           )}
-          {data.personalInfo.portfolio && (
-            <span className="flex items-center gap-1">
-              <Globe className="h-3 w-3" /> {data.personalInfo.portfolio}
-            </span>
+          {d.personalInfo.portfolio && (
+            <span className="flex items-center gap-1"><Globe className="h-3 w-3" /> {d.personalInfo.portfolio}</span>
           )}
         </div>
       </header>
 
-      {/* Professional Summary */}
-      {data.careerSummary && (
+      {d.careerSummary && (
         <section className="mb-6">
-          <h2 
-            className="text-lg font-semibold mb-2 uppercase tracking-wide" 
-            style={{ color: theme.primary, fontFamily: headingFont }}
-          >
+          <h2 className="text-lg font-semibold mb-2 uppercase tracking-wide" style={{ color: theme.primary, fontFamily: headingFont }}>
             Professional Summary
           </h2>
-          <p className="text-gray-700 text-sm leading-relaxed">{data.careerSummary}</p>
+          <p className="text-gray-700 text-sm leading-relaxed">{d.careerSummary}</p>
         </section>
       )}
 
-      {/* Skills */}
-      {(data.skills.core.length > 0 || data.skills.technologies.length > 0) && (
+      {(d.skills.core.length > 0 || d.skills.technologies.length > 0) && (
         <section className="mb-6">
-          <h2 
-            className="text-lg font-semibold mb-2 uppercase tracking-wide" 
-            style={{ color: theme.primary, fontFamily: headingFont }}
-          >
-            Skills
-          </h2>
+          <h2 className="text-lg font-semibold mb-2 uppercase tracking-wide" style={{ color: theme.primary, fontFamily: headingFont }}>Skills</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            {data.skills.technologies.length > 0 && (
-              <div>
-                <span className="font-medium">Technologies:</span>{' '}
-                <span className="text-gray-600">{data.skills.technologies.join(', ')}</span>
-              </div>
+            {d.skills.technologies.length > 0 && (
+              <div><span className="font-medium">Technologies:</span> <span className="text-gray-600">{d.skills.technologies.join(', ')}</span></div>
             )}
-            {data.skills.tools.length > 0 && (
-              <div>
-                <span className="font-medium">Tools:</span>{' '}
-                <span className="text-gray-600">{data.skills.tools.join(', ')}</span>
-              </div>
+            {d.skills.tools.length > 0 && (
+              <div><span className="font-medium">Tools:</span> <span className="text-gray-600">{d.skills.tools.join(', ')}</span></div>
             )}
-            {data.skills.core.length > 0 && (
-              <div>
-                <span className="font-medium">Core:</span>{' '}
-                <span className="text-gray-600">{data.skills.core.join(', ')}</span>
-              </div>
+            {d.skills.core.length > 0 && (
+              <div><span className="font-medium">Core:</span> <span className="text-gray-600">{d.skills.core.join(', ')}</span></div>
             )}
-            {data.skills.soft.length > 0 && (
-              <div>
-                <span className="font-medium">Soft Skills:</span>{' '}
-                <span className="text-gray-600">{data.skills.soft.join(', ')}</span>
-              </div>
+            {d.skills.soft.length > 0 && (
+              <div><span className="font-medium">Soft Skills:</span> <span className="text-gray-600">{d.skills.soft.join(', ')}</span></div>
             )}
           </div>
         </section>
       )}
 
-      {/* Experience */}
-      {data.experience.length > 0 && (
+      {d.experience.length > 0 && (
         <section className="mb-6">
-          <h2 
-            className="text-lg font-semibold mb-3 uppercase tracking-wide" 
-            style={{ color: theme.primary, fontFamily: headingFont }}
-          >
-            Experience
-          </h2>
+          <h2 className="text-lg font-semibold mb-3 uppercase tracking-wide" style={{ color: theme.primary, fontFamily: headingFont }}>Experience</h2>
           <div className="space-y-4">
-            {data.experience.map((exp) => (
+            {d.experience.map((exp) => (
               <div key={exp.id}>
                 <div className="flex justify-between items-start">
                   <div>
@@ -132,12 +96,10 @@ export const ModernCorporate: React.FC<ModernCorporateProps> = ({ data, settings
                   </div>
                   <span className="text-sm text-gray-500">{exp.duration}</span>
                 </div>
-                {exp.responsibilities.length > 0 && (
+                {Array.isArray(exp.responsibilities) && exp.responsibilities.length > 0 && (
                   <ul className="mt-2 space-y-1 text-sm text-gray-700">
                     {exp.responsibilities.map((resp, i) => (
-                      <li key={i} className="pl-4 relative before:content-['•'] before:absolute before:left-0">
-                        {resp}
-                      </li>
+                      <li key={i} className="pl-4 relative before:content-['•'] before:absolute before:left-0">{resp}</li>
                     ))}
                   </ul>
                 )}
@@ -147,24 +109,16 @@ export const ModernCorporate: React.FC<ModernCorporateProps> = ({ data, settings
         </section>
       )}
 
-      {/* Projects */}
-      {data.projects.length > 0 && (
+      {d.projects.length > 0 && (
         <section className="mb-6">
-          <h2 
-            className="text-lg font-semibold mb-3 uppercase tracking-wide" 
-            style={{ color: theme.primary, fontFamily: headingFont }}
-          >
-            Projects
-          </h2>
+          <h2 className="text-lg font-semibold mb-3 uppercase tracking-wide" style={{ color: theme.primary, fontFamily: headingFont }}>Projects</h2>
           <div className="space-y-3">
-            {data.projects.map((project) => (
+            {d.projects.map((project) => (
               <div key={project.id}>
                 <h3 className="font-semibold" style={{ fontFamily: headingFont }}>{project.title}</h3>
                 <p className="text-sm text-gray-700">{project.description}</p>
-                {project.technologies.length > 0 && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    <span className="font-medium">Tech:</span> {project.technologies.join(', ')}
-                  </p>
+                {Array.isArray(project.technologies) && project.technologies.length > 0 && (
+                  <p className="text-xs text-gray-500 mt-1"><span className="font-medium">Tech:</span> {project.technologies.join(', ')}</p>
                 )}
               </div>
             ))}
@@ -172,17 +126,11 @@ export const ModernCorporate: React.FC<ModernCorporateProps> = ({ data, settings
         </section>
       )}
 
-      {/* Education */}
-      {data.education.length > 0 && (
+      {d.education.length > 0 && (
         <section className="mb-6">
-          <h2 
-            className="text-lg font-semibold mb-3 uppercase tracking-wide" 
-            style={{ color: theme.primary, fontFamily: headingFont }}
-          >
-            Education
-          </h2>
+          <h2 className="text-lg font-semibold mb-3 uppercase tracking-wide" style={{ color: theme.primary, fontFamily: headingFont }}>Education</h2>
           <div className="space-y-2">
-            {data.education.map((edu) => (
+            {d.education.map((edu) => (
               <div key={edu.id} className="flex justify-between">
                 <div>
                   <h3 className="font-semibold" style={{ fontFamily: headingFont }}>{edu.degree}</h3>
@@ -198,36 +146,22 @@ export const ModernCorporate: React.FC<ModernCorporateProps> = ({ data, settings
         </section>
       )}
 
-      {/* Certifications */}
-      {data.certifications.length > 0 && (
+      {d.certifications.length > 0 && (
         <section className="mb-6">
-          <h2 
-            className="text-lg font-semibold mb-2 uppercase tracking-wide" 
-            style={{ color: theme.primary, fontFamily: headingFont }}
-          >
-            Certifications
-          </h2>
+          <h2 className="text-lg font-semibold mb-2 uppercase tracking-wide" style={{ color: theme.primary, fontFamily: headingFont }}>Certifications</h2>
           <ul className="text-sm space-y-1">
-            {data.certifications.map((cert) => (
-              <li key={cert.id}>
-                {cert.name} — {cert.platform} ({cert.year})
-              </li>
+            {d.certifications.map((cert) => (
+              <li key={cert.id}>{cert.name} — {cert.platform} ({cert.year})</li>
             ))}
           </ul>
         </section>
       )}
 
-      {/* Achievements */}
-      {data.achievements.length > 0 && (
+      {d.achievements.length > 0 && (
         <section>
-          <h2 
-            className="text-lg font-semibold mb-2 uppercase tracking-wide" 
-            style={{ color: theme.primary, fontFamily: headingFont }}
-          >
-            Achievements
-          </h2>
+          <h2 className="text-lg font-semibold mb-2 uppercase tracking-wide" style={{ color: theme.primary, fontFamily: headingFont }}>Achievements</h2>
           <ul className="text-sm space-y-1">
-            {data.achievements.map((ach) => (
+            {d.achievements.map((ach) => (
               <li key={ach.id}>
                 <span className="font-medium">{ach.title}</span>
                 {ach.description && <span className="text-gray-600"> — {ach.description}</span>}
