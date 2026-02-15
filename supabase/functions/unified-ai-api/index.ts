@@ -4,6 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const openRouterApiKey = Deno.env.get('OPENROUTER_API_KEY');
+const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 const siteUrl = Deno.env.get('OPENROUTER_SITE_URL') || '';
 const siteName = Deno.env.get('OPENROUTER_SITE_NAME') || '';
 
@@ -164,11 +165,18 @@ Please provide your analysis in this JSON format:
 
     const isStreamable = type === 'career-coach' || type === 'recruiter-chat';
 
+    const messagesPayload = [
+      { role: "system", content: systemPrompt },
+      ...(data.conversationHistory || []),
+      { role: "user", content: userMessage }
+    ];
+    const maxTokens = type === 'interview-analysis' ? 1500 : 1000;
+
     let response: Response | null = null;
-    
+
+    // Try OpenRouter models first
     for (const tryModel of chatModels) {
-      console.log(`Trying model: ${tryModel}`, isStreamable ? '(streaming)' : '(non-streaming)');
-      
+      console.log(`Trying OpenRouter model: ${tryModel}`);
       response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -177,34 +185,38 @@ Please provide your analysis in this JSON format:
           "X-Title": siteName,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          model: tryModel,
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...(data.conversationHistory || []),
-            { role: "user", content: userMessage }
-          ],
-          max_tokens: type === 'interview-analysis' ? 1500 : 1000,
-          temperature: 0.7,
-          stream: isStreamable
-        })
+        body: JSON.stringify({ model: tryModel, messages: messagesPayload, max_tokens: maxTokens, temperature: 0.7, stream: isStreamable })
       });
+      if (response.ok) { console.log(`Success with OpenRouter: ${tryModel}`); break; }
+      const errText = await response.text();
+      console.warn(`OpenRouter ${tryModel} failed (${response.status}): ${errText}`);
+      if (response.status !== 429) throw new Error(`OpenRouter API error: ${response.status} - ${errText}`);
+      response = null;
+    }
 
-      if (response.ok) {
-        console.log(`Success with model: ${tryModel}`);
-        break;
+    // Fallback to Lovable AI Gateway if all OpenRouter models are rate-limited
+    if (!response && lovableApiKey) {
+      console.log('Falling back to Lovable AI Gateway...');
+      response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${lovableApiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: messagesPayload, max_tokens: maxTokens, temperature: 0.7, stream: isStreamable })
+      });
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error(`Lovable AI Gateway error (${response.status}): ${errText}`);
+        if (response.status === 429) throw new Error('AI service is temporarily busy. Please try again in a moment.');
+        if (response.status === 402) throw new Error('AI credits exhausted. Please add funds to continue.');
+        throw new Error(`AI Gateway error: ${response.status} - ${errText}`);
       }
-      
-      const errorText = await response.text();
-      console.warn(`Model ${tryModel} failed (${response.status}): ${errorText}`);
-      
-      if (response.status !== 429) {
-        throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
-      }
+      console.log('Success with Lovable AI Gateway');
     }
 
     if (!response || !response.ok) {
-      throw new Error('All AI models are currently rate-limited. Please try again in a moment.');
+      throw new Error('All AI models are currently unavailable. Please try again in a moment.');
     }
 
     // For streamable types, pass through the SSE stream
