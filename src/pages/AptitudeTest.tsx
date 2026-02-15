@@ -294,7 +294,7 @@ const AptitudeTest: React.FC = () => {
     return (
       <ProtectedRoute>
         <Layout>
-          <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50 py-12">
+          <div className="min-h-screen bg-gradient-to-br from-background via-background to-background py-12">
             <div className="max-w-4xl mx-auto px-4">
               <div className="text-center mb-12">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-2xl mb-4">
@@ -440,7 +440,7 @@ const AptitudeTest: React.FC = () => {
     return (
       <ProtectedRoute>
         <Layout>
-          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-slate-50">
+          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-background">
             <Card className="w-full max-w-md">
               <CardContent className="p-12 text-center">
                 <Loader2 className="h-12 w-12 animate-spin mx-auto mb-6 text-primary" />
@@ -465,7 +465,7 @@ const AptitudeTest: React.FC = () => {
     return (
       <ProtectedRoute>
         <Layout>
-          <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50 py-8">
+          <div className="min-h-screen bg-gradient-to-br from-background via-background to-background py-8">
             <div className="max-w-4xl mx-auto px-4">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
@@ -589,7 +589,7 @@ const AptitudeTest: React.FC = () => {
     return (
       <ProtectedRoute>
         <Layout>
-          <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50 py-12">
+          <div className="min-h-screen bg-gradient-to-br from-background via-background to-background py-12">
             <div className="max-w-4xl mx-auto px-4">
               {/* Result Header */}
               <div className="text-center mb-12">

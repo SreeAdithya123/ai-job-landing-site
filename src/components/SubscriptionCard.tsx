@@ -14,7 +14,7 @@ const SubscriptionCard = () => {
 
   if (isLoading) {
     return (
-      <Card className="glass-card">
+      <Card className="clay-card">
         <CardHeader>
           <Skeleton className="h-6 w-32" />
         </CardHeader>
@@ -62,7 +62,7 @@ const SubscriptionCard = () => {
   const isBeginner = subscription.plan === 'beginner';
 
   return (
-    <Card className="glass-card border-primary/20">
+    <Card className="clay-card border-primary/20">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">

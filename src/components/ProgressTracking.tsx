@@ -131,7 +131,7 @@ const ProgressTracking = () => {
         {stats.map((stat, index) => (
           <motion.div
             key={stat.label}
-            className="glass-card p-3 sm:p-4 rounded-xl"
+            className="clay-card p-3 sm:p-4 rounded-xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: index * 0.05 }}
@@ -155,7 +155,7 @@ const ProgressTracking = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Pie Chart - Interview Types */}
         <motion.div
-          className="glass-card p-4 sm:p-6 rounded-xl"
+          className="clay-card p-4 sm:p-6 rounded-xl"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -194,7 +194,7 @@ const ProgressTracking = () => {
 
         {/* Bar Chart - Weekly Activity */}
         <motion.div
-          className="glass-card p-4 sm:p-6 rounded-xl"
+          className="clay-card p-4 sm:p-6 rounded-xl"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
@@ -221,7 +221,7 @@ const ProgressTracking = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Skill Progress */}
         <motion.div
-          className="glass-card p-4 sm:p-6 rounded-xl"
+          className="clay-card p-4 sm:p-6 rounded-xl"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
@@ -252,7 +252,7 @@ const ProgressTracking = () => {
 
         {/* Recent Activities */}
         <motion.div
-          className="glass-card p-4 sm:p-6 rounded-xl"
+          className="clay-card p-4 sm:p-6 rounded-xl"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
@@ -288,7 +288,7 @@ const ProgressTracking = () => {
 
       {/* Performance Trend Line Chart */}
       <motion.div
-        className="glass-card p-4 sm:p-6 rounded-xl"
+        className="clay-card p-4 sm:p-6 rounded-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.6 }}

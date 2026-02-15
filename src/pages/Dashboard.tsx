@@ -396,7 +396,7 @@ const Dashboard = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
             
             {/* Welcome Message */}
-            <div className="glass-card p-4 sm:p-6 rounded-xl">
+            <div className="clay-card p-4 sm:p-6 rounded-xl">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h2 className="text-lg sm:text-xl font-semibold font-headline text-foreground">
@@ -433,7 +433,7 @@ const Dashboard = () => {
             {/* Quick Actions - Interview Options */}
             <div className="grid grid-cols-1 gap-4 sm:gap-6">
               {/* AI Interviewer */}
-              <div className="glass-card p-4 sm:p-6 rounded-xl hover:shadow-lg transition-shadow">
+              <div className="clay-card p-4 sm:p-6 rounded-xl hover:shadow-lg transition-shadow">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-xl flex items-center justify-center shadow-md shrink-0">
                     <MessageSquare className="h-6 w-6 text-primary-foreground" />

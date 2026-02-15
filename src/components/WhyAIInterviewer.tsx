@@ -55,7 +55,7 @@ const WhyAIInterviewer = () => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
             >
-              <Card className="glass-card h-full hover:shadow-xl transition-all duration-300 border border-white/20">
+              <Card className="clay-card h-full hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-8">
                   <div className="flex items-start space-x-4">
                     <div className="flex-shrink-0">
@@ -85,7 +85,7 @@ const WhyAIInterviewer = () => {
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
         >
-          <div className="glass-card p-8 rounded-xl border border-white/20 max-w-4xl mx-auto">
+          <div className="clay-card p-8 rounded-xl max-w-4xl mx-auto">
             <h3 className="text-2xl font-bold text-foreground mb-4">
               Join 50,000+ Job Seekers Who've Transformed Their Interview Skills
             </h3>

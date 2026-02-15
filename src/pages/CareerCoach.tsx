@@ -69,14 +69,14 @@ const CareerCoach = () => {
                 </button>
                 <button 
                   onClick={() => navigate('/dashboard')}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
                 >
                   <Home className="h-4 w-4" />
                   <span>Dashboard</span>
                 </button>
                 <button 
                   onClick={handleSignOut} 
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                  className="flex items-center space-x-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
                 >
                   <span>Sign Out</span>
                 </button>
