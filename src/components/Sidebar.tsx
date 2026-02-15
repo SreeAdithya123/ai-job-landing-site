@@ -22,7 +22,7 @@ import {
   Brain
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import ThemeToggle from './ThemeToggle';
+
 
 interface SidebarProps {
   onClose?: () => void;
@@ -78,14 +78,11 @@ const Sidebar = ({ onClose }: SidebarProps) => {
             </div>
             <span className="font-headline text-xl font-bold text-foreground whitespace-nowrap tracking-title">AI Interviewer</span>
           </div>
-          <div className="flex items-center gap-1">
-            <ThemeToggle />
-            {onClose && (
-              <button onClick={onClose} className="lg:hidden p-1 hover:bg-muted rounded">
-                <X className="h-5 w-5 text-foreground" />
-              </button>
-            )}
-          </div>
+          {onClose && (
+            <button onClick={onClose} className="lg:hidden p-1 hover:bg-muted rounded">
+              <X className="h-5 w-5 text-foreground" />
+            </button>
+          )}
         </div>
       </div>
 

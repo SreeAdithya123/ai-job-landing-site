@@ -7,14 +7,10 @@ import CareersSection from '../components/CareersSection';
 import Features from '../components/Features';
 import Pricing from '../components/Pricing';
 import Footer from '../components/Footer';
-import ThemeToggle from '../components/ThemeToggle';
 
 const Index = () => {
   return (
     <div className="min-h-screen">
-      <div className="fixed top-4 right-4 z-50">
-        <ThemeToggle />
-      </div>
       <Hero />
       <AIInterviewerSection />
       <AboutSection />

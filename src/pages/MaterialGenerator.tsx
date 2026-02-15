@@ -83,7 +83,7 @@ const MaterialGenerator = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-slate-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
@@ -103,7 +103,7 @@ const MaterialGenerator = () => {
                 <Plus className="h-4 w-4" />
                 <span>New Material</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 glass-card border border-primary/20 rounded-lg hover:bg-white/90 transition-colors">
+              <button className="flex items-center space-x-2 px-4 py-2 clay-card border border-primary/20 rounded-xl hover:shadow-clay-pressed transition-all">
                 <Settings className="h-4 w-4 text-primary" />
                 <span className="text-primary font-medium">Settings</span>
               </button>
@@ -135,15 +135,15 @@ const MaterialGenerator = () => {
           )}
 
           {/* Recent Sessions Section */}
-          <div className="glass-card rounded-xl shadow-sm border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <div className="clay-card overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center">
               <h2 className="text-lg font-semibold text-foreground">Recent Sessions</h2>
             </div>
             
             {recentSessions.length > 0 ? (
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-border">
                 {recentSessions.map((session) => (
-                  <div key={session.id} className="px-6 py-4 flex items-center justify-between hover:bg-white/50 transition-colors">
+                  <div key={session.id} className="px-6 py-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
                     <div>
                       <h3 className="font-medium text-foreground">{session.fileName}</h3>
                       <p className="text-sm text-muted-foreground">

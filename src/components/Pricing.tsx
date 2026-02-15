@@ -115,7 +115,7 @@ const Pricing = () => {
   };
 
   return (
-    <section className="py-24 bg-gradient-to-b from-background via-slate-50/50 to-background relative overflow-hidden">
+    <section className="py-24 bg-background relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(139,92,246,0.05),transparent_50%)] pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(20,184,166,0.05),transparent_50%)] pointer-events-none" />
@@ -171,10 +171,10 @@ const Pricing = () => {
                 </div>
               )}
               
-              <Card className={`glass-card h-full transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${
+              <Card className={`clay-card h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-2 ${
                 plan.popular 
                   ? 'border-primary/30 shadow-xl ring-2 ring-primary/20 scale-105' 
-                  : 'border-white/20 hover:border-primary/20'
+                  : 'hover:border-primary/20'
               }`}>
                 <CardHeader className="text-center pb-8 pt-8">
                   <div className="flex items-center justify-center mb-4">
@@ -272,7 +272,7 @@ const Pricing = () => {
           viewport={{ once: true }}
         >
           {/* Money-back guarantee */}
-          <div className="glass-card p-8 rounded-2xl border border-white/20 max-w-3xl mx-auto text-center">
+          <div className="clay-card p-8 max-w-3xl mx-auto text-center">
             <div className="flex items-center justify-center mb-4">
               <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
                 <Shield className="h-6 w-6 text-white" />

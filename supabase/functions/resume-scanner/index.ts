@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -20,16 +20,15 @@ serve(async (req) => {
       });
     }
 
-    // Truncate resume text to ~100k characters (~25k tokens) to stay within API limits
     const MAX_CHARS = 100000;
     if (resumeText.length > MAX_CHARS) {
       console.warn(`Resume text truncated from ${resumeText.length} to ${MAX_CHARS} characters`);
       resumeText = resumeText.substring(0, MAX_CHARS);
     }
 
-    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
-    if (!OPENROUTER_API_KEY) {
-      throw new Error('OPENROUTER_API_KEY is not configured');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    if (!OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY is not configured');
     }
 
     const prompt = `You are an expert ATS (Applicant Tracking System) resume analyzer. Analyze the following resume text and provide a detailed ATS compatibility report.
@@ -61,32 +60,29 @@ Respond with ONLY valid JSON in this exact format (no markdown, no code blocks):
   "summary_text": "<2-3 sentence overall assessment>"
 }`;
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': Deno.env.get('OPENROUTER_SITE_URL') || 'https://ai-job-landing-site.lovable.app',
-        'X-Title': Deno.env.get('OPENROUTER_SITE_NAME') || 'AI Interviewer',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-001',
+        model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.3,
+        response_format: { type: 'json_object' },
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`OpenRouter API error [${response.status}]: ${errorText}`);
+      throw new Error(`OpenAI API error [${response.status}]: ${errorText}`);
     }
 
     const result = await response.json();
     const content = result.choices?.[0]?.message?.content || '';
 
-    // Parse JSON from response, stripping markdown code blocks if present
-    const jsonMatch = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    const analysisData = JSON.parse(jsonMatch);
+    const analysisData = JSON.parse(content);
 
     return new Response(JSON.stringify(analysisData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

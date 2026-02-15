@@ -34,15 +34,15 @@ const InterviewDetailsModal: React.FC<InterviewDetailsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-foreground/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <motion.div
-        className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+        className="bg-card rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-clay"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-border">
           <div>
             <h2 className="text-2xl font-bold text-foreground">{analysis.interview_type}</h2>
             <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
@@ -57,9 +57,9 @@ const InterviewDetailsModal: React.FC<InterviewDetailsModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-muted rounded-lg transition-colors"
           >
-            <X className="h-6 w-6 text-gray-500" />
+            <X className="h-6 w-6 text-muted-foreground" />
           </button>
         </div>
 
@@ -68,7 +68,7 @@ const InterviewDetailsModal: React.FC<InterviewDetailsModalProps> = ({
           {/* Overall Scores */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {analysis.overall_score && (
-              <div className="text-center p-4 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg">
+              <div className="text-center p-4 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl">
                 <div className={`text-3xl font-bold ${getScoreColor(analysis.overall_score)}`}>
                   {analysis.overall_score}%
                 </div>
@@ -79,7 +79,7 @@ const InterviewDetailsModal: React.FC<InterviewDetailsModalProps> = ({
               </div>
             )}
             {analysis.communication_score && (
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="text-center p-4 bg-primary/5 rounded-xl">
                 <div className={`text-2xl font-bold ${getScoreColor(analysis.communication_score)}`}>
                   {analysis.communication_score}%
                 </div>
@@ -87,7 +87,7 @@ const InterviewDetailsModal: React.FC<InterviewDetailsModalProps> = ({
               </div>
             )}
             {analysis.technical_score && (
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
+              <div className="text-center p-4 bg-accent/5 rounded-xl">
                 <div className={`text-2xl font-bold ${getScoreColor(analysis.technical_score)}`}>
                   {analysis.technical_score}%
                 </div>
@@ -95,7 +95,7 @@ const InterviewDetailsModal: React.FC<InterviewDetailsModalProps> = ({
               </div>
             )}
             {analysis.confidence_score && (
-              <div className="text-center p-4 bg-green-50 rounded-lg">
+              <div className="text-center p-4 bg-secondary/5 rounded-xl">
                 <div className={`text-2xl font-bold ${getScoreColor(analysis.confidence_score)}`}>
                   {analysis.confidence_score}%
                 </div>
@@ -126,13 +126,13 @@ const InterviewDetailsModal: React.FC<InterviewDetailsModalProps> = ({
             {analysis.areas_for_improvement && analysis.areas_for_improvement.length > 0 && (
               <div>
                 <div className="flex items-center space-x-2 mb-3">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
+                  <TrendingUp className="h-5 w-5 text-primary" />
                   <h3 className="text-lg font-semibold text-foreground">Areas for Improvement</h3>
                 </div>
                 <div className="space-y-2">
                   {analysis.areas_for_improvement.map((area, index) => (
                     <div key={index} className="flex items-start space-x-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                      <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
                       <p className="text-sm text-muted-foreground">{area}</p>
                     </div>
                   ))}
@@ -148,7 +148,7 @@ const InterviewDetailsModal: React.FC<InterviewDetailsModalProps> = ({
                 <MessageCircle className="h-5 w-5 text-accent" />
                 <h3 className="text-lg font-semibold text-foreground">Overall Feedback</h3>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-muted rounded-xl p-4">
                 <p className="text-sm text-muted-foreground leading-relaxed">{analysis.feedback}</p>
               </div>
             </div>
@@ -160,7 +160,7 @@ const InterviewDetailsModal: React.FC<InterviewDetailsModalProps> = ({
               <h3 className="text-lg font-semibold text-foreground mb-4">Question-by-Question Breakdown</h3>
               <div className="space-y-6">
                 {questions.map((question, index) => (
-                  <div key={question.id || index} className="border border-gray-200 rounded-lg p-6">
+                  <div key={question.id || index} className="border border-border rounded-xl p-6">
                     <div className="flex items-start justify-between mb-4">
                       <h4 className="text-md font-medium text-foreground">
                         Question {question.question_order || index + 1}
@@ -174,22 +174,22 @@ const InterviewDetailsModal: React.FC<InterviewDetailsModalProps> = ({
                     
                     <div className="space-y-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-700 mb-2">Question:</p>
-                        <p className="text-sm text-muted-foreground bg-blue-50 p-3 rounded-lg">
+                        <p className="text-sm font-medium text-foreground mb-2">Question:</p>
+                        <p className="text-sm text-muted-foreground bg-primary/5 p-3 rounded-lg">
                           {question.question_text}
                         </p>
                       </div>
                       
                       <div>
-                        <p className="text-sm font-medium text-gray-700 mb-2">Your Answer:</p>
-                        <p className="text-sm text-muted-foreground bg-gray-50 p-3 rounded-lg">
+                        <p className="text-sm font-medium text-foreground mb-2">Your Answer:</p>
+                        <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
                           {question.user_answer}
                         </p>
                       </div>
                       
                       {question.ai_feedback && (
                         <div>
-                          <p className="text-sm font-medium text-gray-700 mb-2">AI Feedback:</p>
+                          <p className="text-sm font-medium text-foreground mb-2">AI Feedback:</p>
                           <p className="text-sm text-muted-foreground bg-green-50 p-3 rounded-lg">
                             {question.ai_feedback}
                           </p>
@@ -200,7 +200,7 @@ const InterviewDetailsModal: React.FC<InterviewDetailsModalProps> = ({
                         <div className="flex space-x-4 text-sm">
                           {question.fluency_score && (
                             <div className="flex items-center space-x-2">
-                              <span className="text-gray-600">Fluency:</span>
+                              <span className="text-muted-foreground">Fluency:</span>
                               <span className={`font-medium ${getScoreColor(question.fluency_score)}`}>
                                 {question.fluency_score}%
                               </span>
@@ -208,7 +208,7 @@ const InterviewDetailsModal: React.FC<InterviewDetailsModalProps> = ({
                           )}
                           {question.confidence_score && (
                             <div className="flex items-center space-x-2">
-                              <span className="text-gray-600">Confidence:</span>
+                              <span className="text-muted-foreground">Confidence:</span>
                               <span className={`font-medium ${getScoreColor(question.confidence_score)}`}>
                                 {question.confidence_score}%
                               </span>

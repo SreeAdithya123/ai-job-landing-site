@@ -1,7 +1,6 @@
 import type { Config } from "tailwindcss";
 
 export default {
-	darkMode: ["class"],
 	content: [
 		"./pages/**/*.{ts,tsx}",
 		"./components/**/*.{ts,tsx}",
@@ -104,7 +103,9 @@ export default {
 				'medium': '0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 8px 24px -4px rgba(0, 0, 0, 0.12)',
 				'glow': '0 0 20px rgba(79, 70, 229, 0.15)',
 				'glow-secondary': '0 0 20px rgba(56, 189, 248, 0.15)',
-				'glow-accent': '0 0 20px rgba(244, 114, 182, 0.15)'
+				'glow-accent': '0 0 20px rgba(244, 114, 182, 0.15)',
+				'clay': '8px 8px 16px rgba(0,0,0,0.06), -4px -4px 12px rgba(255,255,255,0.8), inset 1px 1px 2px rgba(255,255,255,0.6)',
+				'clay-pressed': 'inset 4px 4px 8px rgba(0,0,0,0.06), inset -2px -2px 6px rgba(255,255,255,0.7)',
 			},
 			keyframes: {
 				'accordion-down': {
