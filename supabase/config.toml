@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.resume-generate]
 verify_jwt = false
+
+[functions.resume-scanner]
+verify_jwt = false
