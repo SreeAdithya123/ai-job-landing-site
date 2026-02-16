@@ -149,8 +149,8 @@ const UPSCInterviewer = () => {
       
       // Start the session with both agentId and signedUrl as required by the SDK
       const conversationId = await conversation.startSession({
-        agentId: configData.agentId,
-        signedUrl: data.signedUrl
+        signedUrl: data.signedUrl,
+        connectionType: 'websocket',
       });
       
       console.log('✅ UPSC Interview started with conversation ID:', conversationId);
