@@ -25,6 +25,7 @@ import Payments from "./pages/Payments";
 import Teams from "./pages/Teams";
 import AptitudeTest from "./pages/AptitudeTest";
 import Interviewer from "./pages/Interviewer";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 
@@ -59,6 +60,7 @@ function App() {
               <Route path="/teams" element={<Teams />} />
               <Route path="/aptitude-test" element={<AptitudeTest />} />
               <Route path="/interviewer" element={<Interviewer />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

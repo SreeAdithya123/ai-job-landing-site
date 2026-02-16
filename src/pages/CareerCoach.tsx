@@ -63,7 +63,10 @@ const CareerCoach = () => {
               </div>
 
               <div className="flex items-center space-x-3">
-                <button className="flex items-center space-x-2 px-4 py-2 bg-muted border border-border rounded-lg hover:bg-muted/80 transition-all duration-200">
+                <button 
+                  onClick={() => navigate('/settings')}
+                  className="flex items-center space-x-2 px-4 py-2 bg-muted border border-border rounded-lg hover:bg-muted/80 transition-all duration-200"
+                >
                   <Settings className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground font-medium">Settings</span>
                 </button>
