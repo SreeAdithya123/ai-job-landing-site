@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   Laptop, 
   Code, 
@@ -60,8 +60,11 @@ const Sidebar = ({ onClose }: SidebarProps) => {
     }
   };
 
+  const navigate = useNavigate();
+
   const handleManageAccount = () => {
-    console.log('Manage Account clicked');
+    navigate('/settings');
+    onClose?.();
   };
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';

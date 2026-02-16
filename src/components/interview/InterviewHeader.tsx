@@ -26,7 +26,10 @@ const InterviewHeader: React.FC<InterviewHeaderProps> = ({ onSignOut }) => {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <button className="flex items-center space-x-2 px-6 py-3 bg-muted/60 backdrop-blur-sm border border-border rounded-xl hover:bg-muted transition-all duration-200 shadow-sm">
+            <button 
+              onClick={() => navigate('/settings')}
+              className="flex items-center space-x-2 px-6 py-3 bg-muted/60 backdrop-blur-sm border border-border rounded-xl hover:bg-muted transition-all duration-200 shadow-sm"
+            >
               <Settings className="h-5 w-5 text-muted-foreground" />
               <span className="text-foreground font-medium">Settings</span>
             </button>
