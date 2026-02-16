@@ -38,6 +38,7 @@ const InterviewCopilot = () => {
   const [userIsSpeaking, setUserIsSpeaking] = useState(false);
   const [sessionId, setSessionId] = useState<string>('');
   const [showCreditModal, setShowCreditModal] = useState(false);
+  const [micMuted, setMicMuted] = useState(false);
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
   const { hasCredits, refetch: refetchSubscription } = useSubscription();
@@ -51,6 +52,7 @@ const InterviewCopilot = () => {
 
 
   const conversation = useConversation({
+    micMuted,
     onConnect: () => {
       console.log('✅ Successfully connected to ElevenLabs Conversational AI');
       const newSessionId = `interview_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -341,6 +343,8 @@ const InterviewCopilot = () => {
           onExitInterview={handleExitInterview}
           onClearTranscript={handleClearTranscript}
           timeRemaining={isInterviewActive ? formattedTimeRemaining : undefined}
+          isMuted={micMuted}
+          onToggleMute={() => setMicMuted(prev => !prev)}
         />
       </ProtectedRoute>
     );

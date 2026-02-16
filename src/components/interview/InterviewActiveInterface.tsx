@@ -21,6 +21,8 @@ interface InterviewActiveInterfaceProps {
   onExitInterview: () => void;
   onClearTranscript: () => void;
   timeRemaining?: string;
+  isMuted?: boolean;
+  onToggleMute?: () => void;
 }
 
 const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
@@ -34,7 +36,9 @@ const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
   onStartInterview,
   onExitInterview,
   onClearTranscript,
-  timeRemaining
+  timeRemaining,
+  isMuted = false,
+  onToggleMute
 }) => {
   const getInterviewDetails = () => {
     if (selectedType === 'general') {
@@ -115,7 +119,9 @@ const InterviewActiveInterface: React.FC<InterviewActiveInterfaceProps> = ({
         <InterviewControls 
           isInterviewActive={isInterviewActive} 
           onStartInterview={onStartInterview} 
-          onExitInterview={onExitInterview} 
+          onExitInterview={onExitInterview}
+          isMuted={isMuted}
+          onToggleMute={onToggleMute}
         />
         <InterviewTranscript 
           transcript={transcript} 
