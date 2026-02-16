@@ -1,94 +1,89 @@
 
 
-# Hide UPSC/Friendly Interviews + Fix Material Generator for PDF/Word
+# Settings Page -- Edit Personal Details
 
-## Overview
-Three changes: (1) Hide UPSC and Friendly Interviewer routes, (2) Fix the Material Generator's "corrupted file" error for PDF/Word uploads, and (3) Ensure clean human-tone output.
+## What We're Building
 
----
+A new Settings page where users can view and update their personal information (full name, email display). The Settings buttons across the app (in the sidebar, interview header, career coach header) will navigate to this page.
 
-## Part 1: Hide UPSC and Friendly Interviews
+## Current State
 
-The sidebar already has no links to these pages, but routes still exist in `App.tsx`. We will remove them.
+- The `profiles` table already exists with columns: `id`, `email`, `full_name`, `avatar_url`, `created_at`, `updated_at`
+- RLS policies already allow users to update their own profile
+- A `handle_new_user` trigger auto-creates profiles on signup
+- The Settings buttons in InterviewHeader, Sidebar ("Manage Account"), and CareerCoach currently do nothing
 
-**`src/App.tsx`**
-- Remove imports for `FriendlyInterviewer` and `UPSCInterviewer`
-- Remove their `<Route>` entries (`/friendly-interviewer` and `/upsc-interviewer`)
+## Changes
 
----
+### 1. Create Settings Page (`src/pages/Settings.tsx`)
 
-## Part 2: Fix Material Generator -- PDF/Word "Corrupted File" Error
+A new page with a form allowing users to edit:
+- Full Name (editable, saved to `profiles.full_name`)
+- Email (display only -- changing email requires auth flow)
+- Account status display
+- Save button that updates the `profiles` table via Supabase
 
-### Root Cause
+The page will:
+- Fetch current profile data from `profiles` table on load
+- Allow editing `full_name`
+- Show a success toast on save
+- Use the existing Layout component with sidebar
+- Follow the claymorphism design system
 
-The `extractTextFromFile` function in `UploadModal.tsx` uses `FileReader.readAsText(file)` for ALL file types. PDFs and Word documents (.docx) are **binary files** -- reading them as text produces garbled characters or very short strings, triggering the "File content is too short to process" or "corrupted file" errors.
+### 2. Add Route in App.tsx
 
-### Solution
+- Add `/settings` route pointing to the new Settings page
 
-Instead of trying to extract text client-side, we will:
-1. Convert the file to **base64** in the browser
-2. Send the base64 data + file name + MIME type to the edge function
-3. In the edge function, use **OpenAI's GPT-4o vision/file capabilities** to process the document directly
+### 3. Wire Up Settings Buttons
 
-For PDFs specifically, OpenAI GPT-4o can process PDF content when sent as a base64-encoded file in the API request. For Word documents, we will extract text server-side using a simple approach.
+- **Sidebar.tsx**: Change `handleManageAccount` to navigate to `/settings`
+- **InterviewHeader.tsx**: Add `onClick` to the Settings button to navigate to `/settings`
+- **CareerCoach.tsx**: Wire the Settings button to navigate to `/settings`
 
-### Changes
+## Technical Details
 
-**`src/components/UploadModal.tsx`**
-- Replace `extractTextFromFile` with `fileToBase64` that converts any file to base64
-- Update `handleGenerate` to send `{ fileBase64, fileName, mimeType, type }` instead of `{ text, type }`
-- Keep the same UI and flow
+### Settings Page Structure
 
-**`supabase/functions/material-generator/index.ts`**
-- Accept both the old `{ text, type }` format (backward compatible) and new `{ fileBase64, fileName, mimeType, type }` format
-- For text files (.txt): decode base64 and use directly as text
-- For PDFs: send to OpenAI as a base64-encoded file using the messages API with document content type
-- For Word documents (.doc, .docx): decode base64, extract text from the XML structure (docx is a zip of XML files), or use OpenAI to process it
-- The simplest reliable approach: convert all uploaded file content to a data URL and send it to GPT-4o as an image/file attachment, letting OpenAI handle the parsing
-
-### Technical Approach for the Edge Function
-
-```text
-Client uploads file
-       |
-       v
-Convert to base64 in browser
-       |
-       v
-Send { fileBase64, fileName, mimeType, type } to edge function
-       |
-       v
-Edge function checks mimeType:
-  - text/plain --> decode base64, use as text directly
-  - application/pdf --> send as file to OpenAI GPT-4o with document processing
-  - application/vnd.openxmlformats* (docx) --> send as file to OpenAI GPT-4o
-       |
-       v
-OpenAI processes + generates material (summary/notes/flashcards/qa)
-       |
-       v
-Return clean human-tone output
+```
+Settings Page
+  |-- Back button
+  |-- Page header (Settings icon + title)
+  |-- Personal Information Card
+  |     |-- Full Name input (editable)
+  |     |-- Email (read-only display)
+  |     |-- Account Status
+  |     |-- Save Changes button
+  |-- Account Info Card
+        |-- User ID
+        |-- Member Since date
 ```
 
-For PDFs and Word docs, we will use OpenAI's multi-modal input: send the document as a base64-encoded file in the `messages` array using the `file` content type (or extract text from it first using PDF parsing). The most reliable approach is to use a two-step process:
-1. First message: "Extract all text from this document" with the file attached
-2. Second message: Use the extracted text to generate the requested material type
+### Database Interaction
 
----
+```typescript
+// Fetch profile
+const { data } = await supabase
+  .from('profiles')
+  .select('full_name, email, avatar_url, created_at')
+  .eq('id', user.id)
+  .single();
 
-## Part 3: Human-Tone Output (Already Partially Fixed)
+// Update profile
+await supabase
+  .from('profiles')
+  .update({ full_name: newName })
+  .eq('id', user.id);
+```
 
-The prompts in the edge function already instruct "no markdown." We will strengthen this by:
-- Adding a post-processing step in the edge function to strip any residual markdown
-- The `cleanOutput` function already exists in `OutputDisplay.tsx`
+No database migrations needed -- the `profiles` table and RLS policies already support this.
 
----
+## File Summary
 
-## File Change Summary
-
-| File | Changes |
-|------|---------|
-| `src/App.tsx` | Remove UPSC and Friendly Interviewer imports and routes |
-| `src/components/UploadModal.tsx` | Replace `readAsText` with base64 conversion, send file data to edge function |
-| `supabase/functions/material-generator/index.ts` | Accept base64 file data, use OpenAI to process PDFs/Word docs, generate material with human-tone prompts |
+| File | Change |
+|------|--------|
+| `src/pages/Settings.tsx` | New file -- settings page with profile editing form |
+| `src/App.tsx` | Add `/settings` route |
+| `src/components/Sidebar.tsx` | Navigate to `/settings` on "Manage Account" click |
+| `src/components/interview/InterviewHeader.tsx` | Wire Settings button to `/settings` |
+| `src/pages/CareerCoach.tsx` | Wire Settings button to `/settings` |
 
