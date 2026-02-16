@@ -230,8 +230,8 @@ const InterviewCopilot = () => {
         throw new Error('Failed to get agent configuration');
       }
       const conversationId = await conversation.startSession({
-        agentId: configData.agentId,
-        signedUrl: data.signedUrl
+        signedUrl: data.signedUrl,
+        connectionType: 'websocket',
       });
       console.log(`✅ ${selectedType} Interview started with conversation ID:`, conversationId);
       setConnectionStatus('connected');

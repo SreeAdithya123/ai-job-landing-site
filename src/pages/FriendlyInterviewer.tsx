@@ -133,8 +133,8 @@ const FriendlyInterviewer = () => {
       }
       
       const conversationId = await conversation.startSession({
-        agentId: configData.agentId,
-        signedUrl: data.signedUrl
+        signedUrl: data.signedUrl,
+        connectionType: 'websocket',
       });
       
       console.log('✅ Friendly Chat started with conversation ID:', conversationId);
